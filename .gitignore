@@ -1,0 +1,30 @@
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+[Ex]tLib/
+
+## Visual Studio cache and settings
+.vs/
+
+## VS Code settings
+.vscode/
+
+## Rider settings
+.idea/
+
+## User secrets and configuration overrides (Crucial for Razor Pages apps)
+appsettings.Development.json
+
