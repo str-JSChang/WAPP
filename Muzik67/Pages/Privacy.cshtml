@@ -1,8 +1,51 @@
 ﻿@page
 @model PrivacyModel
 @{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Terms & Privacy Policy - Muzik 67";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+                <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                    <img src="~/images/muzik67-logo.svg" alt="Muzik 67" style="height: 48px;" />
+                    <div>
+                        <h2 class="fw-bold mb-0">Terms of Service &amp; Privacy Policy</h2>
+                        <small class="text-muted">Muzik 67 Platform - Child Safety &amp; Educational Privacy</small>
+                    </div>
+                </div>
+
+                <section class="mb-4">
+                    <h4 class="fw-semibold text-primary">1. Terms and Conditions</h4>
+                    <p class="text-muted">
+                        Welcome to Muzik 67. By accessing our platform, parents, educators, and children agree to use the 
+                        educational services strictly for learning music theory, playing educational games, and exploring virtual instruments.
+                    </p>
+                    <ul class="text-muted small">
+                        <li>Member accounts are intended for children aged 6 to 7 under the supervision of a parent or guardian.</li>
+                        <li>All musical exercises, quizzes, and lessons are protected educational materials.</li>
+                        <li>Account credentials must be kept confidential.</li>
+                    </ul>
+                </section>
+
+                <section class="mb-4">
+                    <h4 class="fw-semibold text-primary">2. Privacy Policy &amp; Child Protection</h4>
+                    <p class="text-muted">
+                        Muzik 67 takes young learner privacy seriously. We comply with child online privacy principles:
+                    </p>
+                    <ul class="text-muted small">
+                        <li>We collect minimal personal data: only a child username and parent contact email for registration.</li>
+                        <li>Learning activity scores and badge achievements are securely stored and never shared with third parties.</li>
+                        <li>Passwords are securely hashed before database storage.</li>
+                    </ul>
+                </section>
+
+                <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                    <a asp-page="/Index" class="btn btn-outline-secondary rounded-pill px-4">← Back to Home</a>
+                    <a asp-page="/Account/Register" class="btn btn-primary rounded-pill px-4 text-white">Join Muzik 67</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -3,42 +3,75 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Muzik67</title>
+    <title>@ViewData["Title"] - Muzik 67</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Muzik67.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light custom-navbar sticky-top">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">Muzik67</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <!-- Top-Left Logo matching Storyboard Slide 3 -->
+                <a class="navbar-brand brand-wrapper" asp-area="" asp-page="/Index">
+                    <img src="~/images/muzik67-logo.svg" alt="Muzik 67 Logo" class="nav-brand-logo" />
+                    <span class="nav-brand-text">Muzik 67</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" 
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-page="/Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                            <a class="nav-link" href="#aboutSection">About Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-page="/Privacy">Privacy Policy</a>
                         </li>
                     </ul>
+
+                    <!-- Top-Right Actions matching Storyboard Slide 3 -->
+                    <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                        <button type="button" class="btn btn-replay-intro replay-intro-trigger" title="Replay the Intro Animation">
+                            <i class="bi bi-play-circle"></i> Replay Intro
+                        </button>
+                        <a class="btn btn-outline-secondary px-3" asp-page="/Account/Login">Sign In</a>
+                        <a class="btn btn-primary px-3 text-white" asp-page="/Account/Register">Register</a>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
+    <main role="main" class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <!-- Footer matching Storyboard Slide 3 -->
+    <footer class="custom-footer mt-auto">
         <div class="container">
-            &copy; 2026 - Muzik67 - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="~/images/muzik67-logo.svg" alt="Muzik 67 Logo" class="footer-logo" />
+                    <span class="fw-bold fs-6 text-dark">Muzik 67</span>
+                    <span class="text-muted small ms-2">&copy; 2026 Asia Pacific University (CT050-3-2)</span>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap justify-content-center">
+                    <a asp-page="/Privacy" class="footer-nav-link">Term and Condition</a>
+                    <span class="text-muted">•</span>
+                    <a href="#aboutSection" class="footer-nav-link">About Us</a>
+                    <span class="text-muted">•</span>
+                    <a asp-page="/Privacy" class="footer-nav-link">Privacy Policy</a>
+                </div>
+            </div>
         </div>
     </footer>
 

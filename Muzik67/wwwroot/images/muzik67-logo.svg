@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="muzik67-symbol">
+  <!-- Top bar / accent hook -->
+  <path d="M 50 40 L 150 40 L 165 75" stroke-width="14"/>
+  <path d="M 70 65 L 140 65" stroke-width="10"/>
+  
+  <!-- Central stylized clef stem and loop -->
+  <!-- Upper stem descending through loop -->
+  <path d="M 100 25 L 100 135 C 100 160 145 160 145 130 C 145 105 100 105 100 135 C 100 195 50 205 50 165 C 50 130 95 125 100 150 L 100 215 C 100 225 90 230 80 225" stroke-width="14"/>
+  
+  <!-- Decorative musical dot / note head -->
+  <circle cx="80" cy="225" r="7" fill="currentColor"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" fill="none">
+  <!-- Symbol Icon on the left -->
+  <g transform="translate(10, 0) scale(0.48)" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Top horizontal bars (stylized 7 / musical bar) -->
+    <path d="M 40 38 L 150 38 L 165 72" stroke-width="15"/>
+    <path d="M 60 62 L 135 62" stroke-width="12"/>
+    <!-- Clef / note body -->
+    <path d="M 98 25 L 98 120 C 98 155 148 150 148 120 C 148 92 98 92 98 125 C 98 185 45 195 45 155 C 45 125 90 120 98 142 L 98 215 C 98 226 88 232 78 226" stroke-width="15"/>
+    <circle cx="78" cy="226" r="8" fill="currentColor"/>
+  </g>
+
+  <!-- Typography "Muzik 67" -->
+  <g fill="currentColor">
+    <text x="125" y="75" font-family="'Courier New', Courier, monospace, 'Segoe UI', sans-serif" font-weight="800" font-size="44" letter-spacing="2">Muzik 67</text>
+  </g>
+</svg>

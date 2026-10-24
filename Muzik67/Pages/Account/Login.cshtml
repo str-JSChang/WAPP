@@ -1,0 +1,76 @@
+@page
+@model Muzik67.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Login - Muzik 67";
+}
+
+<div class="auth-container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-7 col-lg-5 col-xl-4">
+            <div class="card auth-card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <img src="~/images/muzik67-full-logo.svg" alt="Muzik 67 Logo" class="auth-logo mb-2" style="height: 55px;" />
+                        <h2 class="auth-title mt-2">Welcome Back!</h2>
+                        <p class="text-muted small">Please sign in to your Muzik 67 account.</p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @Model.SuccessMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form method="post" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Identifier" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.Identifier" class="form-control" placeholder="Enter username or email" autofocus />
+                            <span asp-validation-for="Input.Identifier" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label asp-for="Input.Password" class="form-label fw-semibold mb-0"></label>
+                                <a href="javascript:void(0)" class="text-decoration-none small text-muted">Forgot password?</a>
+                            </div>
+                            <input asp-for="Input.Password" class="form-control mt-1" placeholder="••••••••" />
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Role" class="form-label fw-semibold"></label>
+                            <select asp-for="Input.Role" class="form-select">
+                                <option value="Member">Student / Member Portal</option>
+                                <option value="Admin">Administrator Portal</option>
+                            </select>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input asp-for="Input.RememberMe" class="form-check-input" />
+                            <label asp-for="Input.RememberMe" class="form-check-label small text-muted"></label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold auth-btn">
+                            Sign In
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4 pt-2 border-top">
+                        <p class="text-muted small mb-0">
+                            Don't have an account yet? 
+                            <a asp-page="/Account/Register" class="text-primary fw-semibold text-decoration-none">Register here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

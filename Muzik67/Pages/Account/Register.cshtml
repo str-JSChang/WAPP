@@ -1,0 +1,85 @@
+@page
+@model Muzik67.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Register - Muzik 67";
+}
+
+<div class="auth-container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card auth-card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <img src="~/images/muzik67-full-logo.svg" alt="Muzik 67 Logo" class="auth-logo mb-2" style="height: 55px;" />
+                        <h2 class="auth-title mt-2">Create Account</h2>
+                        <p class="text-muted small">Join Muzik 67 and start your music adventure today!</p>
+                    </div>
+
+                    <form method="post" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Username" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.Username" class="form-control" placeholder="Choose a friendly username" />
+                            <span asp-validation-for="Input.Username" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Email" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.Email" class="form-control" placeholder="parent@example.com" type="email" />
+                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.Password" class="form-label fw-semibold"></label>
+                                <input asp-for="Input.Password" class="form-control" placeholder="••••••••" />
+                                <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold"></label>
+                                <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="••••••••" />
+                                <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Role" class="form-label fw-semibold"></label>
+                            <select asp-for="Input.Role" class="form-select">
+                                <option value="Member">Student / Member (Child &amp; Parent)</option>
+                                <option value="Admin">Administrator</option>
+                            </select>
+                            <span asp-validation-for="Input.Role" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input asp-for="Input.AgreeToTerms" class="form-check-input" />
+                            <label asp-for="Input.AgreeToTerms" class="form-check-label small text-muted">
+                                I agree to the <a asp-page="/Privacy" class="text-decoration-none">Terms and Conditions</a> and Privacy Policy
+                            </label>
+                            <div>
+                                <span asp-validation-for="Input.AgreeToTerms" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold auth-btn">
+                            Create My Account
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4 pt-2 border-top">
+                        <p class="text-muted small mb-0">
+                            Already have an account? 
+                            <a asp-page="/Account/Login" class="text-primary fw-semibold text-decoration-none">Sign in here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

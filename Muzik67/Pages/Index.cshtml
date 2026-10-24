@@ -1,10 +1,157 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Muzik 67 - Interactive Music Learning";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- =========================================================================
+     STORYBOARD INTRO ANIMATION OVERLAY (Slides 1 & 2)
+     Slide 1: Full black screen with Logo in the center.
+     Slide 2: Logo fades out.
+     Slide 3: Animation shifts smoothly into the landing page.
+     ========================================================================= -->
+<div id="introOverlay">
+    <!-- Floating background musical particles -->
+    <span class="music-note-float" style="top: 20%; left: 15%;">♪</span>
+    <span class="music-note-float" style="top: 28%; right: 20%; animation-delay: 1s;">♫</span>
+    <span class="music-note-float" style="bottom: 25%; left: 22%; animation-delay: 2s;">♬</span>
+    <span class="music-note-float" style="bottom: 30%; right: 18%; animation-delay: 1.5s;">♩</span>
+
+    <div class="intro-content">
+        <div class="intro-logo-wrapper">
+            <!-- Center Logo as requested in Slide 1 -->
+            <img src="~/images/muzik67-logo.svg" alt="Muzik 67 Logo" class="intro-logo-svg" />
+            <h1 class="intro-title">Muzik 67</h1>
+            <p class="intro-tagline">Music Learning Adventure</p>
+        </div>
+    </div>
+
+    <!-- Intro Interactive Controls -->
+    <div class="intro-controls">
+        <button id="soundToggleBtn" type="button" class="intro-btn" title="Toggle audio chime">
+            🔊 Sound: On
+        </button>
+        <button id="skipIntroBtn" type="button" class="intro-btn" title="Skip directly to landing page">
+            Skip Intro [Esc]
+        </button>
+    </div>
 </div>
+
+<!-- =========================================================================
+     LANDING PAGE (Slide 3: "animation shift into the landing page")
+     ========================================================================= -->
+<div id="landingWrapper" class="landing-page-wrapper">
+    <!-- Background Cross Lines Motif from Storyboard Wireframe -->
+    <div class="wireframe-cross-lines" aria-hidden="true">
+        <svg preserveAspectRatio="none" viewBox="0 0 1000 600">
+            <!-- Diagonal crossing lines as depicted in Slide 3 -->
+            <line x1="0" y1="0" x2="1000" y2="600" />
+            <line x1="1000" y1="0" x2="0" y2="600" />
+            <line x1="0" y1="300" x2="1000" y2="300" stroke="#e2e8f0" stroke-width="1" />
+        </svg>
+    </div>
+
+    <!-- Hero Content matching Slide 3 wireframe -->
+    <div class="container position-relative z-2">
+        <div class="landing-hero py-4">
+            <!-- Center Card: "Muzik 67" -->
+            <div class="landing-hero-card">
+                <h1 class="landing-title">Muzik 67</h1>
+            </div>
+
+            <p class="landing-subtitle">
+                An engaging online learning platform that introduces children aged 6–7 to the 
+                fundamentals of music in a fun, simple, and age-appropriate way.
+            </p>
+
+            <!-- Action Buttons: "Get Started" and "Learn More" -->
+            <div class="landing-actions">
+                <a asp-page="/Account/Register" class="btn btn-storyboard btn-get-started text-decoration-none">
+                    Get Started
+                </a>
+                <a href="#aboutSection" class="btn btn-storyboard btn-learn-more text-decoration-none">
+                    Learn More
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Interactive Piano Preview (Demonstrates music theme & interactivity) -->
+        <div class="row justify-content-center mt-5 pt-3">
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden text-center p-4 bg-white">
+                    <h5 class="fw-bold mb-1 text-primary">🎵 Try the Mini Virtual Piano</h5>
+                    <p class="text-muted small mb-3">Click any key below to play notes and hear the sound!</p>
+                    
+                    <div class="d-flex justify-content-center gap-1 gap-md-2 py-2">
+                        <button type="button" class="btn btn-outline-dark piano-key-btn py-3 px-3 px-md-4 fw-bold" onclick="playTone(261.63)">C<br /><small class="fw-normal text-muted">Do</small></button>
+                        <button type="button" class="btn btn-outline-dark piano-key-btn py-3 px-3 px-md-4 fw-bold" onclick="playTone(293.66)">D<br /><small class="fw-normal text-muted">Re</small></button>
+                        <button type="button" class="btn btn-outline-dark piano-key-btn py-3 px-3 px-md-4 fw-bold" onclick="playTone(329.63)">E<br /><small class="fw-normal text-muted">Mi</small></button>
+                        <button type="button" class="btn btn-outline-dark piano-key-btn py-3 px-3 px-md-4 fw-bold" onclick="playTone(349.23)">F<br /><small class="fw-normal text-muted">Fa</small></button>
+                        <button type="button" class="btn btn-outline-dark piano-key-btn py-3 px-3 px-md-4 fw-bold" onclick="playTone(392.00)">G<br /><small class="fw-normal text-muted">Sol</small></button>
+                        <button type="button" class="btn btn-outline-dark piano-key-btn py-3 px-3 px-md-4 fw-bold" onclick="playTone(440.00)">A<br /><small class="fw-normal text-muted">La</small></button>
+                        <button type="button" class="btn btn-outline-dark piano-key-btn py-3 px-3 px-md-4 fw-bold" onclick="playTone(493.88)">B<br /><small class="fw-normal text-muted">Ti</small></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Overview Section (Matching Proposal Scope) -->
+        <div id="aboutSection" class="row g-4 mt-5 pt-3">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-bubble">🎹</div>
+                    <h5 class="fw-bold">Virtual Instruments</h5>
+                    <p class="text-muted small mb-0">
+                        Explore musical keyboards and percussion instruments right in the browser with interactive sound.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-bubble">👂</div>
+                    <h5 class="fw-bold">Ear-Training Games</h5>
+                    <p class="text-muted small mb-0">
+                        Fun games like "Guess the Sound" and melody matching designed for children aged 6 to 7.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-bubble">🏆</div>
+                    <h5 class="fw-bold">Progress &amp; Badges</h5>
+                    <p class="text-muted small mb-0">
+                        Motivating visual badges and learning progress tracking for young learners and parents.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Interactive Mini Piano Tone Generator
+        function playTone(freq) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.8);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    </script>
+}
