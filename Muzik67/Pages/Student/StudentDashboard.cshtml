@@ -1,0 +1,54 @@
+﻿@page
+@model Muzik67.Pages.Student.StudentDashboardModel
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<link rel="stylesheet" href="~/css/student-dashboard.css" />
+
+<div class="student-dashboard-container container-fluid py-4">
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main container my-5">
+        <div class="text-center mb-5">
+            <h1 class="dashboard-title display-6 fw-bold">What You Wish to Do Today ?</h1>
+        </div>
+
+        <div class="row justify-content-center g-4 g-lg-5">
+            <!-- Card 1: Hop In My Moosik Journey -->
+            <div class="col-12 col-md-6 col-lg-5">
+                <div class="card dashboard-card shadow-sm text-center p-3 h-100">
+                    <div class="card-body d-flex flex-column justify-content-between align-items-center py-4">
+                        <div class="card-icon mb-2">
+                            <i class="bi bi-music-note-beamed fs-1 text-dark"></i>
+                        </div>
+                        <h3 class="card-title fw-bold my-3">
+                            Hop In<br />My Moosik Journey
+                        </h3>
+                        <a asp-page="/Student/MusicLessonSelection" class="btn btn-storyboard btn-go text-decoration-none">
+                            GO
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Having Fun With Moosik -->
+            <div class="col-12 col-md-6 col-lg-5">
+                <div class="card dashboard-card shadow-sm text-center p-3 h-100 position-relative">
+                    <div class="card-body d-flex flex-column justify-content-between align-items-center py-4">
+                        <div class="card-icon mb-2">
+                            <i class="bi bi-soundwave fs-1 text-dark"></i>
+                        </div>
+                        <h3 class="card-title fw-bold my-3">
+                            Having Fun<br />With Moosik
+                        </h3>
+                        <a asp-page="/Student/GameSelection" class="btn btn-storyboard btn-go text-decoration-none">
+                            GO
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</div>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Muzik 67</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/student-dashboard.css" asp-append-version="true" />
+</head>
+<!-- 1. Body must be a flex container taking up at least full viewport height -->
+<body class="d-flex flex-column min-vh-100 bg-white">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light custom-navbar sticky-top bg-white border-bottom">
+            <div class="container">
+                <!-- Logo -->
+                <a class="navbar-brand brand-wrapper" asp-page="/Index">
+                    <img src="~/images/muzik67-logo.svg" alt="Muzik 67 Logo" class="nav-brand-logo" />
+                    <span class="nav-brand-text">Muzik 67</span>
+                </a>
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-page="/Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/#aboutSection">About Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-page="/Privacy">Privacy Policy</a>
+                        </li>
+                    </ul>
+
+                    <!-- Top-Right Actions matching Storyboard Slide 3 -->
+                    <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                        <!-- Profile Icon -->
+                        <div class="d-flex align-items-center gap-2 ms-auto">
+                            <a asp-page="/Student/Profile" class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 40px; height: 40px;" title="My Profile">
+                                <i class="bi bi-person-circle fs-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </nav>
+    </header>
+
+    <!-- 2. Main content area expands to push footer down -->
+    <main role="main" class="flex-fill py-4">
+        @RenderBody()
+    </main>
+
+    <footer class="custom-footer mt-auto">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="~/images/muzik67-logo.svg" alt="Muzik 67 Logo" class="footer-logo" />
+                    <span class="fw-bold fs-6 text-dark">Muzik 67</span>
+                    <span class="text-muted small ms-2">&copy; 2026 Asia Pacific University (CT050-3-2)</span>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap justify-content-center">
+                    <a asp-page="/Privacy" class="footer-nav-link">Term and Condition</a>
+                    <span class="text-muted">•</span>
+                    <a href="#aboutSection" class="footer-nav-link">About Us</a>
+                    <span class="text-muted">•</span>
+                    <a asp-page="/Privacy" class="footer-nav-link">Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

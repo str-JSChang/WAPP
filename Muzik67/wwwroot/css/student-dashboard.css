@@ -1,0 +1,68 @@
+/* Student Dashboard Scoped Styles */
+
+.student-dashboard-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #fcfcfc;
+}
+
+/* Main Heading */
+.dashboard-title {
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    letter-spacing: -0.5px;
+    color: #1a1a1a;
+}
+
+/* Cards */
+.dashboard-card {
+    border: 2px solid #212529 !important;
+    border-radius: 24px !important;
+    background-color: #ffffff;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.dashboard-card .card-title {
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    font-size: 1.75rem;
+    line-height: 1.4;
+    color: #212529;
+}
+
+/* Action Buttons */
+.btn-storyboard {
+    border-radius: 30px;
+    padding: 12px 36px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    min-width: 170px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-go {
+    background-color: #cbd5e1;
+    color: #1e293b;
+    border: 1px solid #94a3b8;
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    letter-spacing: 1.5px;
+}
+
+.btn-go:hover {
+    background-color: #3b82f6;
+    color: #ffffff;
+    border-color: #3b82f6;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+    text-decoration: none;
+}
+
