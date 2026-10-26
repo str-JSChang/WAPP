@@ -4,62 +4,139 @@
     ViewData["Title"] = "Music Lesson Selection";
 }
 
-<!-- External Stylesheet Link -->
 <link rel="stylesheet" href="~/css/music-lesson-selection.css" asp-append-version="true" />
 
 <div class="container py-5">
-    <h2 class="fw-bold mb-4 font-monospace-title"><i class="bi bi-music-note-beamed fs-0.7 text-dark"></i>    Moosik Lesson :D</h2>
+    <h1 class="fw-bold mb-4 font-monospace-title lesson-main-title">
+        <i class="bi bi-music-note-beamed"></i> Moosik Lesson :D
+    </h1>
 
     <div class="row lesson-selection-container p-4 shadow-sm rounded-4 align-items-stretch">
         
-        <!-- LEFT SIDE: Difficulty Filters -->
-        <div class="col-12 col-md-4 d-flex flex-column justify-content-center align-items-center gap-3 border-end-md py-3">
-            <a asp-page="./MusicLessonSelection" asp-route-difficulty="Easy" 
-               class="btn btn-storyboard btn-go text-decoration-none @(Model.SelectedDifficulty == "Easy" ? "active-difficulty" : "")">
-                Easy
-            </a>
-            <a asp-page="./MusicLessonSelection" asp-route-difficulty="Normal" 
-               class="btn btn-storyboard btn-go text-decoration-none @(Model.SelectedDifficulty == "Normal" ? "active-difficulty" : "")">
-                Normal
-            </a>
-            <a asp-page="./MusicLessonSelection" asp-route-difficulty="Hard" 
-               class="btn btn-storyboard btn-go text-decoration-none @(Model.SelectedDifficulty == "Hard" ? "active-difficulty" : "")">
-                Hard
-            </a>
+        <!-- LEFT SIDE: Difficulty Filters (Fixed position, perfectly centered) -->
+        <div class="col-12 col-md-4 lesson-left-col border-end-md py-3">
+            <div class="d-flex flex-column justify-content-center align-items-center gap-3 w-100">
+                <a asp-page="./MusicLessonSelection" asp-route-difficulty="Easy" 
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "Easy" ? "active-difficulty" : "")">
+                    Easy
+                </a>
+                <a asp-page="./MusicLessonSelection" asp-route-difficulty="Normal" 
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "Normal" ? "active-difficulty" : "")">
+                    Normal
+                </a>
+                <a asp-page="./MusicLessonSelection" asp-route-difficulty="Hard" 
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "Hard" ? "active-difficulty" : "")">
+                    Hard
+                </a>
+            </div>
         </div>
 
-        <!-- RIGHT SIDE: Dynamically Displayed Lessons -->
-        <div class="col-12 col-md-8 ps-md-4 py-3 d-flex flex-column justify-content-center">
+        <!-- RIGHT SIDE: Scrollable Lessons Area -->
+        <div class="col-12 col-md-8 lesson-right-col ps-md-4 py-3">
             @if (string.IsNullOrEmpty(Model.SelectedDifficulty))
             {
-                <!-- Initial empty prompt -->
-                <div class="text-muted text-center py-5">
+                <div class="text-muted text-center py-5 h-100 d-flex flex-column justify-content-center align-items-center">
                     <i class="bi bi-arrow-left-circle fs-2 d-block mb-2"></i>
                     <p class="mb-0">Please select a difficulty on the left to view lessons.</p>
                 </div>
             }
             else
             {
-                <!-- Horizontally Scrollable Lesson Area -->
-                <div class="lesson-scroll-wrapper">
-                    <div class="d-flex flex-column gap-3" style="min-width: 300px;">
-                        @* @if (Model.Lessons != null && Model.Lessons.Any())
+                <div class="d-flex flex-column gap-3">
+                    
+                    <!-- For Testing, Gonna remove em when ada db-->
+                    @*<a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>*@
+
+                    @if (Model.Lessons != null && Model.Lessons.Any())
+                    {
+                        @foreach (var lesson in Model.Lessons)
                         {
-                            @foreach (var lesson in Model.Lessons)
-                            {
-                                <a asp-page="/Student/LessonDetail" asp-route-id="@lesson.Id" 
-                                   class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                                    @lesson.Title
-                                </a>
-                            }
+                            <a asp-page="/Student/LessonDetail" asp-route-id="@lesson.Id" 
+                               class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                                @lesson.Title
+                            </a>
                         }
-                        else
-                        {
-                            <div class="text-muted text-center py-4">
-                                No lessons found for @Model.SelectedDifficulty difficulty.
-                            </div>
-                        } *@
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted text-center py-5">
+                            No lessons found for @Model.SelectedDifficulty difficulty.
+                        </div>
+                    }
+
                 </div>
             }
         </div>
@@ -67,13 +144,10 @@
     </div>
 </div>
 
-
-    @*Clear selection on reload*@
 @section Scripts {
     <script>
-        // Check if the page was reloaded (refreshed by user)
+        // Reset selection on browser refresh
         if (performance.getEntriesByType('navigation')[0]?.type === 'reload' || performance.navigation.type === 1) {
-            // If there are query parameters in the URL during a refresh, strip them out and reload clean
             if (window.location.search) {
                 window.location.href = window.location.pathname;
             }
