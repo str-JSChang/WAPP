@@ -1,0 +1,96 @@
+/* Container Box Layout */
+.lesson-selection-container {
+    height: 520px;
+    background-color: #ffffff;
+}
+
+/* Monospace font style matching wireframe */
+.font-monospace-title {
+    font-size: 3.8rem !important;
+    font-family: monospace;
+}
+
+/* Left side difficulty buttons hover/active transition */
+.btn-difficulty {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Custom vertical divider line for medium screens and above */
+@media (min-width: 768px) {
+    .border-end-md {
+        border-right: 2px solid #212529 !important;
+    }
+}
+
+/* Right side horizontal scroll wrapper */
+.lesson-scroll-wrapper {
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 100%;
+    scrollbar-width: thin; /* Clean scrollbar for Firefox */
+    padding-bottom: 8px;   /* Prevents scrollbar from touching content */
+}
+
+/* Custom Webkit Scrollbar Styling */
+.lesson-scroll-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.lesson-scroll-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.lesson-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.lesson-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Lesson buttons full width inside scroll wrapper */
+.lesson-pill-btn {
+    width: 100%;
+    transition: all 0.2s ease-in-out;
+}
+
+
+
+/* Action Buttons */
+.btn-storyboard {
+    border-radius: 30px;
+    padding: 12px 36px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    min-width: 300px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-go {
+    background-color: #cbd5e1;
+    color: #1e293b;
+    border: 1px solid #94a3b8;
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    letter-spacing: 1.5px;
+}
+
+.btn-go:hover {
+    background-color: #3b82f6;
+    color: #ffffff;
+    border-color: #3b82f6;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+    text-decoration: none;
+}
+
+.btn-storyboard.active-difficulty {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+}
