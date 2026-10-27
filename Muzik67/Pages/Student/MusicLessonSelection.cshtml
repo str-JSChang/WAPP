@@ -45,11 +45,6 @@
                 <div class="d-flex flex-column gap-3">
                     
                     <!-- For Testing, Gonna remove em when ada db-->
-                    @*<a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
-
                     <a asp-page="/Student/LessonDetail"
                         class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
                         Lorem ipsum dolor 
@@ -118,9 +113,14 @@
                     <a asp-page="/Student/LessonDetail"
                         class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
                         Lorem ipsum dolor 
-                    </a>*@
+                    </a>
 
-                    @if (Model.Lessons != null && Model.Lessons.Any())
+                    <a asp-page="/Student/LessonDetail"
+                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    @*@if (Model.Lessons != null && Model.Lessons.Any())
                     {
                         @foreach (var lesson in Model.Lessons)
                         {
@@ -135,7 +135,7 @@
                         <div class="text-muted text-center py-5">
                             No lessons found for @Model.SelectedDifficulty difficulty.
                         </div>
-                    }
+                    }*@
 
                 </div>
             }

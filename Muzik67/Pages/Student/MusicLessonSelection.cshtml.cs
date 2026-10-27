@@ -7,10 +7,11 @@ namespace Muzik67.Pages.Student
 {
     public class MusicLessonSelectionModel : PageModel
     {
-
-        public MusicLessonSelectionModel()
+        // Wait for DB
+        // readonly ApplicationDbContext _context;
+        public MusicLessonSelectionModel(/*ApplicationDbContext context*/)
         {
-            
+            // _context = context;
         }
 
         /* Pending for Db*/

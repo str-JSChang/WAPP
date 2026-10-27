@@ -1,0 +1,67 @@
+/* Fixed size outer container box with strict containment */
+.game-selection-container {
+    background-color: #ffffff;
+    height: 520px;
+    overflow: hidden; /* Prevents content from spilling out of the box */
+}
+
+/* Left side column: locked height and centered alignment */
+.game-left-col {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Right side column: restricted height with active vertical scrollbar */
+.game-right-col {
+    height: 100%;
+    overflow-y: auto;   /* Enables vertical scrollbar inside the right side */
+    overflow-x: hidden; /* Prevents horizontal page stretching */
+    padding-right: 12px;
+}
+
+/* Custom Webkit Scrollbar Styling for the right side */
+.game-right-col::-webkit-scrollbar {
+    width: 6px;
+}
+
+.game-right-col::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.game-right-col::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.game-right-col::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Main title styling */
+.game-main-title {
+    font-size: 3.2rem !important;
+    font-family: monospace !important;
+}
+
+/* Custom vertical divider line for medium screens and above */
+@media (min-width: 768px) {
+    .border-end-md {
+        border-right: 2px solid #212529 !important;
+    }
+}
+
+/* Custom active/trigger color for difficulty buttons */
+.btn-storyboard.active-difficulty {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+}
+
+.game-pill-btn {
+    width: 100%;
+    transition: all 0.2s ease-in-out;
+}

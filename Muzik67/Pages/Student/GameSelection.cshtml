@@ -1,4 +1,123 @@
 ﻿@page
-@model MyApp.Namespace.GameSelectionModel
+@model Muzik67.Pages.Student.GameSelectionModel
 @{
+    ViewData["Title"] = "Game Selection";
+}
+
+<link rel="stylesheet" href="~/css/game-selection.css" asp-append-version="true" />
+
+
+<div class="container py-5">
+    <h1 class="fw-bold mb-4 font-monospace-title game-main-title">
+        <i class="bi bi-controller"></i> Moosik Game :p
+    </h1>
+
+    <div class="row game-selection-container p-4 shadow-sm rounded-4 align-items-stretch">
+        
+        <!-- LEFT SIDE: Difficulty Filters (Fixed position, perfectly centered) -->
+        <div class="col-12 col-md-4 game-left-col border-end-md py-3">
+            <div class="d-flex flex-column justify-content-center align-items-center gap-3 w-100">
+                <a asp-page="./GameSelection" asp-route-difficulty="Easy" 
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "Easy" ? "active-difficulty" : "")">
+                    Easy
+                </a>
+                <a asp-page="./GameSelection" asp-route-difficulty="Normal" 
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "Normal" ? "active-difficulty" : "")">
+                    Normal
+                </a>
+                <a asp-page="./GameSelection" asp-route-difficulty="Hard" 
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "Hard" ? "active-difficulty" : "")">
+                    Hard
+                </a>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: Scrollable Games Area -->
+        <div class="col-12 col-md-8 game-right-col ps-md-4 py-3">
+            @if (string.IsNullOrEmpty(Model.SelectedDifficulty))
+            {
+                <div class="text-muted text-center py-5 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <i class="bi bi-arrow-left-circle fs-2 d-block mb-2"></i>
+                    <p class="mb-0">Please select a difficulty on the left to view games.</p>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3">
+                    
+                    <!-- For Testing, Gonna remove em when ada db-->
+                    <a asp-page="/Student/GameDetail"
+                        class="btn btn-outline-dark game-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/GameDetail"
+                        class="btn btn-outline-dark game-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/GameDetail"
+                        class="btn btn-outline-dark game-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/GameDetail"
+                        class="btn btn-outline-dark game-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/GameDetail"
+                        class="btn btn-outline-dark game-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/GameDetail"
+                        class="btn btn-outline-dark game-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/GameDetail"
+                        class="btn btn-outline-dark game-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+                    <a asp-page="/Student/GameDetail"
+                        class="btn btn-outline-dark game-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                        Lorem ipsum dolor 
+                    </a>
+
+
+                    @*@if (Model.Game != null && Model.Game.Any())
+                    {
+                        @foreach (var game in Model.Game)
+                        {
+                            <a asp-page="/Student/GameDetail" asp-route-id="@game.Id" 
+                               class="btn btn-outline-dark game-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
+                                @game.Title
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted text-center py-5">
+                            No Game found for @Model.SelectedDifficulty difficulty.
+                        </div>
+                    }*@
+
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Reset selection on browser refresh
+        if (performance.getEntriesByType('navigation')[0]?.type === 'reload' || performance.navigation.type === 1) {
+            if (window.location.search) {
+                window.location.href = window.location.pathname;
+            }
+        }
+    </script>
 }
