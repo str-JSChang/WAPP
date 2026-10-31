@@ -1,15 +1,21 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Muzik67.Data;
+using Muzik67.Helpers;
+using Muzik67.Models;
 
 namespace Muzik67.Pages.Account
 {
     public class RegisterModel : PageModel
     {
+        private readonly MuzikDbContext _context;
         private readonly ILogger<RegisterModel> _logger;
 
-        public RegisterModel(ILogger<RegisterModel> logger)
+        public RegisterModel(MuzikDbContext context, ILogger<RegisterModel> logger)
         {
+            _context = context;
             _logger = logger;
         }
 
@@ -69,22 +75,41 @@ namespace Muzik67.Pages.Account
 
             try
             {
-                // =========================================================================
-                // BOILERPLATE: DATABASE INSERTION (Person in Charge: CHANG JIR SHEN)
-                // =========================================================================
-                // 1. Check if username or email already exists in `Users` table
-                // 2. Hash password securely (e.g., using BCrypt, PBKDF2, or SHA256 with salt)
-                // 3. Execute INSERT query into `Users` table:
-                //    INSERT INTO Users (Username, Email, PasswordHash, Role, RegistrationDate, AccountStatus)
-                //    VALUES (@Username, @Email, @PasswordHash, @Role, GETDATE(), 'Active');
-                // =========================================================================
+                // Check if username already exists
+                var normalizedUsername = Input.Username.Trim();
+                if (await _context.Users.AnyAsync(u => u.Username.ToLower() == normalizedUsername.ToLower()))
+                {
+                    ModelState.AddModelError("Input.Username", "Username is already taken. Please choose another.");
+                    return Page();
+                }
 
-                _logger.LogInformation("New user registration requested for {Username} ({Role})", Input.Username, Input.Role);
+                // Check if email already exists
+                var normalizedEmail = Input.Email.Trim();
+                if (await _context.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail.ToLower()))
+                {
+                    ModelState.AddModelError("Input.Email", "Email address is already registered.");
+                    return Page();
+                }
 
-                // Simulation placeholder for successful registration
-                await Task.Delay(100);
+                // Hash password securely with salt using PBKDF2
+                string hashedPassword = PasswordHelper.HashPassword(Input.Password);
 
-                SuccessMessage = "Account registered successfully! You can now log in.";
+                var newUser = new User
+                {
+                    Username = normalizedUsername,
+                    Email = normalizedEmail,
+                    PasswordHash = hashedPassword,
+                    Role = Input.Role == "Admin" ? "Admin" : "Member",
+                    RegistrationDate = DateTime.UtcNow,
+                    AccountStatus = "Active"
+                };
+
+                await _context.Users.AddAsync(newUser);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("New user registered successfully: {Username} ({Role})", newUser.Username, newUser.Role);
+
+                SuccessMessage = $"Account registered successfully! Welcome, {newUser.Username}. Please sign in.";
                 return RedirectToPage("/Account/Login");
             }
             catch (Exception ex)

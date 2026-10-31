@@ -1,7 +1,15 @@
+using Microsoft.EntityFrameworkCore;
+using Muzik67.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// Configure SQLite database context
+builder.Services.AddDbContext<MuzikDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? "Data Source=Muzik67.db"));
 
 // Configure in-memory session state for user authentication & tracking
 builder.Services.AddDistributedMemoryCache();
@@ -13,6 +21,22 @@ builder.Services.AddSession(options =>
 });
 
 var app = builder.Build();
+
+// Auto-initialize and seed the SQLite database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<MuzikDbContext>();
+        DbInitializer.Initialize(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred creating or seeding the SQLite database.");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

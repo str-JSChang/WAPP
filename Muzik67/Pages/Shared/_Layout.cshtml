@@ -19,7 +19,7 @@
                     <span class="nav-brand-text">Muzik 67</span>
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" 
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
                         aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -42,8 +42,26 @@
                         <button type="button" class="btn btn-replay-intro replay-intro-trigger" title="Replay the Intro Animation">
                             <i class="bi bi-play-circle"></i> Replay Intro
                         </button>
-                        <a class="btn btn-outline-secondary px-3" asp-page="/Account/Login">Sign In</a>
-                        <a class="btn btn-primary px-3 text-white" asp-page="/Account/Register">Register</a>
+
+                        @{
+                            var sessionUser = Context.Session.GetString("Username");
+                            var sessionRole = Context.Session.GetString("Role");
+                        }
+
+                        @if (!string.IsNullOrEmpty(sessionUser))
+                        {
+                            <span class="badge bg-light text-dark border px-3 py-2 d-flex align-items-center gap-1">
+                                <i class="bi bi-person-circle text-primary"></i>
+                                <span>@sessionUser</span>
+                                <span class="badge bg-primary text-white ms-1">@sessionRole</span>
+                            </span>
+                            <a class="btn btn-outline-danger btn-sm px-3" asp-page="/Account/Login" asp-page-handler="Logout">Sign Out</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-outline-secondary px-3" asp-page="/Account/Login">Sign In</a>
+                            <a class="btn btn-primary px-3 text-white" asp-page="/Account/Register">Register</a>
+                        }
                     </div>
                 </div>
             </div>

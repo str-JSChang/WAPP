@@ -1,15 +1,20 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Muzik67.Data;
+using Muzik67.Helpers;
 
 namespace Muzik67.Pages.Account
 {
     public class LoginModel : PageModel
     {
+        private readonly MuzikDbContext _context;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(ILogger<LoginModel> logger)
+        public LoginModel(MuzikDbContext context, ILogger<LoginModel> logger)
         {
+            _context = context;
             _logger = logger;
         }
 
@@ -56,42 +61,42 @@ namespace Muzik67.Pages.Account
 
             try
             {
-                // =========================================================================
-                // BOILERPLATE: DATABASE AUTHENTICATION (Person in Charge: CHANG JIR SHEN)
-                // =========================================================================
-                // 1. Fetch user by Identifier (Username OR Email) from `Users` table:
-                //    SELECT UserID, Username, Email, PasswordHash, Role, AccountStatus 
-                //    FROM Users 
-                //    WHERE (Username = @Identifier OR Email = @Identifier) AND AccountStatus = 'Active';
-                // 2. Verify hashed password.
-                // 3. If verified, create claims / session (e.g. HttpContext.Session or Cookie Authentication):
-                //    - Store UserID, Username, and Role in session/claims.
-                //    - Check role:
-                //      - If Admin: Redirect to Admin Dashboard (/Admin/Dashboard)
-                //      - If Member: Redirect to Student Portal / Games (/Index or /Games)
-                // =========================================================================
+                var identifier = Input.Identifier.Trim().ToLower();
 
-                _logger.LogInformation("Login attempt for identifier: {Identifier} as {Role}", Input.Identifier, Input.Role);
+                // 1. Fetch user by username OR email from SQLite `Users` table
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => (u.Username.ToLower() == identifier || u.Email.ToLower() == identifier)
+                                           && u.AccountStatus == "Active");
 
-                // Simulation placeholder for boilerplate authentication
-                await Task.Delay(100);
-
-                if (Input.Identifier == "admin" && Input.Password == "admin123")
+                if (user == null || !PasswordHelper.VerifyPassword(Input.Password, user.PasswordHash))
                 {
-                    // Mock admin demo credentials
-                    return LocalRedirect(returnUrl);
+                    ModelState.AddModelError(string.Empty, "Invalid username/email or password.");
+                    return Page();
                 }
 
-                // Default simulated success for testing boilerplate
-                SuccessMessage = $"Welcome back, {Input.Identifier}!";
+                // 2. Set Session state
+                HttpContext.Session.SetInt32("UserId", user.UserId);
+                HttpContext.Session.SetString("Username", user.Username);
+                HttpContext.Session.SetString("Role", user.Role);
+
+                _logger.LogInformation("User '{Username}' logged in successfully as {Role}.", user.Username, user.Role);
+
+                SuccessMessage = $"Welcome back, {user.Username}!";
                 return LocalRedirect(returnUrl);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred during login");
-                ModelState.AddModelError(string.Empty, "Invalid login credentials. Please verify your username and password.");
+                ModelState.AddModelError(string.Empty, "An error occurred during login. Please try again.");
                 return Page();
             }
+        }
+
+        public IActionResult OnGetLogout()
+        {
+            HttpContext.Session.Clear();
+            SuccessMessage = "You have been logged out successfully.";
+            return RedirectToPage("/Account/Login");
         }
     }
 }
