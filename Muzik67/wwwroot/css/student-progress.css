@@ -1,0 +1,282 @@
+/* Shared layout for the student progress and result pages */
+.student-feature-page {
+    max-width: 1000px;
+}
+
+.student-page-toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Shared page headings */
+.feature-title,
+.section-title {
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.progress-heading {
+    margin: 2rem auto 1.5rem;
+}
+
+/* Lessons and games navigation tabs */
+.progress-tabs {
+    display: flex;
+    justify-content: center;
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+}
+
+.progress-tab {
+    border: 1px solid #212529;
+    border-radius: 999px;
+    color: #212529;
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    font-weight: 700;
+    min-width: 120px;
+    padding: .6rem 1.5rem;
+    text-align: center;
+    text-decoration: none;
+}
+
+.progress-tab:hover,
+.progress-tab.active {
+    background: #d6d3d1;
+    color: #212529;
+}
+
+/* Summary cards and main content panels */
+.summary-card,
+.progress-list-card,
+.result-card {
+    background: #fff;
+    border: 2px solid #212529;
+    border-radius: 24px;
+}
+
+.summary-card {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    height: 100%;
+    justify-content: center;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.summary-card span {
+    color: #6b7280;
+    font-size: .9rem;
+}
+
+.summary-card strong {
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    font-size: 1.6rem;
+}
+
+.summary-icon {
+    font-size: 1.5rem;
+    margin-bottom: .25rem;
+}
+
+/* Progress records */
+.progress-list-card {
+    padding: 1.5rem;
+}
+
+/* Empty progress state */
+.empty-progress-state {
+    color: #6b7280;
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+/* Individual game score row */
+.game-progress-row {
+    align-items: center;
+    border-top: 1px solid #dee2e6;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(150px, 1fr) minmax(120px, 2fr) auto;
+    padding: 1rem 0;
+}
+
+.game-progress-name {
+    display: flex;
+    flex-direction: column;
+}
+
+.game-progress-name span {
+    color: #6b7280;
+    font-size: .8rem;
+}
+
+.game-progress-meter {
+    background: #e5e7eb;
+    border-radius: 999px;
+    height: 12px;
+    overflow: hidden;
+}
+
+.game-progress-meter span {
+    background: #64748b;
+    border-radius: inherit;
+    display: block;
+    height: 100%;
+}
+
+.game-score {
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    min-width: 55px;
+    text-align: right;
+}
+
+/* Game result card */
+.result-card {
+    max-width: 480px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+}
+
+.result-icon {
+    align-items: center;
+    background: #e7e5e4;
+    border-radius: 50%;
+    display: flex;
+    font-size: 2rem;
+    height: 76px;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    width: 76px;
+}
+
+.celebrate-icon {
+    animation: trophy-bounce .8s ease-in-out infinite alternate;
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.celebration-message {
+    animation: celebration-pop .55s ease-out both;
+    color: #15803d;
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    font-weight: 700;
+}
+
+.confetti-container {
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: fixed;
+    z-index: 1050;
+}
+
+.confetti-piece {
+    animation: confetti-fall 3s ease-in forwards;
+    height: 10px;
+    position: absolute;
+    top: -20px;
+    width: 7px;
+}
+
+@keyframes trophy-bounce {
+    from {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    to {
+        transform: translateY(-8px) rotate(5deg);
+    }
+}
+
+@keyframes celebration-pop {
+    from {
+        opacity: 0;
+        transform: scale(.85);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes confetti-fall {
+    0% {
+        opacity: 1;
+        transform: translateY(-20px) rotate(0deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(105vh) rotate(720deg);
+    }
+}
+
+/* Score display */
+.score-panel {
+    background: #f5f5f4;
+    border: 1px solid #d6d3d1;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+}
+
+.score-label {
+    color: #6b7280;
+    font-size: .9rem;
+    text-transform: uppercase;
+}
+
+.score-value {
+    font-family: 'Courier New', Courier, monospace, sans-serif;
+    font-size: 2.5rem;
+}
+
+.score-percentage {
+    color: #475569;
+    font-weight: 700;
+}
+
+.result-message {
+    color: #4b5563;
+    min-height: 48px;
+}
+
+.result-error {
+    margin: 1.5rem 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .celebrate-icon,
+    .celebration-message,
+    .confetti-piece {
+        animation: none;
+    }
+
+    .confetti-container {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .game-progress-row {
+        grid-template-columns: 1fr auto;
+    }
+
+    .game-progress-meter {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .game-score {
+        grid-column: 2;
+        grid-row: 1;
+    }
+}

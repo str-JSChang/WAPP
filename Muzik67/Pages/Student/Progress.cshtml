@@ -1,0 +1,94 @@
+@page
+@model Muzik67.Pages.Student.ProgressModel
+@{
+    ViewData["Title"] = "My Game Progress";
+}
+
+<!-- Styles for the game progress and result pages -->
+<link rel="stylesheet" href="~/css/student-progress.css" asp-append-version="true" />
+
+<div class="student-feature-page container py-4 py-lg-5">
+    <!-- Page navigation -->
+    <div class="student-page-toolbar">
+        <a asp-page="/Student/StudentDashboard" class="btn btn-outline-dark rounded-pill px-4">
+            <i class="bi bi-arrow-left me-1"></i> Return
+        </a>
+        <a asp-page="/Student/GameSelection" class="btn btn-primary rounded-pill px-4">
+            Play a Game <i class="bi bi-controller ms-1"></i>
+        </a>
+    </div>
+
+    <!-- Progress page heading and tabs -->
+    <div class="progress-heading text-center">
+        <p class="text-uppercase text-muted fw-semibold small mb-2">Student profile</p>
+        <h1 class="feature-title">My Progress</h1>
+        <p class="text-muted mb-0">Track your best game scores and keep practising.</p>
+    </div>
+
+    <div class="progress-tabs" role="tablist" aria-label="Student progress sections">
+        <a asp-page="/Student/Progress" class="progress-tab">Lessons</a>
+        <a asp-page="/Student/Progress" class="progress-tab active" aria-current="page">Games</a>
+    </div>
+
+    <!-- Student progress summary -->
+    <div class="progress-summary row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="summary-card">
+                <i class="bi bi-controller summary-icon" aria-hidden="true"></i>
+                <span>Games completed</span>
+                <strong>@Model.CompletedGames</strong>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="summary-card">
+                <i class="bi bi-arrow-repeat summary-icon" aria-hidden="true"></i>
+                <span>Total attempts</span>
+                <strong>@Model.TotalAttempts</strong>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="summary-card">
+                <i class="bi bi-star summary-icon" aria-hidden="true"></i>
+                <span>Average score</span>
+                <strong>@Model.AverageScore%</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game progress records -->
+    <section class="progress-list-card" aria-labelledby="games-progress-title">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+            <h2 id="games-progress-title" class="section-title mb-0">Games</h2>
+            <span class="text-muted small">Highest score</span>
+        </div>
+
+        <!-- Display a message when the student has no completed games -->
+        @if (Model.GameProgress.Count == 0)
+        {
+            <div class="empty-progress-state">
+                <i class="bi bi-controller fs-1 mb-2" aria-hidden="true"></i>
+                <p class="mb-3">You have not completed a game yet.</p>
+                <a asp-page="/Student/GameSelection" class="btn btn-primary rounded-pill px-4">Start a Game</a>
+            </div>
+        }
+        else
+        {
+            <!-- Display the highest score and progress for each game -->
+            @foreach (var game in Model.GameProgress)
+            {
+                <div class="game-progress-row">
+                    <div class="game-progress-name">
+                        <strong>@game.GameName</strong>
+                        <span>@game.Difficulty · @game.Attempts attempts · Last played @game.LastCompleted.ToLocalTime().ToString("dd MMM yyyy")</span>
+                    </div>
+                    <div class="game-progress-meter" role="progressbar"
+                         aria-label="@game.GameName score"
+                         aria-valuenow="@game.ScorePercentage" aria-valuemin="0" aria-valuemax="100">
+                        <span style="width: @game.ScorePercentage%"></span>
+                    </div>
+                    <strong class="game-score">@game.HighestScore / @game.TotalQuestions</strong>
+                </div>
+            }
+        }
+    </section>
+</div>
