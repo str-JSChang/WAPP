@@ -13,132 +13,94 @@
 
     <div class="row lesson-selection-container p-4 shadow-sm rounded-4 align-items-stretch">
         
-        <!-- LEFT SIDE: Difficulty Filters (Fixed position, perfectly centered) -->
+        <!-- LEFT SIDE: Content Type Filters -->
         <div class="col-12 col-md-4 lesson-left-col border-end-md py-3">
             <div class="d-flex flex-column justify-content-center align-items-center gap-3 w-100">
-                <a asp-page="./MusicLessonSelection" asp-route-difficulty="Easy" 
-                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "Easy" ? "active-difficulty" : "")">
-                    Easy
+                <a asp-page="./MusicLessonSelection" asp-route-type="All" asp-route-difficulty="@Model.SelectedDifficulty"
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedType == "All" ? "active-difficulty" : "")">
+                    All Types
                 </a>
-                <a asp-page="./MusicLessonSelection" asp-route-difficulty="Normal" 
-                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "Normal" ? "active-difficulty" : "")">
-                    Normal
+                
+                <a asp-page="./MusicLessonSelection" asp-route-type="Theory" asp-route-difficulty="@Model.SelectedDifficulty"
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold btn-type-theory @(Model.SelectedType == "Theory" ? "active-theory" : "")">
+                    Theory
                 </a>
-                <a asp-page="./MusicLessonSelection" asp-route-difficulty="Hard" 
-                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "Hard" ? "active-difficulty" : "")">
-                    Hard
+
+                <a asp-page="./MusicLessonSelection" asp-route-type="EarTraining" asp-route-difficulty="@Model.SelectedDifficulty"
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold btn-type-eartraining @(Model.SelectedType == "EarTraining" ? "active-eartraining" : "")">
+                    Ear Training
                 </a>
+                
+                <a asp-page="./MusicLessonSelection" asp-route-type="Instrument" asp-route-difficulty="@Model.SelectedDifficulty"
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold btn-type-instrument @(Model.SelectedType == "Instrument" ? "active-instrument" : "")">
+                    Instrument
+                </a>
+
             </div>
         </div>
 
-        <!-- RIGHT SIDE: Scrollable Lessons Area -->
+        <!-- RIGHT SIDE: Difficulty Bar + Scrollable Lessons Area -->
         <div class="col-12 col-md-8 lesson-right-col ps-md-4 py-3">
-            @if (string.IsNullOrEmpty(Model.SelectedDifficulty))
-            {
-                <div class="text-muted text-center py-5 h-100 d-flex flex-column justify-content-center align-items-center">
-                    <i class="bi bi-arrow-left-circle fs-2 d-block mb-2"></i>
-                    <p class="mb-0">Please select a difficulty on the left to view lessons.</p>
-                </div>
-            }
-            else
-            {
-                <div class="d-flex flex-column gap-3">
-                    
-                    <!-- For Testing, Gonna remove em when ada db-->
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
 
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
+            <!-- Difficulty Bar -->
+            <div class="d-flex justify-content-around align-items-center pd-3 border-bottom mb-3 gap-2">
+                <a asp-page="./MusicLessonSelection" asp-route-type="@Model.SelectedType" asp-route-difficulty="All"
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "All" ? "active-difficulty" : "")">
+                    All
+                </a>
+                
+                <a asp-page="./MusicLessonSelection" asp-route-type="@Model.SelectedType" asp-route-difficulty="Easy"
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold btn-difficulty-easy @(Model.SelectedDifficulty == "Easy" ? "active-easy" : "")">
+                    Easy
+                </a>
 
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
+                <a asp-page="./MusicLessonSelection" asp-route-type="@Model.SelectedType" asp-route-difficulty="Medium"
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold btn-difficulty-medium @(Model.SelectedDifficulty == "Medium" ? "active-medium" : "")">
+                    Medium
+                </a>
 
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
+                <a asp-page="./MusicLessonSelection" asp-route-type="@Model.SelectedType" asp-route-difficulty="Hard"
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold btn-difficulty-hard @(Model.SelectedDifficulty == "Hard" ? "active-hard" : "")">
+                    Hard
+                </a>
 
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
+            </div>
 
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
+            <!-- Lesson List (Scrollable) -->
+            <div class="lesson-scroll-wrapper">
+                @if (string.IsNullOrEmpty(Model.SelectedDifficulty))
+                {
+                    <div class="text-muted text-center py-5 h-100 d-flex flex-column justify-content-center align-items-center">
+                        <i class="bi bi-arrow-left-circle fs-2 d-block mb-2"></i>
+                        <p class="mb-0">Please select a difficulty on the left to view lessons.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
 
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
-
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
-
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
-
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
-
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
-
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
-
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
-
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
-
-                    <a asp-page="/Student/LessonDetail"
-                        class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                        Lorem ipsum dolor 
-                    </a>
-
-                    @*@if (Model.Lessons != null && Model.Lessons.Any())
-                    {
-                        @foreach (var lesson in Model.Lessons)
+                        @if (Model.Lessons != null && Model.Lessons.Any())
                         {
-                            <a asp-page="/Student/LessonDetail" asp-route-id="@lesson.Id" 
-                               class="btn btn-outline-dark lesson-pill-btn rounded-pill py-3 px-4 text-center fw-bold text-decoration-none text-truncate shadow-sm">
-                                @lesson.Title
-                            </a>
+                            @foreach (var lesson in Model.Lessons)
+                            {
+                                <a asp-page="/Student/LessonDetail" asp-route-id="@lesson.ContentId" 
+                                class="btn btn-storyboard btn-go text-decoration-none w-100 py-3 fw-bold text-decoration-none text-truncate shadow-sm">
+                                    @lesson.Title
+                                </a>
+                            }
                         }
-                    }
-                    else
-                    {
-                        <div class="text-muted text-center py-5">
-                            No lessons found for @Model.SelectedDifficulty difficulty.
-                        </div>
-                    }*@
+                        else
+                        {
+                            <div class="text-muted text-center py-5">
+                                No lessons found.
+                            </div>
+                        }
 
-                </div>
-            }
+                    </div>
+                }
+
+            </div>
+            
         </div>
 
     </div>

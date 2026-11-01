@@ -1,7 +1,7 @@
 /* Fixed size outer container box with strict containment */
 .lesson-selection-container {
     background-color: #ffffff;
-    height: 520px;
+    height: 540px;
     overflow: hidden; /* Prevents content from spilling out of the box */
 }
 
@@ -14,31 +14,33 @@
     align-items: center;
 }
 
-/* Right side column: restricted height with active vertical scrollbar */
-.lesson-right-col {
+.lesson-right-pane {
     height: 100%;
-    overflow-y: auto;   /* Enables vertical scrollbar inside the right side */
-    overflow-x: hidden; /* Prevents horizontal page stretching */
-    padding-right: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.lesson-scroll-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+    max-height: 400px;
 }
 
 /* Custom Webkit Scrollbar Styling for the right side */
-.lesson-right-col::-webkit-scrollbar {
+.lesson-scroll-wrapper::-webkit-scrollbar {
     width: 6px;
 }
 
-.lesson-right-col::-webkit-scrollbar-track {
+.lesson-scroll-wrapper::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 10px;
 }
 
-.lesson-right-col::-webkit-scrollbar-thumb {
+.lesson-scroll-wrapper::-webkit-scrollbar-thumb {
     background: #c1c1c1;
     border-radius: 10px;
-}
-
-.lesson-right-col::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
 }
 
 /* Main title styling */
@@ -56,9 +58,55 @@
 
 /* Custom active/trigger color for difficulty buttons */
 .btn-storyboard.active-difficulty {
-    background-color: #3b82f6 !important;
+    background-color: #2e73e3 !important;
     color: #ffffff !important;
-    border-color: #3b82f6 !important;
+    border-color: #1c61cf !important;
+}
+
+.btn-type-theory:hover,
+.btn-storyboard.active-theory {
+    background-color: #24e5e8 !important;
+    color: #000000 !important;
+    border-color: #1fc4c7 !important;
+}
+
+.btn-type-eartraining:hover,
+.btn-storyboard.active-eartraining {
+    background-color: #cd6cf0 !important;
+    color: #000000 !important;
+    border-color: #bd5ddf !important;
+}
+
+.btn-type-instrument:hover,
+.btn-storyboard.active-instrument {
+    background-color: #ef5fa7 !important;
+    color: #000000 !important;
+    border-color: #d35695 !important;
+}
+
+.btn-difficulty-easy:hover,
+.btn-storyboard.active-easy {
+    background-color: #29d685 !important; 
+    color: #000000 !important;
+    border-color: #24ac6d !important;
+}
+
+.btn-difficulty-medium:hover,
+.btn-storyboard.active-medium {
+    background-color: #f7c42a !important;
+    color: #000000 !important;
+    border-color: #d1a523 !important;
+}
+
+.btn-difficulty-hard:hover,
+.btn-storyboard.active-hard {
+    background-color: #f34455 !important;
+    color: #000000 !important;
+    border-color: #d03746 !important;
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
 }
 
 .lesson-pill-btn {

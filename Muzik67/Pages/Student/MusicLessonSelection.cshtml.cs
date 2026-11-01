@@ -1,35 +1,48 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Muzik67.Data;
+using Muzik67.Models;
 
 
 namespace Muzik67.Pages.Student
 {
     public class MusicLessonSelectionModel : PageModel
     {
-        // Wait for DB
-        // readonly ApplicationDbContext _context;
-        public MusicLessonSelectionModel(/*ApplicationDbContext context*/)
+        readonly MuzikDbContext _context;
+        public MusicLessonSelectionModel(MuzikDbContext context)
         {
-            // _context = context;
+            _context = context;
         }
 
-        /* Pending for Db*/
-        // public IList<LearningContent> Lessons { get; set; } = new List<LearningContent>();
+        public IList<LearningContent> Lessons { get; set; } = new List<LearningContent>();
 
-        [BindProperty(SupportsGet = true)]
+        [BindProperty(SupportsGet = true, Name = "type")]
+        public string SelectedType { get; set; }
+
+
+        [BindProperty(SupportsGet = true, Name = "difficulty")]
         public string SelectedDifficulty { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string difficulty)
+        public async Task<IActionResult> OnGetAsync(string? type, string? difficulty)
         {
-            if (!string.IsNullOrEmpty(difficulty))
+            SelectedType = string.IsNullOrEmpty(type) ? "All" : type;
+            SelectedDifficulty = string.IsNullOrEmpty(difficulty) ? "All" : difficulty;
+
+            var query = _context.LearningContents.AsQueryable();
+
+            if (SelectedType != "All")
             {
-                SelectedDifficulty = difficulty;
-                /* Pending for Db*/
-                // Lessons = await _context.LearningContent
-                //     .Where(l => l.Difficulty == difficulty)
-                //     .ToListAsync();
+                query = query.Where(l => l.ContentType == SelectedType);
             }
+
+            if (SelectedDifficulty != "All")
+            {
+                query = query.Where(l => l.DifficultyLevel == SelectedDifficulty);
+            }
+
+            Lessons = await query.ToListAsync();
 
             return Page();
         }
