@@ -1,0 +1,46 @@
+/* Fixed size outer container box matching selection page style */
+.lesson-content-container {
+    background-color: #ffffff;
+    height: 540px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Big description content frame in the middle */
+.lesson-desc-box {
+    height: 380px;
+    overflow-y: auto;
+    border: 2px solid #212529;
+    border-radius: 1.5rem;
+    background-color: #ffffff;
+}
+
+/* Custom webkit scrollbar for description box */
+.lesson-desc-box::-webkit-scrollbar {
+    width: 6px;
+}
+.lesson-desc-box::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+/* Navigation Arrow Buttons */
+.btn-nav-arrow {
+    width: 50px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem !important;
+    transition: all 0.2s ease-in-out;
+}
+.btn-nav-arrow:hover {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+}
+
+/* Top metadata pill badges */
+.lesson-meta-badge {
+    pointer-events: none; /* Acts as a display indicator label */
+}

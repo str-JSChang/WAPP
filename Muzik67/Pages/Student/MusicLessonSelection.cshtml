@@ -82,7 +82,7 @@
                     {
                         @foreach (var lesson in Model.Lessons)
                         {
-                            <a asp-page="/Student/LessonDetail" asp-route-id="@lesson.ContentId" 
+                            <a asp-page="/Student/LessonContent" asp-route-id="@lesson.ContentId" 
                             class="btn btn-storyboard btn-go text-decoration-none w-100 py-3 fw-bold text-decoration-none text-truncate shadow-sm">
                                 @lesson.Title
                             </a>

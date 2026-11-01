@@ -1,0 +1,63 @@
+﻿@page "{id:int}"
+@model wapp.Muzik67.Pages.Student.LessonContentModel
+@{
+    ViewData["Title"] = Model.Lesson?.Title ?? "Lesson Content";
+}
+
+<link rel="stylesheet" href="~/css/lesson-content.css" asp-append-version="true" />
+
+<div class="container pt-3 pb-5">
+    
+    <!-- TOP BAR: Return Button, Difficulty Badge, Lesson Title Badge -->
+    <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+        <!-- Return Button -->
+        <a asp-page="/Student/MusicLessonSelection" class="btn btn-storyboard btn-go text-decoration-none rounded-pill fw-bold btn-back-pill shadow-sm">
+            <i class="bi bi-arrow-left fs-5"></i>
+        </a>
+
+        <!-- 2. Difficulty & Lesson Title Group (Centered & Matching Button Padding) -->
+        <div class="d-flex align-items-center gap-3">
+            <div class="btn btn-outline-dark rounded-pill fw-bold px-4 py-3 lesson-meta-badge shadow-sm">
+                @Model.Lesson.DifficultyLevel
+            </div>
+            <div class="vr" style="height: 60px; width: 2px; background-color: #212529;"></div>
+            <div class="btn btn-outline-dark rounded-pill fw-bold px-4 py-3 lesson-meta-badge shadow-sm text-truncate" style="max-width: 250px;">
+                @Model.Lesson.ContentType
+            </div>
+        </div>
+
+        <!-- 3. Empty Spacer (Matches width of Return button so the middle group stays dead center) -->
+        <div style="width: 200px; visibility: hidden;">
+            <span class="btn">Return</span>
+        </div>
+        
+    </div>
+
+    <!-- MAIN CONTENT FRAME CONTAINER -->
+    <div class="row lesson-content-container p-3 shadow-sm rounded-4 align-items-center justify-content-between">
+        
+        <!-- LEFT NAVIGATION ARROW -->
+        <div class="col-1 text-center">
+            <button type="button" class="btn btn-outline-dark btn-nav-arrow shadow-sm" onclick="alert('This is the first page.')" title="Previous Page">
+                <i class="bi bi-chevron-left fs-4 fw-bold"></i>
+            </button>
+        </div>
+
+        <!-- CENTER DESCRIPTION FRAME (Fetched from "Description" column) -->
+        <div class="col-10">
+            <div class="lesson-desc-box p-4 shadow-sm">
+                <div class="fs-5 text-dark">
+                    @Html.Raw(Model.Lesson.Description)
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT NAVIGATION ARROW (Navigates to Pop Quiz) -->
+        <div class="col-1 text-center d-flex justify-content-end">
+            <a asp-page="/Student/PopQuiz" asp-route-id="@Model.Lesson.ContentId" class="btn btn-outline-dark btn-nav-arrow shadow-sm text-decoration-none" title="Go to Quiz">
+                <i class="bi bi-chevron-right fs-4 fw-bold"></i>
+            </a>
+        </div>
+
+    </div>
+</div>
