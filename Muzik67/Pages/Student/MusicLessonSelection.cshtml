@@ -7,6 +7,14 @@
 <link rel="stylesheet" href="~/css/music-lesson-selection.css" asp-append-version="true" />
 
 <div class="container py-5">
+
+    <!-- Back Button-->
+    <div class="mb-2">
+        <a asp-page="/Student/StudentDashboard" class="btn btn-storyboard btn-go text-decoration-none rounded-pill fw-bold btn-back-pill shadow-sm">
+            <i class="bi bi-arrow-left fs-5"></i>
+        </a>
+    </div>
+
     <h1 class="fw-bold mb-4 font-monospace-title lesson-main-title">
         <i class="bi bi-music-note-beamed"></i> Moosik Lesson :D
     </h1>
@@ -68,36 +76,26 @@
 
             <!-- Lesson List (Scrollable) -->
             <div class="lesson-scroll-wrapper">
-                @if (string.IsNullOrEmpty(Model.SelectedDifficulty))
-                {
-                    <div class="text-muted text-center py-5 h-100 d-flex flex-column justify-content-center align-items-center">
-                        <i class="bi bi-arrow-left-circle fs-2 d-block mb-2"></i>
-                        <p class="mb-0">Please select a difficulty on the left to view lessons.</p>
-                    </div>
-                }
-                else
-                {
-                    <div class="d-flex flex-column gap-3">
+                <div class="d-flex flex-column gap-3">
 
-                        @if (Model.Lessons != null && Model.Lessons.Any())
+                    @if (Model.Lessons != null && Model.Lessons.Any())
+                    {
+                        @foreach (var lesson in Model.Lessons)
                         {
-                            @foreach (var lesson in Model.Lessons)
-                            {
-                                <a asp-page="/Student/LessonDetail" asp-route-id="@lesson.ContentId" 
-                                class="btn btn-storyboard btn-go text-decoration-none w-100 py-3 fw-bold text-decoration-none text-truncate shadow-sm">
-                                    @lesson.Title
-                                </a>
-                            }
+                            <a asp-page="/Student/LessonDetail" asp-route-id="@lesson.ContentId" 
+                            class="btn btn-storyboard btn-go text-decoration-none w-100 py-3 fw-bold text-decoration-none text-truncate shadow-sm">
+                                @lesson.Title
+                            </a>
                         }
-                        else
-                        {
-                            <div class="text-muted text-center py-5">
-                                No lessons found.
-                            </div>
-                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted text-center py-5">
+                            No lessons found.
+                        </div>
+                    }
 
-                    </div>
-                }
+                </div>
 
             </div>
             

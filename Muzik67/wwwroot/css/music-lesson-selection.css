@@ -113,3 +113,12 @@
     width: 100%;
     transition: all 0.2s ease-in-out;
 }
+
+.btn-back-pill {
+    width: auto !important;
+    min-width: 100px;
+    padding: 6px 16px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}

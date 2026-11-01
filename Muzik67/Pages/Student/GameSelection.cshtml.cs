@@ -1,34 +1,38 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Muzik67.Data;
+using Muzik67.Models;
 
 namespace Muzik67.Pages.Student
 {
     public class GameSelectionModel : PageModel
     {
-        // Wait for DB
-        // readonly ApplicationDbContext _context;
-        public GameSelectionModel(/*ApplicationDbContext _context*/)
+         readonly MuzikDbContext _context;
+        public GameSelectionModel(MuzikDbContext context)
         {
-            // _context = context;
+            _context = context;
         }
 
         /* Pending for DB */
-        // public IList<Games> Game { get; set; } = new List<Games>();
+        public IList<Game> Games { get; set; } = new List<Game>();
 
-        [BindProperty(SupportsGet = true)]
+        [BindProperty(SupportsGet = true, Name = "difficulty")]
         public string SelectedDifficulty { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string difficulty)
         {
-            if (!string.IsNullOrEmpty(difficulty))
+            SelectedDifficulty = string.IsNullOrEmpty(difficulty) ? "All" : difficulty;
+
+            var query = _context.Games.AsQueryable();
+
+            if (SelectedDifficulty != "All")
             {
-                SelectedDifficulty = difficulty;
-                /* 
-                Pending for DB 
-                Game = await _context.Games
-                    .Where(1 => 1.Difficulty == difficulty
-                    .ToListAsync();*/
+                query = query.Where(g => g.DifficultyLevel == SelectedDifficulty);
             }
+
+            Games = await query.ToListAsync();
+            
             return Page();
         }
     }

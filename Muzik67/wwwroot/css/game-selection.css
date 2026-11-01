@@ -61,7 +61,41 @@
     border-color: #3b82f6 !important;
 }
 
+.btn-difficulty-easy:hover,
+.btn-storyboard.active-easy {
+    background-color: #29d685 !important; 
+    color: #000000 !important;
+    border-color: #24ac6d !important;
+}
+
+.btn-difficulty-medium:hover,
+.btn-storyboard.active-medium {
+    background-color: #f7c42a !important;
+    color: #000000 !important;
+    border-color: #d1a523 !important;
+}
+
+.btn-difficulty-hard:hover,
+.btn-storyboard.active-hard {
+    background-color: #f34455 !important;
+    color: #000000 !important;
+    border-color: #d03746 !important;
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
 .game-pill-btn {
     width: 100%;
     transition: all 0.2s ease-in-out;
+}
+
+.btn-back-pill {
+    width: auto !important;
+    min-width: 100px;
+    padding: 6px 16px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
