@@ -15,7 +15,15 @@
     <section class="row g-4 justify-content-center admin-dashboard-cards" aria-label="Administration modules">
         <div class="col-12 col-md-6">
             <article class="admin-module-card">
-                <h2>User Management</h2>
+                <header class="admin-module-card-heading">
+                    <span class="admin-module-icon" aria-hidden="true">
+                        <i class="bi bi-people-fill"></i>
+                    </span>
+                    <div>
+                        <p class="admin-module-kicker">MEMBERS &amp; ACCOUNTS</p>
+                        <h2>User Management</h2>
+                    </div>
+                </header>
                 <ul>
                     <li>User List</li>
                     <li>User Progress Tracking</li>
@@ -23,25 +31,23 @@
                         <a asp-page="/Admin/Subscriptions">Subscription Management</a>
                     </li>
                 </ul>
-                <a asp-page="/Admin/Subscriptions" class="btn admin-select-button">
-                    Select <span class="visually-hidden">User Management</span>
-                </a>
             </article>
         </div>
         <div class="col-12 col-md-6">
             <article class="admin-module-card">
-                <h2>Content Management</h2>
+                <header class="admin-module-card-heading">
+                    <span class="admin-module-icon" aria-hidden="true">
+                        <i class="bi bi-music-note-list"></i>
+                    </span>
+                    <div>
+                        <p class="admin-module-kicker">LESSONS &amp; ACTIVITIES</p>
+                        <h2>Content Management</h2>
+                    </div>
+                </header>
                 <ul>
                     <li>Music Lesson Management</li>
                     <li>Music Game Management</li>
                 </ul>
-                <button type="button" class="btn admin-select-button" disabled
-                        aria-describedby="content-management-note">
-                    Select <span class="visually-hidden">Content Management</span>
-                </button>
-                <p id="content-management-note" class="admin-module-note">
-                    Content management is handled in another module.
-                </p>
             </article>
         </div>
     </section>

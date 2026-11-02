@@ -46,71 +46,92 @@
 }
 
 .admin-module-card {
-  align-items: center;
-  border: 2px solid #777;
-  border-radius: 1.5rem;
-  color: #171717;
+  background: linear-gradient(145deg, #fff 60%, #f7faff);
+  border: 1px solid #dbe5f3;
+  border-radius: 1.25rem;
+  box-shadow: 0 0.4rem 1.2rem rgb(23 37 84 / 5%);
+  color: #172554;
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 310px;
-  padding: 1.1rem 1.25rem 1.25rem;
-  text-align: center;
+  min-height: clamp(280px, 42vh, 360px);
+  padding: 1.25rem 1.4rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.admin-module-card:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 0.75rem 1.6rem rgb(23 37 84 / 9%);
+  transform: translateY(-2px);
+}
+
+.admin-module-card-heading {
+  align-items: center;
+  display: flex;
+  gap: 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
+.admin-module-icon {
+  align-items: center;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 0.85rem;
+  color: #2563eb;
+  display: inline-flex;
+  flex: 0 0 2.8rem;
+  height: 2.8rem;
+  justify-content: center;
+  width: 2.8rem;
+}
+
+.admin-module-icon i {
+  font-size: 1.15rem;
+}
+
+.admin-module-kicker {
+  color: #64748b;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  margin: 0 0 0.15rem;
 }
 
 .admin-module-card h2 {
-  font-size: 1.15rem;
+  color: #172554;
+  font-size: 1.08rem;
   font-weight: 700;
-  margin: 0 0 1.1rem;
+  margin: 0;
 }
 
 .admin-module-card ul {
-  align-self: stretch;
+  display: flex;
   flex: 1;
-  line-height: 1.8;
-  margin: 0 0 1.1rem;
-  padding-left: 1.4rem;
-  text-align: left;
+  flex-direction: column;
+  justify-content: space-evenly;
+  margin: 0;
+  padding: 0.6rem 0 0.6rem 3.7rem;
+  width: 100%;
+}
+
+.admin-module-card li {
+  color: #475569;
+  line-height: 1.55;
+  padding-left: 0.15rem;
 }
 
 .admin-module-card li a {
-  color: inherit;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  border-radius: 0.25rem;
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .admin-module-card li a:hover,
 .admin-module-card li a:focus-visible {
-  color: #1d4ed8;
-}
-
-.admin-select-button {
-  background: #fff;
-  border: 2px solid #777;
-  border-radius: 999px;
-  color: #171717;
-  font-weight: 700;
-  min-width: 145px;
-  padding: 0.35rem 1.5rem;
-}
-
-.admin-select-button:not(:disabled):hover,
-.admin-select-button:not(:disabled):focus-visible {
-  background: #f0f0f0;
-  border-color: #222;
-  color: #111;
-}
-
-.admin-select-button:disabled {
-  background: #f4f4f4;
-  color: #777;
-  opacity: 1;
-}
-
-.admin-module-note {
-  color: #64748b;
-  font-size: 0.78rem;
-  margin: 0.65rem 0 0;
+  color: #1e40af;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .admin-workspace {
@@ -120,9 +141,25 @@
   grid-template-columns: minmax(155px, 190px) minmax(0, 1fr);
 }
 
+.admin-subscriptions-page {
+  max-width: 1180px;
+}
+
+.admin-subscriptions-page .admin-workspace {
+  gap: clamp(1.75rem, 3.5vw, 3rem);
+  grid-template-columns: minmax(205px, 235px) minmax(0, 1fr);
+}
+
 .admin-workspace-sidebar {
   position: sticky;
   top: 1rem;
+}
+
+.admin-subscriptions-page .admin-workspace-sidebar {
+  background: #f8faff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.15rem 0.9rem;
 }
 
 .workspace-return {
@@ -133,6 +170,10 @@
   gap: 0.45rem;
   margin-bottom: 1rem;
   text-decoration: none;
+}
+
+.admin-subscriptions-page .workspace-return {
+  margin: 0 0 1.35rem 0.35rem;
 }
 
 .workspace-return:hover,
@@ -148,6 +189,10 @@
   gap: 0.4rem;
 }
 
+.admin-subscriptions-page .workspace-nav {
+  gap: 0.65rem;
+}
+
 .workspace-nav-heading {
   color: #64748b;
   font-size: 0.75rem;
@@ -155,6 +200,10 @@
   letter-spacing: 0.05em;
   margin: 0 0 0.35rem 0.85rem;
   text-transform: uppercase;
+}
+
+.admin-subscriptions-page .workspace-nav-heading {
+  margin: 0 0 0.2rem 0.65rem;
 }
 
 .workspace-nav-item {
@@ -165,6 +214,10 @@
   display: block;
   padding: 0.75rem 0.85rem;
   text-decoration: none;
+}
+
+.admin-subscriptions-page .workspace-nav-item {
+  padding: 0.9rem 0.85rem;
 }
 
 .workspace-nav-item[aria-disabled="true"] {
@@ -461,6 +514,18 @@ a.workspace-nav-item:focus-visible {
 }
 
 @media (max-width: 767.98px) {
+  .admin-module-card {
+    min-height: 240px;
+  }
+
+  .admin-subscriptions-page .admin-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-subscriptions-page .admin-workspace-sidebar {
+    position: static;
+  }
+
   .admin-workspace {
     grid-template-columns: 1fr;
   }
