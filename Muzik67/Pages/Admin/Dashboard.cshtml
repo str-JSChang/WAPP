@@ -1,0 +1,48 @@
+@page
+@model Muzik67.Pages.Admin.DashboardModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<link rel="stylesheet" href="~/css/modules.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+
+<div class="container module-page admin-page">
+    <div class="admin-dashboard-heading">
+        <h1>Admin Dashboard</h1>
+    </div>
+
+    <section class="row g-4 justify-content-center admin-dashboard-cards" aria-label="Administration modules">
+        <div class="col-12 col-md-6">
+            <article class="admin-module-card">
+                <h2>User Management</h2>
+                <ul>
+                    <li>User List</li>
+                    <li>User Progress Tracking</li>
+                    <li>
+                        <a asp-page="/Admin/Subscriptions">Subscription Management</a>
+                    </li>
+                </ul>
+                <a asp-page="/Admin/Subscriptions" class="btn admin-select-button">
+                    Select <span class="visually-hidden">User Management</span>
+                </a>
+            </article>
+        </div>
+        <div class="col-12 col-md-6">
+            <article class="admin-module-card">
+                <h2>Content Management</h2>
+                <ul>
+                    <li>Music Lesson Management</li>
+                    <li>Music Game Management</li>
+                </ul>
+                <button type="button" class="btn admin-select-button" disabled
+                        aria-describedby="content-management-note">
+                    Select <span class="visually-hidden">Content Management</span>
+                </button>
+                <p id="content-management-note" class="admin-module-note">
+                    Content management is handled in another module.
+                </p>
+            </article>
+        </div>
+    </section>
+</div>
