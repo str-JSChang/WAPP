@@ -1,10 +1,10 @@
-﻿// Muzik 67 - Interactive Intro Animation, Scroll Reveals & Web Audio Synthesizer
+﻿// Muzik 67 - Interactive Intro Animation, 4-Phase Video Navigation & Web Audio Synthesizer
 
 document.addEventListener("DOMContentLoaded", function () {
     initIntroAnimation();
     initScrollReveal();
     initBgmController();
-    initScrollVideoController();
+    initFourPhaseVideoController();
 });
 
 // =========================================================================
@@ -193,80 +193,227 @@ function initScrollReveal() {
 }
 
 // =========================================================================
-// 3. SCROLL-DRIVEN VIDEO CONTROLLER (Above-water loop + underwater dive on scroll)
+// 3. FOUR-PHASE MINECRAFT VIDEO CONTROLLER
+//    Phase 1: Above water surface loop (0.5s - 9.2s)
+//    Phase 2: Diving into water transition (9.4s - 11.5s) + Dive audio cue
+//    Phase 3: Underwater journey loop (11.8s - 24.5s)
+//    Phase 4: Resurface transition (24.8s - 28.0s) + Surface audio cue
 // =========================================================================
-function initScrollVideoController() {
+function initFourPhaseVideoController() {
     const video = document.getElementById("landingBgVideo");
+    const exploreBtn = document.getElementById("exploreUnderwaterBtn");
+    const resurfaceBtn = document.getElementById("resurfaceBtn");
     if (!video) return;
 
-    // Timeline markers in the 28.5s cut video:
-    // 0.0s to 9.0s: Above water (lake, clouds, shaders)
-    // 9.2s to 11.5s: Submerging down underwater
-    // 11.5s to 24.5s: Underwater path with squid and seagrass
-    // 25.0s to 28.2s: Rising back up and splashing above water
-    const SURFACE_LOOP_START = 0.5;
-    const SURFACE_LOOP_END = 9.0;
-    const DIVE_START = 9.2;
-    const RESURFACE_END = 28.2;
+    // Video Timeline Markers
+    const SURFACE_START = 0.5;
+    const SURFACE_END = 9.2;
+    const DIVE_START = 9.4;
+    const DIVE_END = 11.5;
+    const UNDERWATER_START = 11.8;
+    const UNDERWATER_END = 24.5;
+    const RESURFACE_START = 24.8;
+    const RESURFACE_END = 28.0;
 
-    let targetTime = 0;
-    let isTicking = false;
+    // 'SURFACE' | 'DIVING' | 'UNDERWATER' | 'RESURFACING'
+    let currentState = 'SURFACE';
+    let isTransitioning = false;
 
-    // When at the top: loop peaceful above-water scene continuously
+    // Keep video playing
+    video.play().catch(() => {});
+
+    // Active playback loop controller
     video.addEventListener("timeupdate", function () {
-        if (window.scrollY <= 60) {
-            if (video.currentTime >= SURFACE_LOOP_END || video.currentTime < SURFACE_LOOP_START - 0.2) {
-                video.currentTime = SURFACE_LOOP_START;
+        const time = video.currentTime;
+
+        if (currentState === 'SURFACE') {
+            if (time >= SURFACE_END || time < SURFACE_START - 0.2) {
+                video.currentTime = SURFACE_START;
+            }
+        } else if (currentState === 'DIVING') {
+            if (time >= DIVE_END) {
+                currentState = 'UNDERWATER';
+                isTransitioning = false;
+                video.currentTime = UNDERWATER_START;
+            }
+        } else if (currentState === 'UNDERWATER') {
+            if (time >= UNDERWATER_END || time < UNDERWATER_START - 0.2) {
+                video.currentTime = UNDERWATER_START;
+            }
+        } else if (currentState === 'RESURFACING') {
+            if (time >= RESURFACE_END) {
+                currentState = 'SURFACE';
+                isTransitioning = false;
+                video.currentTime = SURFACE_START;
             }
         }
     });
 
-    function handleScroll() {
-        const scrollY = window.scrollY;
-        const maxScroll = (document.documentElement.scrollHeight - window.innerHeight) || 1;
+    // Dive Transition Action
+    function diveUnderwater(targetScroll = true) {
+        if (currentState === 'UNDERWATER' || currentState === 'DIVING') return;
+        currentState = 'DIVING';
+        isTransitioning = true;
+        playWaterDiveSound();
 
-        if (scrollY <= 60) {
-            // At the top / hero section: ensure video plays naturally in ambient loop
-            if (video.paused) {
-                video.play().catch(() => {});
+        video.currentTime = DIVE_START;
+        if (video.paused) video.play().catch(() => {});
+
+        if (targetScroll) {
+            const realms = document.getElementById("realmNavigation");
+            if (realms) {
+                realms.scrollIntoView({ behavior: "smooth" });
             }
-            return;
-        }
-
-        // As user scrolls down, pause natural play so scroll position drives video
-        if (!video.paused) {
-            video.pause();
-        }
-
-        // Calculate scroll progress from 0% (past hero) to 100% (bottom of page)
-        const progress = Math.min(Math.max((scrollY - 60) / (maxScroll - 60), 0), 1);
-
-        // Map progress to the diving -> underwater -> resurfacing timeline
-        targetTime = DIVE_START + progress * (RESURFACE_END - DIVE_START);
-
-        if (!isTicking) {
-            isTicking = true;
-            requestAnimationFrame(smoothUpdate);
         }
     }
 
-    function smoothUpdate() {
-        const diff = targetTime - video.currentTime;
-        if (Math.abs(diff) > 0.08) {
-            // Smooth lerp seeking
-            video.currentTime = Math.min(Math.max(video.currentTime + diff * 0.35, 0), 28.3);
-            requestAnimationFrame(smoothUpdate);
-        } else {
-            video.currentTime = targetTime;
-            isTicking = false;
+    // Resurface Transition Action
+    function resurfaceToOverworld(targetScroll = true) {
+        if (currentState === 'SURFACE' || currentState === 'RESURFACING') return;
+        currentState = 'RESURFACING';
+        isTransitioning = true;
+        playWaterSurfaceSound();
+
+        video.currentTime = RESURFACE_START;
+        if (video.paused) video.play().catch(() => {});
+
+        if (targetScroll) {
+            window.scrollTo({ top: 0, behavior: "smooth" });
         }
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Button Click: "Explore the Underwater"
+    if (exploreBtn) {
+        exploreBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            diveUnderwater(true);
+        });
+    }
+
+    // Button Click: "Resurface to Overworld"
+    if (resurfaceBtn) {
+        resurfaceBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            resurfaceToOverworld(true);
+        });
+    }
+
+    // Scroll trigger
+    let scrollDebounce = null;
+    window.addEventListener("scroll", function () {
+        if (isTransitioning) return;
+        const scrollY = window.scrollY;
+
+        clearTimeout(scrollDebounce);
+        scrollDebounce = setTimeout(function () {
+            // Scroll down past hero (scrollY > 220) triggers dive into underwater
+            if (scrollY > 220 && currentState === 'SURFACE') {
+                diveUnderwater(false);
+            }
+            // Scroll back up into hero (scrollY < 120) triggers resurface
+            else if (scrollY < 120 && currentState === 'UNDERWATER') {
+                resurfaceToOverworld(false);
+            }
+        }, 80);
+    }, { passive: true });
 }
 
 // =========================================================================
-// 4. AMBIENT BGM VIDEO AUDIO CONTROLLER
+// 4. WATER DIVE & SURFACE AUDIO CUES (Web Audio API)
+// =========================================================================
+function playWaterDiveSound() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const now = ctx.currentTime;
+
+        // 1. Splash noise burst (bubble impact)
+        const bufferSize = Math.floor(ctx.sampleRate * 0.45);
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        // Resonant low-pass sweep: head entering water
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(950, now);
+        filter.frequency.exponentialRampToValueAtTime(140, now + 0.4);
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start(now);
+
+        // 2. Underwater bubble gurgles
+        [220, 165, 130].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const oscGain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.75, now + idx * 0.09 + 0.16);
+
+            oscGain.gain.setValueAtTime(0.001, now + idx * 0.09);
+            oscGain.gain.linearRampToValueAtTime(0.25, now + idx * 0.09 + 0.02);
+            oscGain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.09 + 0.18);
+
+            osc.connect(oscGain);
+            oscGain.connect(ctx.destination);
+            osc.start(now + idx * 0.09);
+            osc.stop(now + idx * 0.09 + 0.2);
+        });
+    } catch (e) {
+        console.log("Audio notice:", e);
+    }
+}
+
+function playWaterSurfaceSound() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const now = ctx.currentTime;
+
+        const bufferSize = Math.floor(ctx.sampleRate * 0.4);
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        // Bandpass sweep rising up into open air
+        const filter = ctx.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.setValueAtTime(220, now);
+        filter.frequency.exponentialRampToValueAtTime(1400, now + 0.35);
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.28, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start(now);
+    } catch (e) {
+        console.log("Audio notice:", e);
+    }
+}
+
+// =========================================================================
+// 5. AMBIENT BGM VIDEO AUDIO CONTROLLER
 // =========================================================================
 function initBgmController() {
     const video = document.getElementById("landingBgVideo");
@@ -294,7 +441,7 @@ function initBgmController() {
 }
 
 // =========================================================================
-// 5. INTERACTIVE PIANO / NOTE SYNTHESIZER (Web Audio API)
+// 6. INTERACTIVE PIANO / NOTE SYNTHESIZER (Web Audio API)
 // =========================================================================
 let pianoAudioCtx = null;
 

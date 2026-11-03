@@ -401,6 +401,37 @@ body {
   box-shadow: inset -2px -4px 0px rgba(0, 0, 0, 0.35), inset 2px 2px 0px rgba(255, 255, 255, 0.45), 0 10px 25px rgba(16, 185, 129, 0.4);
 }
 
+
+.btn-explore-underwater {
+  background: #0284c7;
+  color: #ffffff;
+  border: 2px solid #0369a1;
+  box-shadow: inset -2px -4px 0px rgba(0, 0, 0, 0.35), inset 2px 2px 0px rgba(255, 255, 255, 0.45), 0 10px 25px rgba(2, 132, 199, 0.45);
+}
+
+.btn-explore-underwater:hover {
+  background-color: #0369a1;
+  color: #ffffff;
+  border-color: #075985;
+  transform: translateY(-3px);
+  box-shadow: inset -2px -4px 0px rgba(0, 0, 0, 0.35), 0 15px 30px rgba(2, 132, 199, 0.6);
+}
+
+.btn-resurface {
+  background: #f59e0b;
+  color: #ffffff;
+  border: 2px solid #d97706;
+  box-shadow: inset -2px -4px 0px rgba(0, 0, 0, 0.35), inset 2px 2px 0px rgba(255, 255, 255, 0.45), 0 10px 25px rgba(245, 158, 11, 0.45);
+}
+
+.btn-resurface:hover {
+  background-color: #d97706;
+  color: #ffffff;
+  border-color: #b45309;
+  transform: translateY(-3px);
+  box-shadow: inset -2px -4px 0px rgba(0, 0, 0, 0.35), 0 15px 30px rgba(245, 158, 11, 0.6);
+}
+
 .btn-get-started:hover {
   background-color: #059669;
   color: #ffffff;

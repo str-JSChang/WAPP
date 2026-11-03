@@ -39,7 +39,7 @@
 
 <!-- =========================================================================
      MINECRAFT VIDEO BACKGROUND LAYER
-     Web-optimized H.264 video with faststart streaming & smooth looping
+     4-Phase Scene: Surface Loop -> Diving Transition -> Underwater Loop -> Resurface
      ========================================================================= -->
 <div class="landing-video-fixed-bg" aria-hidden="true">
     <video id="landingBgVideo" autoplay muted loop playsinline preload="auto">
@@ -55,21 +55,12 @@
 </button>
 
 <!-- =========================================================================
-     LANDING PAGE CONTENT & ANIMATED NAVIGATION
+     LANDING PAGE CONTENT & 4-PHASE SECTIONS
      ========================================================================= -->
 <div id="landingWrapper" class="landing-page-wrapper">
 
-    <!-- HERO SECTION (Slide 3 Wireframe & Storyboard) -->
+    <!-- PHASE 1: ABOVE WATER SURFACE (Hero Section) -->
     <section class="landing-hero-fullscreen d-flex flex-column justify-content-center align-items-center text-center">
-        <!-- Storyboard X-Cross Lines Motif -->
-        <!--<div class="wireframe-cross-lines" aria-hidden="true">
-            <svg preserveAspectRatio="none" viewBox="0 0 1000 600">
-                <line x1="0" y1="0" x2="1000" y2="600" />
-                <line x1="1000" y1="0" x2="0" y2="600" />
-                <line x1="0" y1="300" x2="1000" y2="300" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
-            </svg>
-        </div>-->
-
         <div class="container position-relative z-2 hero-inner">
             <!-- Minecraft World Badge -->
             <div class="mc-tag-badge mb-3">
@@ -86,35 +77,27 @@
                 fundamentals of music in a fun, simple, and age-appropriate way.
             </p>
 
-            <!-- Action Buttons -->
+            <!-- Action Buttons: Get Started + Explore the Underwater -->
             <div class="landing-actions mt-4">
                 <a asp-page="/Account/Register" class="btn btn-storyboard btn-get-started text-decoration-none">
                     <i class="bi bi-stars me-1"></i> Get Started
                 </a>
-                <a href="#realmNavigation" class="btn btn-storyboard btn-learn-more text-decoration-none">
-                    <i class="bi bi-compass me-1"></i> Explore World
-                </a>
-            </div>
-
-            <!-- Scroll Cue Indicator -->
-            <div class="scroll-down-indicator mt-5">
-                <a href="#realmNavigation" class="text-white text-decoration-none d-inline-flex flex-column align-items-center gap-1">
-                    <span class="scroll-cue-text">SCROLL TO EXPLORE</span>
-                    <i class="bi bi-chevron-down scroll-bounce-icon fs-4"></i>
-                </a>
+                <button type="button" id="exploreUnderwaterBtn" class="btn btn-storyboard btn-explore-underwater text-decoration-none">
+                    <i class="bi bi-water me-1"></i> Explore the Underwater
+                </button>
             </div>
         </div>
     </section>
 
     <!-- =========================================================================
-         SECTION 2: ANIMATED NAVIGATION REALMS (Glassmorphic Cards)
+         PHASE 2 & 3: UNDERWATER REALMS (Navigation Hubs)
          ========================================================================= -->
     <section id="realmNavigation" class="container py-5 my-3 position-relative z-2">
         <div class="text-center mb-5 scroll-reveal">
-            <span class="mc-sub-badge">EXPLORATION HUBS</span>
+            <span class="mc-sub-badge"><i class="bi bi-water me-1"></i> UNDERWATER REALMS</span>
             <h2 class="display-5 fw-bold text-white text-shadow-mc mt-2">Choose Your Realm</h2>
             <p class="text-light opacity-75 max-w-600 mx-auto">
-                Step into interactive lessons, challenging ear-training games, or track your musical journey.
+                Step into interactive lessons, challenging ear-training games, or track your musical journey beneath the waves.
             </p>
         </div>
 
@@ -235,10 +218,10 @@
     </section>
 
     <!-- =========================================================================
-         SECTION 4: FEATURES & LEARNING SCOPE
+         SECTION 4: FEATURES & RESURFACE TO OVERWORLD
          ========================================================================= -->
     <section id="aboutSection" class="container py-5 my-2 position-relative z-2">
-        <div class="row g-4">
+        <div class="row g-4 mb-5">
             <div class="col-md-4 scroll-reveal">
                 <div class="feature-card-mc h-100 p-4">
                     <div class="feature-icon-bubble">🎹</div>
@@ -266,6 +249,13 @@
                     </p>
                 </div>
             </div>
+        </div>
+
+        <!-- PHASE 4: RESURFACE TO SURFACE BUTTON -->
+        <div class="text-center pt-3 pb-4">
+            <button type="button" id="resurfaceBtn" class="btn btn-storyboard btn-resurface shadow-lg">
+                <i class="bi bi-arrow-up-circle-fill me-2"></i> Resurface to Overworld
+            </button>
         </div>
     </section>
 
