@@ -43,15 +43,13 @@ namespace Muzik67.Pages.Account
 
         }
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
-            // Initialise login page
+            return RedirectSignedInUser() ?? Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
-
             if (!ModelState.IsValid)
             {
                 return Page();
@@ -80,7 +78,16 @@ namespace Muzik67.Pages.Account
                 _logger.LogInformation("User '{Username}' logged in successfully as {Role}.", user.Username, user.Role);
 
                 SuccessMessage = $"Welcome back, {user.Username}!";
-                return LocalRedirect(returnUrl);
+
+                if (!string.IsNullOrWhiteSpace(returnUrl) &&
+                    Url.IsLocalUrl(returnUrl) &&
+                    returnUrl != "/" &&
+                    !returnUrl.Equals("/Index", StringComparison.OrdinalIgnoreCase))
+                {
+                    return LocalRedirect(returnUrl);
+                }
+
+                return RedirectForRole(user.Role);
             }
             catch (Exception ex)
             {
@@ -95,6 +102,32 @@ namespace Muzik67.Pages.Account
             HttpContext.Session.Clear();
             SuccessMessage = "You have been logged out successfully.";
             return RedirectToPage("/Account/Login");
+        }
+
+        private IActionResult? RedirectSignedInUser()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId is null or <= 0)
+            {
+                return null;
+            }
+
+            var role = HttpContext.Session.GetString("Role");
+            if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(role, "Member", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectForRole(role);
+            }
+
+            HttpContext.Session.Clear();
+            return null;
+        }
+
+        private IActionResult RedirectForRole(string? role)
+        {
+            return string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)
+                ? RedirectToPage("/Admin/Dashboard")
+                : RedirectToPage("/Student/StudentDashboard");
         }
     }
 }
