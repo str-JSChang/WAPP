@@ -1,0 +1,106 @@
+@page
+@model Muzik67.Pages.Student.ProgressModel
+@{
+    ViewData["Title"] = "Learning Progress";
+}
+
+<link rel="stylesheet" href="~/css/progress.css" asp-append-version="true" />
+
+<main class="container progress-page py-5">
+    <header class="text-center mb-4">
+        <p class="text-uppercase text-muted small fw-semibold mb-1">Learning report</p>
+        <h1 class="progress-title">Learning Progress</h1>
+        <p class="text-muted mb-0">Saved activity for <strong>@Model.Username</strong></p>
+    </header>
+
+    <section class="row g-3 mb-4" aria-label="Progress summary">
+        <div class="col-12 col-md-4">
+            <div class="progress-summary h-100">
+                <span class="progress-icon"><i class="bi bi-controller"></i></span>
+                <div>
+                    <p class="summary-label">Recorded results</p>
+                    <p class="summary-value">@Model.ResultCount</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="progress-summary h-100">
+                <span class="progress-icon"><i class="bi bi-arrow-repeat"></i></span>
+                <div>
+                    <p class="summary-label">Total attempts</p>
+                    <p class="summary-value">@Model.TotalAttempts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="progress-summary h-100">
+                <span class="progress-icon"><i class="bi bi-star"></i></span>
+                <div>
+                    <p class="summary-label">Average score</p>
+                    <p class="summary-value">@(Model.AverageScore?.ToString("0.#") ?? "—")</p>
+                    <span class="summary-note">score points</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="progress-panel mb-4" aria-labelledby="lessons-heading">
+        <div class="panel-heading">
+            <span class="section-icon"><i class="bi bi-music-note-list"></i></span>
+            <div>
+                <h2 id="lessons-heading">Lesson Progress</h2>
+                <p class="text-muted mb-0">Completed learning materials will appear here.</p>
+            </div>
+        </div>
+        <div class="progress-empty">
+            <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+            <p class="mb-1 fw-semibold">Lesson tracking is not available yet</p>
+            <p class="text-muted small mb-0">Lesson completion data will show here once it is saved by the learning pages.</p>
+        </div>
+    </section>
+
+    <section class="progress-panel" aria-labelledby="quiz-heading">
+        <div class="panel-heading">
+            <span class="section-icon"><i class="bi bi-patch-question"></i></span>
+            <div>
+                <h2 id="quiz-heading">Game &amp; Quiz Results</h2>
+                <p class="text-muted mb-0">Recent saved scores and attempts.</p>
+            </div>
+        </div>
+
+        @if (Model.RecentResults.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table align-middle progress-table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Game</th>
+                            <th scope="col">Score</th>
+                            <th scope="col">Attempts</th>
+                            <th scope="col">Completed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var result in Model.RecentResults)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@result.GameName</td>
+                                <td>@result.Score</td>
+                                <td>@result.Attempts</td>
+                                <td>@result.CompletedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="progress-empty">
+                <i class="bi bi-clipboard2-check" aria-hidden="true"></i>
+                <p class="mb-1 fw-semibold">No quiz results recorded yet</p>
+                <p class="text-muted small mb-0">Saved game and quiz activity will appear here.</p>
+            </div>
+        }
+    </section>
+</main>
