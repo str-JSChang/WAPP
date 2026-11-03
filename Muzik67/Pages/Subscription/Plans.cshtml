@@ -1,17 +1,24 @@
 @page
 @model Muzik67.Pages.Subscription.PlansModel
 @{
-    ViewData["Title"] = "Subscription Plans";
+    ViewData["Title"] = "Choose Your Plan";
+    Layout = "_StudentLayout";
 }
 
 <link rel="stylesheet" href="~/css/management.css" asp-append-version="true" />
 
-<main class="container subscription-page py-5">
-    <div class="text-center mb-4">
-        <p class="text-uppercase text-muted small fw-semibold mb-1">Keep learning and playing</p>
-        <h1 class="management-title">Subscription Plans</h1>
-        <p class="text-muted">Choose a plan to unlock premium music lessons and games.</p>
-    </div>
+<main class="container subscription-page mc-pricing-page py-4 py-lg-5">
+    <header class="mc-status-bar d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-end">
+        <div>
+            <p class="mb-1 text-white">CHOOSE YOUR PLAN</p>
+            <h1 class="h4 mb-0 text-white">For parents only</h1>
+        </div>
+        <strong class="text-uppercase mc-lime-text">MUZIK 67</strong>
+    </header>
+
+    <p class="demo-payment-note text-center mb-4">
+        7-day free trial on paid plans. Demo checkout only—no card details are collected.
+    </p>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
@@ -22,52 +29,86 @@
     {
         <section class="current-subscription mb-4" aria-label="Current subscription">
             <div>
-                <span class="badge text-bg-success mb-2">Active subscription</span>
-                <h2 class="h4 mb-1">@Model.CurrentSubscription.Plan?.PlanName</h2>
-                <p class="text-muted mb-0">
-                    Expires @Model.CurrentSubscription.EndDate.ToLocalTime().ToString("d")
-                    · @Model.CurrentSubscription.Plan?.Price.ToString("C") / @Model.CurrentSubscription.Plan?.Duration.ToLowerInvariant()
+                <span class="badge mb-2">YOUR PLAN</span>
+                <h2 class="h5 mb-1">@Model.CurrentSubscription.Plan?.PlanName</h2>
+                <p class="mb-0">
+                    Active until @Model.CurrentSubscription.EndDate.ToLocalTime().ToString("dd MMM yyyy")
                 </p>
             </div>
-            <a asp-page="/Student/Subscription" class="btn btn-outline-dark rounded-pill">View subscription</a>
+            <a asp-page="/Student/Subscription" class="btn btn-outline-dark">View subscription</a>
         </section>
     }
 
-    <p class="demo-payment-note text-center mb-4">
-        Demo checkout only: no real payment is processed and no card details are collected.
-    </p>
-
-    <div class="row g-4 justify-content-center">
+    <section class="mc-plan-grid" aria-label="Available plans">
         @foreach (var plan in Model.Plans)
         {
             var isCurrent = Model.CurrentSubscription?.PlanId == plan.PlanId;
-            <div class="col-12 col-md-6 col-lg-5">
-                <article class="plan-card h-100">
-                    @if (isCurrent)
+            var isFree = plan.Price == 0;
+            var isYearly = string.Equals(plan.Duration, "Yearly", StringComparison.OrdinalIgnoreCase);
+            var tierClass = isFree ? "wood" : (isYearly ? "diamond" : "iron");
+            var tierName = isFree ? "WOOD" : (isYearly ? "DIAMOND" : "IRON");
+
+            <article class="plan-card @tierClass @(isYearly ? "best-value" : "")">
+                @if (isYearly)
+                {
+                    <span class="mc-plan-ribbon">BEST VALUE</span>
+                }
+                else if (isCurrent)
+                {
+                    <span class="mc-plan-ribbon current-plan-ribbon">YOUR PLAN</span>
+                }
+
+                <p class="mb-0">@tierName</p>
+                <div class="mc-plan-block" aria-hidden="true"></div>
+                <h2 class="h5">@plan.PlanName</h2>
+                <p class="plan-price mb-1">
+                    @(isFree ? "FREE" : $"RM {plan.Price:0.##}")
+                </p>
+                <p class="small mb-2">@(isFree ? "forever" : $"per {plan.Duration.ToLowerInvariant().Replace("ly", "")}")</p>
+
+                <ul class="mc-feature-list flex-grow-1">
+                    <li>Music lesson previews</li>
+                    <li>@(isFree ? "One starter lesson" : "All lessons and quizzes")</li>
+                    <li class="@(isFree ? "locked" : "")">Music games and virtual keyboard</li>
+                    <li class="@(isFree ? "locked" : "")">Progress tracking</li>
+                    @if (isYearly)
                     {
-                        <span class="badge text-bg-success">Your current plan</span>
+                        <li>Printable certificates</li>
                     }
-                    <h2 class="h3 mt-2">@plan.PlanName</h2>
-                    <p class="plan-price">@plan.Price.ToString("C") <span>/ @plan.Duration.ToLowerInvariant()</span></p>
-                    <p class="text-muted flex-grow-1">@plan.Description</p>
-                    @if (isCurrent)
-                    {
-                        <button class="btn btn-secondary rounded-pill w-100" type="button" disabled>Currently subscribed</button>
-                    }
-                    else
-                    {
-                        <a asp-page="/Subscription/Checkout" asp-route-planId="@plan.PlanId" class="btn btn-primary rounded-pill w-100">
-                            @(Model.CurrentSubscription is null ? "Choose plan" : "Switch to this plan")
-                        </a>
-                    }
-                </article>
-            </div>
+                </ul>
+
+                @if (isCurrent)
+                {
+                    <button class="btn btn-secondary w-100" type="button" disabled>Current plan</button>
+                }
+                else
+                {
+                    <a asp-page="/Subscription/Checkout" asp-route-planId="@plan.PlanId" class="btn @(isYearly ? "btn-primary" : "btn-outline-dark") w-100">
+                        Choose @tierName
+                    </a>
+                }
+            </article>
         }
+
         @if (Model.Plans.Count == 0)
         {
-            <div class="col-12">
-                <div class="alert alert-secondary text-center">No subscription plans are available right now.</div>
-            </div>
+            <div class="alert alert-secondary text-center">No subscription plans are available right now.</div>
         }
+    </section>
+
+    <div class="mc-parent-strip">
+        <section class="mc-parent-panel" aria-labelledby="parent-gate-heading">
+            <h2 id="parent-gate-heading" class="h6">PARENT GATE</h2>
+            <p class="mb-0">Ask a grown-up before choosing or changing a paid plan.</p>
+        </section>
+        <section class="mc-parent-panel" aria-labelledby="safe-heading">
+            <h2 id="safe-heading" class="h6">SAFE &amp; SIMPLE</h2>
+            <p class="mb-0">No ads. Parents stay in control.</p>
+        </section>
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-3">
+        <a asp-page="/Student/StudentDashboard" class="btn btn-outline-dark">&lt; Back</a>
+        <a asp-page="/Student/Subscription" class="btn btn-outline-dark">Restore / view plan</a>
     </div>
 </main>

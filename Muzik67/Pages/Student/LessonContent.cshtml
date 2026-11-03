@@ -1,63 +1,104 @@
-﻿@page "{id:int}"
+@page "{id:int}"
 @model wapp.Muzik67.Pages.Student.LessonContentModel
 @{
-    ViewData["Title"] = Model?.Lesson?.Title ?? "Lesson Content";
+    var lesson = Model.Lesson;
+    ViewData["Title"] = lesson.Title;
+    var notes = new[]
+    {
+        (Name: "C", Frequency: 261.63, Color: "red"),
+        (Name: "D", Frequency: 293.66, Color: "pink"),
+        (Name: "E", Frequency: 329.63, Color: "purple"),
+        (Name: "F", Frequency: 349.23, Color: "blue"),
+        (Name: "G", Frequency: 392.00, Color: "green"),
+        (Name: "A", Frequency: 440.00, Color: "lime"),
+        (Name: "B", Frequency: 493.88, Color: "gold"),
+        (Name: "C", Frequency: 523.25, Color: "orange")
+    };
 }
 
 <link rel="stylesheet" href="~/css/lesson-content.css" asp-append-version="true" />
 
-<div class="container pt-3 pb-5">
-    
-    <!-- TOP BAR: Return Button, Difficulty Badge, Lesson Title Badge -->
-    <div class="d-flex justify-content-between align-items-center mb-3 px-2">
-        <!-- Return Button -->
-        <a asp-page="/Student/MusicLessonSelection" class="btn btn-storyboard btn-go text-decoration-none rounded-pill fw-bold btn-back-pill shadow-sm">
-            <i class="bi bi-arrow-left fs-5"></i>
-        </a>
-
-        <!-- 2. Difficulty & Lesson Title Group (Centered & Matching Button Padding) -->
-        <div class="d-flex align-items-center gap-3">
-            <div class="btn btn-outline-dark rounded-pill fw-bold px-4 py-3 lesson-meta-badge shadow-sm">
-                @Model?.Lesson?.DifficultyLevel
-            </div>
-            <div class="vr" style="height: 60px; width: 2px; background-color: #212529;"></div>
-            <div class="btn btn-outline-dark rounded-pill fw-bold px-4 py-3 lesson-meta-badge shadow-sm text-truncate" style="max-width: 250px;">
-                @Model?.Lesson?.ContentType
+<div class="container py-4 py-lg-5 mc-lesson-page">
+    <header class="mc-status-bar d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+        <div>
+            <p class="mb-1 text-white">@lesson.DifficultyLevel.ToUpperInvariant() · @lesson.ContentType.ToUpperInvariant()</p>
+            <h1 class="h5 mb-0 text-white">@lesson.Title</h1>
+        </div>
+        <div class="mc-result-xp">
+            <p class="mc-lime-text mb-1 text-lg-end">XP 40 / 100</p>
+            <div class="mc-xp-track" aria-label="40 out of 100 lesson XP">
+                <span class="mc-xp-fill xp-40"></span>
             </div>
         </div>
+    </header>
 
-        <!-- 3. Empty Spacer (Matches width of Return button so the middle group stays dead center) -->
-        <div style="width: 200px; visibility: hidden;">
-            <span class="btn">Return</span>
+    <nav class="mc-stage-tabs" aria-label="Lesson stages">
+        <span class="active">1 Learn</span>
+        <span>2 Practice</span>
+        <a asp-page="/Student/GameSelection">3 Challenge</a>
+        <span aria-disabled="true">4 Reward</span>
+    </nav>
+
+    <p class="mc-lesson-goal"><strong>GOAL:</strong> @lesson.Description</p>
+
+    <section class="mc-note-board" aria-labelledby="practice-title">
+        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-3">
+            <h2 id="practice-title" class="h6 mb-0">Practice: note-block hotbar</h2>
+            <span class="small">Color = pitch height</span>
         </div>
-        
+
+        <div class="mc-note-grid">
+            @for (var index = 0; index < notes.Length; index++)
+            {
+                var note = notes[index];
+                <button type="button" class="mc-note-key @note.Color" data-frequency="@note.Frequency" onclick="playTone(@note.Frequency, this)">
+                    <span class="mc-note-cube" aria-hidden="true"></span>
+                    <strong>@note.Name</strong>
+                </button>
+            }
+        </div>
+
+        <div class="d-flex justify-content-between small mt-2"><span>Low</span><span>High</span></div>
+        <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3 mt-3">
+            <button type="button" class="btn btn-outline-dark" id="playScaleBtn">Play the scale</button>
+            <span class="small">Click a block to hear it.</span>
+        </div>
+    </section>
+
+    <div class="mc-lesson-lower-grid">
+        <section class="mc-result-panel">
+            <h2 class="h6">CHALLENGE: Which is higher?</h2>
+            <div class="d-flex gap-3">
+                <button type="button" class="mc-mini-note red" onclick="playTone(261.63, this)" aria-label="Play low C"><span></span></button>
+                <button type="button" class="mc-mini-note blue" onclick="playTone(523.25, this)" aria-label="Play high C"><span></span></button>
+            </div>
+            <a asp-page="/Student/GameSelection" class="btn btn-primary mt-3">Try a challenge &gt;</a>
+        </section>
+
+        <section class="mc-result-panel">
+            <h2 class="h6">REWARD</h2>
+            <div class="d-flex align-items-center gap-3">
+                <span class="mc-badge-block" aria-hidden="true">?</span>
+                <p class="mb-0">Finish a challenge to unlock a music explorer badge.</p>
+            </div>
+        </section>
     </div>
 
-    <!-- MAIN CONTENT FRAME CONTAINER -->
-    <div class="row lesson-content-container p-3 shadow-sm rounded-4 align-items-center justify-content-between">
-        
-        <!-- LEFT NAVIGATION ARROW -->
-        <div class="col-1 text-center">
-            <button type="button" class="btn btn-outline-dark btn-nav-arrow shadow-sm" onclick="alert('This is the first page.')" title="Previous Page">
-                <i class="bi bi-chevron-left fs-4 fw-bold"></i>
-            </button>
-        </div>
-
-        <!-- CENTER DESCRIPTION FRAME (Fetched from "Description" column) -->
-        <div class="col-10">
-            <div class="lesson-desc-box p-4 shadow-sm">
-                <div class="fs-5 text-dark">
-                    @Model?.Lesson?.Description
-                </div>
-            </div>
-        </div>
-
-        <!-- RIGHT NAVIGATION ARROW (Navigates to Pop Quiz) -->
-        <div class="col-1 text-center d-flex justify-content-end">
-            <a asp-page="/Student/PopQuiz" asp-route-id="@(Model?.Lesson?.ContentId)" class="btn btn-outline-dark btn-nav-arrow shadow-sm text-decoration-none" title="Go to Quiz">
-                <i class="bi bi-chevron-right fs-4 fw-bold"></i>
-            </a>
-        </div>
-
+    <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-3">
+        <a asp-page="/Student/MusicLessonSelection" class="btn btn-outline-dark">&lt; Back</a>
+        <a asp-page="/Student/MusicLessonSelection" class="btn btn-primary">Next lesson &gt;</a>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById("playScaleBtn")?.addEventListener("click", function () {
+            const keys = Array.from(document.querySelectorAll(".mc-note-key"));
+            keys.forEach(function (key, index) {
+                window.setTimeout(function () {
+                    playTone(Number(key.dataset.frequency), key);
+                }, index * 280);
+            });
+        });
+    </script>
+}

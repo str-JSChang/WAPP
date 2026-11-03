@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+@{
+    var currentPath = Context.Request.Path.Value ?? string.Empty;
+}
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -8,8 +11,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Muzik67.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/minecraft-ui.css" asp-append-version="true" />
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="minecraft-shell student-shell d-flex flex-column min-vh-100">
+    <a class="skip-link" href="#mainContent">Skip to content</a>
     <header>
         <nav class="navbar navbar-expand-lg navbar-light custom-navbar sticky-top">
             <div class="container">
@@ -25,21 +30,21 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="mainNavbar">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3 mc-nav-tabs">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Student/StudentDashboard">Dashboard</a>
+                            <a class="nav-link @(currentPath.Contains("StudentDashboard") ? "active" : "")" asp-area="" asp-page="/Student/StudentDashboard">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Privacy">Privacy Policy</a>
+                            <a class="nav-link @(currentPath.Contains("MusicLesson") || currentPath.Contains("LessonContent") ? "active" : "")" asp-page="/Student/MusicLessonSelection">Lessons</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-page="/Student/Progress">Learning Progress</a>
+                            <a class="nav-link @(currentPath.Contains("Game") ? "active" : "")" asp-page="/Student/GameSelection">Games</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-page="/Subscription/Plans">Subscription Plans</a>
+                            <a class="nav-link @(currentPath.Contains("Progress") ? "active" : "")" asp-page="/Student/Progress">Progress</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-page="/Student/Subscription">My Subscription</a>
+                            <a class="nav-link @(currentPath.Contains("Subscription") ? "active" : "")" asp-page="/Subscription/Plans">Plans</a>
                         </li>
                     </ul>
 
@@ -58,7 +63,7 @@
         </nav>
     </header>
 
-    <main role="main" class="flex-grow-1">
+    <main id="mainContent" role="main" class="flex-grow-1">
         @RenderBody()
     </main>
 
@@ -75,7 +80,7 @@
                 <div class="d-flex align-items-center gap-2 flex-wrap justify-content-center">
                     <a asp-page="/Privacy" class="footer-nav-link">Term and Condition</a>
                     <span class="text-muted">•</span>
-                    <a href="#aboutSection" class="footer-nav-link">About Us</a>
+                    <a href="/#aboutSection" class="footer-nav-link">About Us</a>
                     <span class="text-muted">•</span>
                     <a asp-page="/Privacy" class="footer-nav-link">Privacy Policy</a>
                 </div>

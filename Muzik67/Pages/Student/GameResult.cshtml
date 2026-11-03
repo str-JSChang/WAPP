@@ -3,98 +3,112 @@
 @{
     ViewData["Title"] = "Game Result";
     var saved = bool.TryParse(Request.Query["saved"], out var savedValue) && savedValue;
+    var stars = Math.Clamp((int)Math.Ceiling(Model.ScorePercentage / 20.0), 0, 5);
 }
 
-<!-- Styles for the game result and student progress pages -->
 <link rel="stylesheet" href="~/css/student-progress.css" asp-append-version="true" />
 
 <div class="student-feature-page container py-4 py-lg-5 @(saved ? "result-saved" : "")"
      data-confetti="@saved.ToString().ToLowerInvariant()">
-    <!-- Page navigation -->
-    <div class="student-page-toolbar">
-        <a asp-page="/Student/GameSelection" class="btn btn-outline-dark rounded-pill px-4">
-            <i class="bi bi-arrow-left me-1"></i> Back to Games
-        </a>
-        <a asp-page="/Student/Progress" class="btn btn-outline-dark rounded-pill px-4">
-            View My Progress <i class="bi bi-bar-chart-line ms-1"></i>
-        </a>
-    </div>
-
-    <!-- Game result summary -->
-    <section class="result-card mx-auto mt-4" aria-labelledby="result-title">
-        <div class="result-icon @(saved ? "celebrate-icon" : "")" aria-hidden="true">
-            <i class="bi bi-trophy"></i>
+    <header class="mc-status-bar d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center">
+        <div>
+            <p class="mb-1 text-white">RESULTS</p>
+            <h1 class="h5 mb-0 text-white">@(Model.Game?.GameName ?? "Music challenge")</h1>
         </div>
-        <p class="text-uppercase text-muted fw-semibold small mb-2">Game completed</p>
-        <h1 id="result-title" class="feature-title mb-2">Result</h1>
-        @if (Model.ErrorMessage is not null)
-        {
-            <div class="alert alert-warning result-error" role="alert">
-                <i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>
-                @Model.ErrorMessage
+        <div class="flex-grow-1 mc-result-xp">
+            <p class="mc-lime-text mb-1 text-md-end">XP @Model.ScorePercentage / 100</p>
+            <div class="mc-xp-track" role="progressbar" aria-valuenow="@Model.ScorePercentage" aria-valuemin="0" aria-valuemax="100">
+                <span class="mc-xp-fill" style="width: @Model.ScorePercentage%"></span>
             </div>
-            <a asp-page="/Student/GameSelection" class="btn btn-primary rounded-pill px-4">
-                Choose a Game
-            </a>
-        }
-        else
-        {
-            <p class="text-muted mb-4">@Model.Game?.GameName</p>
+        </div>
+    </header>
 
-            <!-- Confirmation shown after the score is saved -->
-            @if (saved)
-            {
-                <div class="alert alert-success" role="status">
-                    Your score has been saved.
+    <nav class="mc-stage-tabs" aria-label="Lesson stages">
+        <a asp-page="/Student/MusicLessonSelection">1 Learn</a>
+        <a asp-page="/Student/GameSelection">2 Practice</a>
+        <span>3 Challenge</span>
+        <span class="active">4 Reward</span>
+    </nav>
+
+    @if (Model.ErrorMessage is not null)
+    {
+        <div class="alert alert-warning mt-4" role="alert">@Model.ErrorMessage</div>
+        <div class="mt-3">
+            <a asp-page="/Student/GameSelection" class="btn btn-primary">Choose a game</a>
+        </div>
+    }
+    else
+    {
+        <p class="mc-result-lead">
+            @(Model.ScorePercentage >= 80
+                ? "GREAT JOB! You completed the challenge and earned a strong score."
+                : "NICE TRY! Review the lesson, then replay the challenge to raise your score.")
+        </p>
+
+        @if (saved)
+        {
+            <div class="alert alert-success" role="status">Advancement made: your score has been saved.</div>
+        }
+
+        <section class="mc-result-grid" aria-labelledby="result-title">
+            <article class="mc-result-panel score-panel">
+                <h2 id="result-title" class="h6">YOUR SCORE</h2>
+                <div class="mc-stars" aria-label="@stars out of 5 stars">
+                    @for (var index = 1; index <= 5; index++)
+                    {
+                        <span class="@(index <= stars ? "mc-star-earned" : "mc-star-empty")" aria-hidden="true">★</span>
+                    }
                 </div>
-            }
-
-            <!-- Score and performance message -->
-            <div class="score-panel">
-                <span class="score-label">Score</span>
                 <strong class="score-value">@Model.Score / @Model.TotalQuestions</strong>
-                <span class="score-percentage">@Model.ScorePercentage%</span>
-            </div>
+                <span class="score-percentage">@Model.ScorePercentage% mastery</span>
+                <div class="mc-xp-award">+@Model.ScorePercentage XP</div>
+            </article>
 
-            <p class="result-message">
-                @if (Model.ScorePercentage >= 80)
-                {
-                    <text>Excellent work! Keep up the great music practice.</text>
-                }
-                else if (Model.ScorePercentage >= 50)
-                {
-                    <text>Good effort! You are making progress. Keep practising to improve your score.</text>
-                }
-                else
-                {
-                    <text>Do not give up! Try again and practise one question at a time.</text>
-                }
-            </p>
+            <article class="mc-result-panel">
+                <h2 class="h6">ANSWER REVIEW</h2>
+                <dl class="mc-review-list">
+                    <div><dt>Challenge</dt><dd>@Model.Game?.GameName</dd></div>
+                    <div><dt>Questions</dt><dd>@Model.TotalQuestions</dd></div>
+                    <div><dt>Correct</dt><dd>@Model.Score</dd></div>
+                    <div><dt>Attempts</dt><dd>@Model.Attempts</dd></div>
+                    <div><dt>Status</dt><dd class="@(Model.ScorePercentage >= 80 ? "review-ok" : "review-retry")">@(Model.ScorePercentage >= 80 ? "OK" : "RETRY")</dd></div>
+                </dl>
+            </article>
 
-            @if (saved)
+            <article class="mc-result-panel mc-badge-panel">
+                <h2 class="h6">BADGE @(Model.ScorePercentage >= 80 ? "UNLOCKED" : "PROGRESS")</h2>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="mc-badge-block" aria-hidden="true">@(Model.ScorePercentage >= 80 ? "★" : "?")</span>
+                    <p class="mb-0">@(Model.ScorePercentage >= 80 ? "Sound Explorer — challenge cleared." : "Reach 80% to unlock Sound Explorer.")</p>
+                </div>
+            </article>
+
+            <article class="mc-result-panel">
+                <h2 class="h6">NEXT STEP</h2>
+                <p>@(Model.ScorePercentage >= 80 ? "Continue to another musical challenge." : "Replay this game and listen carefully to each sound.")</p>
+                <a asp-page="/Student/GameSelection" class="btn btn-outline-dark w-100">Retry / choose game</a>
+            </article>
+        </section>
+
+        <div class="mc-result-actions">
+            <a asp-page="/Student/GameSelection" class="btn btn-outline-dark">&lt; Retry quiz</a>
+            <a asp-page="/Student/StudentDashboard" class="btn btn-outline-dark">Home map</a>
+            @if (!saved)
             {
-                <p class="celebration-message" role="status">
-                    <i class="bi bi-stars me-1" aria-hidden="true"></i>
-                    You did it! Your progress has been updated.
-                </p>
+                <form method="post">
+                    <input type="hidden" asp-for="GameId" />
+                    <input type="hidden" asp-for="Score" />
+                    <input type="hidden" asp-for="Attempts" />
+                    <input type="hidden" asp-for="SaveResult" value="true" />
+                    <button type="submit" class="btn btn-primary">Save score &gt;</button>
+                </form>
             }
-
-            <!-- Save only once; playing again starts a new result flow -->
-            <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
-                @if (!saved)
-                {
-                    <form method="post">
-                        <input type="hidden" asp-for="GameId" />
-                        <input type="hidden" asp-for="Score" />
-                        <input type="hidden" asp-for="Attempts" />
-                        <input type="hidden" asp-for="SaveResult" value="true" />
-                        <button type="submit" class="btn btn-primary rounded-pill px-4">Save Score</button>
-                    </form>
-                }
-                <a asp-page="/Student/GameSelection" class="btn btn-outline-dark rounded-pill px-4">Play Again</a>
-            </div>
-        }
-    </section>
+            else
+            {
+                <a asp-page="/Student/Progress" class="btn btn-primary">View progress &gt;</a>
+            }
+        </div>
+    }
 </div>
 
 @if (saved)
@@ -106,34 +120,22 @@
     @if (saved)
     {
         <script>
-            // Starts the celebration after a result is successfully saved
             document.addEventListener("DOMContentLoaded", function () {
-                startResultCelebration();
-            });
-
-            function startResultCelebration() {
                 const container = document.getElementById("confettiContainer");
                 if (!container) return;
 
-                const colors = ["#f97316", "#facc15", "#22c55e", "#38bdf8", "#a855f7", "#fb7185"];
-                const confettiCount = 70;
-
-                for (let index = 0; index < confettiCount; index++) {
+                const colors = ["#72ff1d", "#f2aa2c", "#e94b4b", "#368bd5", "#45d9d0"];
+                for (let index = 0; index < 55; index++) {
                     const piece = document.createElement("span");
                     piece.className = "confetti-piece";
                     piece.style.backgroundColor = colors[index % colors.length];
                     piece.style.left = `${Math.random() * 100}%`;
-                    piece.style.animationDelay = `${Math.random() * 0.7}s`;
-                    piece.style.animationDuration = `${2.5 + Math.random() * 1.8}s`;
-                    piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    piece.style.animationDelay = `${Math.random() * 0.6}s`;
                     container.appendChild(piece);
                 }
 
-                window.setTimeout(function () {
-                    container.replaceChildren();
-                }, 4800);
-
-            }
+                window.setTimeout(function () { container.replaceChildren(); }, 4200);
+            });
         </script>
     }
 }

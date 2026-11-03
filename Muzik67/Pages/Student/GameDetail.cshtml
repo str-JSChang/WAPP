@@ -1,0 +1,115 @@
+@page "{id:int}"
+@model Muzik67.Pages.Student.GameDetailModel
+@{
+    ViewData["Title"] = Model.Game?.GameName ?? "Music Quiz";
+    var progress = Model.Questions.Count == 0
+        ? 0
+        : (int)Math.Round(Model.QuestionNumber * 100.0 / Model.Questions.Count);
+}
+
+<div class="container py-4 py-lg-5 mc-quiz-page">
+    <header class="mc-status-bar mc-quiz-status">
+        <div>
+            <p class="mb-1 text-white">@Model.Game?.DifficultyLevel.ToUpperInvariant() QUIZ</p>
+            <h1 class="h5 mb-0 text-white">@Model.Game?.GameName</h1>
+        </div>
+        <div class="mc-question-progress">
+            <p class="mc-lime-text mb-1">QUESTION @Model.QuestionNumber / @Model.Questions.Count</p>
+            <div class="mc-xp-track" aria-hidden="true">
+                <span class="mc-xp-fill" style="width: @progress%"></span>
+            </div>
+        </div>
+        <div>
+            <p class="mc-lime-text mb-1">LIVES</p>
+            <div class="mc-lives" aria-label="@Model.Lives lives remaining">
+                @for (var life = 1; life <= 3; life++)
+                {
+                    <img src="~/images/@(life <= Model.Lives ? "full-heart.jpeg" : "empty-heart.jpeg")"
+                         class="mc-heart" alt="@(life <= Model.Lives ? "Full life" : "Empty life")" />
+                }
+            </div>
+        </div>
+    </header>
+
+    <nav class="mc-stage-tabs" aria-label="Learning stages">
+        <a asp-page="/Student/MusicLessonSelection">1 Learn</a>
+        <a asp-page="/Student/GameSelection">2 Practice</a>
+        <span class="active">3 Challenge</span>
+        <span aria-disabled="true">4 Reward</span>
+    </nav>
+
+    <p class="mb-4">GOAL: Read each question, then pick the best musical answer.</p>
+
+    @if (!string.IsNullOrWhiteSpace(Model.FeedbackMessage))
+    {
+        <div class="alert @(Model.FeedbackWasCorrect ? "alert-success" : "alert-warning")" role="status">
+            @Model.FeedbackMessage
+        </div>
+    }
+
+    <section class="mc-question-board" aria-labelledby="question-heading">
+        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-3">
+            <h2 id="question-heading" class="h6 mb-0">Question @Model.QuestionNumber: @Model.CurrentQuestion?.QuestionText</h2>
+            <span class="small">Choose one answer</span>
+        </div>
+
+        <button type="button" class="btn btn-outline-dark mb-3" onclick="playTone(392, this)">
+            ♪ Hear the question cue
+        </button>
+
+        <form method="post" asp-page-handler="Answer">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="QuestionNumber" />
+            <input type="hidden" asp-for="Score" />
+            <input type="hidden" asp-for="Lives" />
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <span asp-validation-for="SelectedAnswer" class="text-danger"></span>
+
+            <div class="mc-answer-grid">
+                @for (var index = 0; index < Model.AnswerOptions.Count; index++)
+                {
+                    var option = Model.AnswerOptions[index];
+                    var noteFrequency = 261.63 + index * 65.4;
+                    <div class="mc-answer-card">
+                        <label class="mc-answer-choice">
+                            <input asp-for="SelectedAnswer" type="radio" value="@option" />
+                            <span class="mc-answer-block">@((char)('A' + index))</span>
+                            <strong>@option</strong>
+                        </label>
+                        <button type="button" class="btn btn-outline-dark" onclick="playTone(@noteFrequency, this);">
+                            &gt; Play sound
+                        </button>
+                    </div>
+                }
+            </div>
+
+            <div class="mc-quiz-support-grid">
+                <aside class="mc-parent-panel">
+                    <h3 class="h6">HINT</h3>
+                    <p class="mb-0">Say each option aloud and connect it to what you learned in the lesson.</p>
+                </aside>
+                <aside class="mc-parent-panel">
+                    <h3 class="h6">FEEDBACK</h3>
+                    <p class="mb-0">Right answer = +20 XP. Wrong answer = lose one heart.</p>
+                </aside>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row justify-content-end mt-3">
+                <button type="submit" class="btn btn-primary">Check &gt;</button>
+            </div>
+        </form>
+    </section>
+
+    <form method="post" asp-page-handler="Skip" class="mt-3">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="QuestionNumber" />
+        <input type="hidden" asp-for="Score" />
+        <input type="hidden" asp-for="Lives" />
+        <button type="submit" class="btn btn-outline-dark">&lt; Skip</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

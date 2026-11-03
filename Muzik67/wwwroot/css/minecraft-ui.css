@@ -1,0 +1,1324 @@
+/*
+ * Muzik 67 Minecraft UI system
+ * Derived from the supplied practice, quiz, results, and pricing boards.
+ * Scoped to .minecraft-shell so the cinematic landing page keeps its own look.
+ */
+
+:root {
+  --mc-ink: #202020;
+  --mc-charcoal: #363636;
+  --mc-charcoal-2: #4b4b4b;
+  --mc-stone: #c6c6c6;
+  --mc-stone-mid: #a8a8a8;
+  --mc-stone-dark: #777;
+  --mc-paper: #f3f3ef;
+  --mc-white: #f8f8f8;
+  --mc-brown: #74492b;
+  --mc-brown-light: #8c613f;
+  --mc-brown-dark: #5e391f;
+  --mc-grass: #4d8e2f;
+  --mc-grass-light: #64a83d;
+  --mc-lime: #72ff1d;
+  --mc-lime-dark: #45b71c;
+  --mc-red: #e94b4b;
+  --mc-gold: #f2aa2c;
+  --mc-blue: #368bd5;
+  --mc-cyan: #45d9d0;
+  --mc-shadow: 4px 4px 0 var(--mc-ink);
+}
+
+.skip-link {
+  background: var(--mc-lime);
+  border: 2px solid var(--mc-ink);
+  color: var(--mc-ink);
+  left: 1rem;
+  padding: .65rem 1rem;
+  position: fixed;
+  top: -5rem;
+  z-index: 1100;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+.minecraft-shell {
+  background-color: var(--mc-paper);
+  background-image:
+    linear-gradient(rgba(32, 32, 32, .09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(32, 32, 32, .09) 1px, transparent 1px),
+    linear-gradient(rgba(32, 32, 32, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(32, 32, 32, .035) 1px, transparent 1px);
+  background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px;
+  color: var(--mc-ink);
+  font-family: 'Minecraftia', 'Courier New', monospace;
+  margin-bottom: 0;
+  min-width: 320px;
+}
+
+.minecraft-shell *,
+.minecraft-shell *::before,
+.minecraft-shell *::after {
+  border-radius: 0 !important;
+}
+
+.minecraft-shell :focus-visible {
+  outline: 3px solid var(--mc-lime) !important;
+  outline-offset: 3px;
+}
+
+.minecraft-shell > header {
+  background: var(--mc-grass);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .09) 1px, transparent 1px);
+  background-size: 64px 64px;
+  border-bottom: 4px solid var(--mc-ink);
+  padding: clamp(.5rem, 1.5vw, 1rem);
+}
+
+.minecraft-shell .custom-navbar,
+.minecraft-shell.admin-layout .navbar {
+  background: var(--mc-stone) !important;
+  border: 3px solid var(--mc-ink) !important;
+  box-shadow:
+    inset 3px 3px 0 var(--mc-white),
+    inset -3px -3px 0 #696969,
+    var(--mc-shadow) !important;
+  min-height: auto;
+  padding: .55rem !important;
+  position: relative;
+}
+
+.minecraft-shell .brand-wrapper,
+.minecraft-shell .navbar-brand {
+  color: var(--mc-ink) !important;
+  gap: .55rem;
+  margin-right: 1rem;
+}
+
+.minecraft-shell .nav-brand-logo {
+  filter: none;
+  height: 38px;
+  image-rendering: pixelated;
+}
+
+.minecraft-shell .nav-brand-text {
+  color: var(--mc-ink);
+  font-family: 'Minecraftia', 'Courier New', monospace;
+  font-size: 1rem;
+  letter-spacing: 0;
+  text-shadow: 1px 1px 0 var(--mc-white);
+}
+
+.minecraft-shell .admin-label,
+.minecraft-shell .role-badge,
+.minecraft-shell .count-badge,
+.minecraft-shell .badge {
+  background: var(--mc-charcoal) !important;
+  border: 2px solid var(--mc-ink);
+  color: var(--mc-lime) !important;
+  font-size: .67rem;
+  letter-spacing: .04em;
+  padding: .4rem .6rem;
+}
+
+.minecraft-shell .navbar-nav {
+  gap: .35rem;
+}
+
+.minecraft-shell .navbar-nav .nav-link {
+  background: #989898;
+  border: 2px solid var(--mc-ink);
+  box-shadow: inset 2px 2px 0 #dcdcdc, inset -2px -2px 0 #656565;
+  color: var(--mc-white) !important;
+  font-size: .68rem;
+  min-width: 96px;
+  padding: .7rem .75rem;
+  text-align: center;
+  text-shadow: 1px 1px 0 #555;
+}
+
+.minecraft-shell .navbar-nav .nav-link:hover,
+.minecraft-shell .navbar-nav .nav-link.active,
+.minecraft-shell .navbar-nav .nav-link[aria-current='page'] {
+  background: #858585;
+  box-shadow:
+    inset 2px 2px 0 #5e5e5e,
+    inset -2px -2px 0 #d7d7d7,
+    0 0 0 3px var(--mc-white);
+  color: var(--mc-lime) !important;
+  transform: translateY(1px);
+}
+
+.minecraft-shell .navbar-toggler {
+  background: var(--mc-stone-mid);
+  border: 2px solid var(--mc-ink);
+  box-shadow: inset 2px 2px 0 var(--mc-white), inset -2px -2px 0 #666;
+}
+
+.minecraft-shell > main {
+  background-color: var(--mc-brown);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .12) 1px, transparent 1px),
+    linear-gradient(90deg, transparent 50%, rgba(0, 0, 0, .08) 50%);
+  background-size: 64px 64px, 64px 64px, 128px 64px;
+  border-left: 4px solid var(--mc-brown-dark);
+  border-right: 4px solid var(--mc-brown-dark);
+  margin: 0 auto;
+  max-width: 1500px;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  width: calc(100% - clamp(0rem, 4vw, 4rem));
+}
+
+.minecraft-shell.student-shell > main,
+.minecraft-shell.public-shell > main:has(.subscription-page) {
+  background-color: var(--mc-grass);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .12) 1px, transparent 1px),
+    linear-gradient(90deg, transparent 50%, rgba(0, 0, 0, .08) 50%);
+}
+
+.minecraft-shell > main > .container,
+.minecraft-shell > main > .container-fluid,
+.minecraft-shell > main > main.container,
+.minecraft-shell > main > .auth-container,
+.minecraft-shell > main > .student-feature-page,
+.minecraft-shell > main > .module-page {
+  background: var(--mc-stone);
+  border: 3px solid var(--mc-ink);
+  box-shadow:
+    0 0 0 5px #ececec,
+    0 0 0 8px var(--mc-ink),
+    8px 8px 0 rgba(0, 0, 0, .42);
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1280px;
+  min-height: min(760px, calc(100dvh - 170px));
+  padding: clamp(1rem, 3vw, 2rem) !important;
+  width: 100%;
+}
+
+.minecraft-shell .student-dashboard-container {
+  display: block;
+}
+
+.minecraft-shell .dashboard-main {
+  margin: 0 auto !important;
+  max-width: 1100px;
+}
+
+.minecraft-shell h1,
+.minecraft-shell h2,
+.minecraft-shell h3,
+.minecraft-shell h4,
+.minecraft-shell h5,
+.minecraft-shell h6,
+.minecraft-shell .management-title,
+.minecraft-shell .feature-title,
+.minecraft-shell .section-title,
+.minecraft-shell .dashboard-title,
+.minecraft-shell .lesson-main-title,
+.minecraft-shell .game-main-title {
+  color: var(--mc-ink) !important;
+  font-family: 'Minecraftia', 'Courier New', monospace !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.45;
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, .55);
+  text-wrap: balance;
+}
+
+.minecraft-shell h1,
+.minecraft-shell .dashboard-title,
+.minecraft-shell .lesson-main-title,
+.minecraft-shell .game-main-title {
+  font-size: clamp(1.4rem, 3.5vw, 2.25rem) !important;
+}
+
+.minecraft-shell p,
+.minecraft-shell li,
+.minecraft-shell td,
+.minecraft-shell th,
+.minecraft-shell label,
+.minecraft-shell input,
+.minecraft-shell select,
+.minecraft-shell textarea,
+.minecraft-shell button,
+.minecraft-shell a {
+  font-family: 'Minecraftia', 'Courier New', monospace;
+}
+
+.minecraft-shell .text-muted,
+.minecraft-shell .opacity-75,
+.minecraft-shell small {
+  color: #4d4d4d !important;
+}
+
+.minecraft-shell .module-eyebrow,
+.minecraft-shell .text-uppercase {
+  color: #2e7d18 !important;
+  font-size: .7rem;
+  letter-spacing: .03em;
+}
+
+/* Reference-style charcoal status header */
+.mc-status-bar,
+.minecraft-shell .progress-heading,
+.minecraft-shell .admin-dashboard-heading,
+.minecraft-shell .module-heading,
+.minecraft-shell .management-page > div:first-child,
+.minecraft-shell .subscription-page > div:first-child:not(.checkout-card) {
+  background: var(--mc-charcoal);
+  border: 3px solid var(--mc-ink);
+  box-shadow: inset 0 0 0 2px #d8d8d8;
+  color: var(--mc-white);
+  margin-bottom: 1.25rem !important;
+  padding: 1rem 1.25rem;
+  text-align: left !important;
+}
+
+.minecraft-shell .progress-heading h1,
+.minecraft-shell .admin-dashboard-heading h1,
+.minecraft-shell .module-heading h1,
+.minecraft-shell .management-page > div:first-child h1,
+.minecraft-shell .subscription-page > div:first-child h1 {
+  color: var(--mc-white) !important;
+  text-shadow: 2px 2px 0 #111;
+}
+
+.minecraft-shell .progress-heading p,
+.minecraft-shell .management-page > div:first-child p,
+.minecraft-shell .subscription-page > div:first-child p {
+  color: #e6e6e6 !important;
+}
+
+/* Beveled Minecraft controls */
+.minecraft-shell .btn,
+.minecraft-shell button:not(.navbar-toggler):not(.btn-close),
+.minecraft-shell .workspace-nav-item,
+.minecraft-shell .progress-tab {
+  background: #a5a5a5;
+  border: 2px solid var(--mc-ink) !important;
+  box-shadow:
+    inset 3px 3px 0 #e8e8e8,
+    inset -3px -3px 0 #666,
+    2px 2px 0 var(--mc-ink);
+  color: var(--mc-ink);
+  font-size: .72rem;
+  min-height: 42px;
+  padding: .7rem 1rem;
+  text-decoration: none;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.minecraft-shell .btn:hover,
+.minecraft-shell button:not(.navbar-toggler):not(.btn-close):hover,
+.minecraft-shell .workspace-nav-item:hover,
+.minecraft-shell .progress-tab:hover {
+  color: var(--mc-ink);
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+}
+
+.minecraft-shell .btn:active,
+.minecraft-shell button:not(.navbar-toggler):not(.btn-close):active {
+  box-shadow: inset 3px 3px 0 #666, inset -3px -3px 0 #dedede;
+  transform: translate(2px, 2px);
+}
+
+.minecraft-shell .btn-primary,
+.minecraft-shell .auth-btn,
+.minecraft-shell .btn-go:hover,
+.minecraft-shell .btn-storyboard.active-difficulty,
+.minecraft-shell .progress-tab.active,
+.minecraft-shell .workspace-nav-item.active,
+.minecraft-shell .workspace-nav-item[aria-current='page'] {
+  background: var(--mc-lime) !important;
+  border-color: var(--mc-ink) !important;
+  color: var(--mc-ink) !important;
+  text-shadow: none;
+}
+
+.minecraft-shell .btn-danger,
+.minecraft-shell .btn-outline-danger {
+  background: var(--mc-red) !important;
+  color: var(--mc-ink) !important;
+}
+
+.minecraft-shell .btn-outline-primary,
+.minecraft-shell .btn-outline-dark,
+.minecraft-shell .btn-outline-secondary,
+.minecraft-shell .btn-secondary {
+  background: #b5b5b5 !important;
+  color: var(--mc-ink) !important;
+}
+
+.minecraft-shell .btn:disabled,
+.minecraft-shell button:disabled,
+.minecraft-shell [aria-disabled='true'] {
+  filter: grayscale(1);
+  opacity: .58;
+}
+
+.minecraft-shell .form-control,
+.minecraft-shell .form-select,
+.minecraft-shell textarea,
+.minecraft-shell input[type='text'],
+.minecraft-shell input[type='email'],
+.minecraft-shell input[type='password'],
+.minecraft-shell input[type='number'] {
+  background: #efefef;
+  border: 2px solid var(--mc-ink);
+  box-shadow: inset 3px 3px 0 #767676, inset -2px -2px 0 #fff;
+  color: var(--mc-ink);
+  font-size: .8rem;
+  min-height: 46px;
+  padding: .7rem .8rem;
+}
+
+.minecraft-shell .form-control:focus,
+.minecraft-shell .form-select:focus,
+.minecraft-shell textarea:focus {
+  background: #fff;
+  border-color: var(--mc-lime-dark);
+  box-shadow: inset 3px 3px 0 #777, 0 0 0 3px var(--mc-lime);
+}
+
+.minecraft-shell .form-check-input {
+  border: 2px solid var(--mc-ink);
+}
+
+.minecraft-shell .form-check-input:checked {
+  background-color: var(--mc-lime-dark);
+  border-color: var(--mc-ink);
+}
+
+/* Stone cards and work panels */
+.minecraft-shell .card,
+.minecraft-shell .auth-card,
+.minecraft-shell .dashboard-card,
+.minecraft-shell .lesson-selection-container,
+.minecraft-shell .lesson-content-container,
+.minecraft-shell .game-selection-container,
+.minecraft-shell .summary-card,
+.minecraft-shell .progress-list-card,
+.minecraft-shell .progress-panel,
+.minecraft-shell .result-card,
+.minecraft-shell .management-panel,
+.minecraft-shell .plan-card,
+.minecraft-shell .checkout-card,
+.minecraft-shell .current-subscription,
+.minecraft-shell .module-card,
+.minecraft-shell .admin-module-card,
+.minecraft-shell .profile-sidebar,
+.minecraft-shell .admin-workspace-sidebar,
+.minecraft-shell .modal-content {
+  background: var(--mc-stone-mid) !important;
+  background-image: none !important;
+  border: 2px solid var(--mc-ink) !important;
+  box-shadow: inset 2px 2px 0 #dedede, inset -2px -2px 0 #747474;
+}
+
+.minecraft-shell .dashboard-card,
+.minecraft-shell .plan-card,
+.minecraft-shell .admin-module-card {
+  border-radius: 0 !important;
+  box-shadow:
+    inset 2px 2px 0 #dedede,
+    inset -2px -2px 0 #747474,
+    var(--mc-shadow) !important;
+}
+
+.minecraft-shell .dashboard-card:hover,
+.minecraft-shell .plan-card:hover,
+.minecraft-shell .admin-module-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow:
+    inset 2px 2px 0 #dedede,
+    inset -2px -2px 0 #747474,
+    7px 7px 0 var(--mc-ink) !important;
+}
+
+.minecraft-shell .lesson-selection-container,
+.minecraft-shell .lesson-content-container,
+.minecraft-shell .game-selection-container {
+  height: auto;
+  min-height: 510px;
+  overflow: visible;
+}
+
+.minecraft-shell .lesson-desc-box,
+.minecraft-shell .score-panel,
+.minecraft-shell .progress-empty,
+.minecraft-shell .empty-progress-state,
+.minecraft-shell .checkout-summary,
+.minecraft-shell .demo-payment-note,
+.minecraft-shell .empty-state {
+  background: #b0b0b0 !important;
+  border: 2px solid var(--mc-ink) !important;
+  box-shadow: inset 2px 2px 0 #dfdfdf;
+  color: var(--mc-ink) !important;
+}
+
+.minecraft-shell .lesson-desc-box {
+  height: auto;
+  min-height: 330px;
+}
+
+/* Data tables */
+.minecraft-shell .table-responsive {
+  border: 2px solid var(--mc-ink);
+  overflow-x: auto;
+}
+
+.minecraft-shell .table {
+  --bs-table-bg: #b0b0b0;
+  --bs-table-color: var(--mc-ink);
+  border-color: #5d5d5d;
+  color: var(--mc-ink);
+  font-size: .72rem;
+  margin: 0;
+}
+
+.minecraft-shell .table thead th,
+.minecraft-shell .module-table thead th,
+.minecraft-shell .progress-table thead th {
+  background: var(--mc-charcoal) !important;
+  border-color: var(--mc-ink);
+  color: var(--mc-lime) !important;
+  font-size: .68rem;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.minecraft-shell .table td,
+.minecraft-shell .table th {
+  border: 1px solid #696969;
+  padding: .8rem;
+  vertical-align: middle;
+}
+
+.minecraft-shell .table tbody tr:hover > * {
+  background: #bebebe;
+}
+
+/* Alerts become advancement-style toasts/panels */
+.minecraft-shell .alert {
+  background: var(--mc-charcoal);
+  border: 3px solid var(--mc-white);
+  box-shadow: 0 0 0 2px var(--mc-ink), var(--mc-shadow);
+  color: var(--mc-white);
+  font-size: .72rem;
+}
+
+.minecraft-shell .alert-success,
+.minecraft-shell .alert-info {
+  color: var(--mc-lime);
+}
+
+.minecraft-shell .alert-danger,
+.minecraft-shell .alert-warning,
+.minecraft-shell .text-danger {
+  color: #ff7676 !important;
+}
+
+/* Progress meters match the segmented neon bars from the designs */
+.minecraft-shell .game-progress-meter,
+.mc-xp-track {
+  background-color: #575757;
+  background-image: repeating-linear-gradient(90deg, transparent 0 29px, var(--mc-ink) 29px 33px);
+  border: 2px solid var(--mc-ink);
+  height: 20px;
+  overflow: hidden;
+}
+
+.minecraft-shell .game-progress-meter span,
+.mc-xp-fill {
+  background-color: var(--mc-lime) !important;
+  background-image: repeating-linear-gradient(90deg, transparent 0 29px, var(--mc-ink) 29px 33px);
+  border-right: 2px solid var(--mc-ink);
+  display: block;
+  height: 100%;
+}
+
+.xp-40 {
+  width: 40%;
+}
+
+.mc-lesson-goal {
+  margin: 1.6rem 0;
+}
+
+.mc-note-board {
+  background: var(--mc-stone-mid);
+  border: 2px solid var(--mc-ink);
+  box-shadow: inset 2px 2px 0 #dedede;
+  padding: clamp(1rem, 2.5vw, 1.4rem);
+}
+
+.mc-note-grid {
+  display: grid;
+  gap: clamp(.45rem, 1.2vw, .8rem);
+  grid-template-columns: repeat(8, minmax(56px, 1fr));
+}
+
+.minecraft-shell .mc-note-key {
+  align-items: center;
+  background: #8b8b8b;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  min-height: 110px;
+  min-width: 0;
+  padding: .55rem;
+}
+
+.mc-note-cube,
+.mc-mini-note > span {
+  background: var(--note-color, var(--mc-red));
+  border: 3px solid var(--mc-ink);
+  box-shadow: inset 5px 5px 0 rgba(255, 255, 255, .3), inset -5px -5px 0 rgba(0, 0, 0, .18);
+  display: block;
+  height: 58px;
+  width: 100%;
+}
+
+.mc-note-key.red,
+.mc-mini-note.red { --note-color: #e94b4b; }
+.mc-note-key.pink { --note-color: #cd4c7b; }
+.mc-note-key.purple { --note-color: #7d70d8; }
+.mc-note-key.blue,
+.mc-mini-note.blue { --note-color: #368bd5; }
+.mc-note-key.green { --note-color: #219d75; }
+.mc-note-key.lime { --note-color: #92c457; }
+.mc-note-key.gold { --note-color: #f2aa2c; }
+.mc-note-key.orange { --note-color: #d75a2e; }
+
+.mc-lesson-lower-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.minecraft-shell .mc-mini-note {
+  background: #888;
+  height: 74px;
+  padding: .45rem;
+  width: 74px;
+}
+
+.mc-mini-note > span {
+  height: 100%;
+}
+
+.minecraft-shell .summary-card strong,
+.minecraft-shell .score-value,
+.minecraft-shell .game-score,
+.minecraft-shell .plan-price {
+  color: var(--mc-ink) !important;
+  font-family: 'Minecraftia', 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.minecraft-shell .section-icon,
+.minecraft-shell .summary-icon,
+.minecraft-shell .admin-module-icon,
+.minecraft-shell .plan-icon,
+.minecraft-shell .profile-avatar,
+.minecraft-shell .result-icon {
+  background: var(--mc-charcoal) !important;
+  border: 2px solid var(--mc-ink);
+  color: var(--mc-lime) !important;
+}
+
+.minecraft-shell .workspace-nav-heading,
+.minecraft-shell .profile-sidebar-name {
+  color: var(--mc-ink);
+}
+
+/* Auth screens */
+.minecraft-shell .auth-container {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  max-width: 860px !important;
+}
+
+.minecraft-shell .auth-container > .row {
+  justify-content: center;
+  width: 100%;
+}
+
+.minecraft-shell .auth-container [class*='col-'] {
+  flex: 0 1 680px;
+  max-width: 680px;
+  width: 100%;
+}
+
+.minecraft-shell .auth-card {
+  background: var(--mc-stone) !important;
+  padding: clamp(.35rem, 1.5vw, 1rem);
+}
+
+.minecraft-shell .auth-logo {
+  filter: drop-shadow(3px 3px 0 #666);
+  height: 64px !important;
+  image-rendering: pixelated;
+}
+
+.mc-access-panel,
+.mc-error-panel {
+  max-width: 36rem;
+}
+
+.legal-logo {
+  height: 48px;
+  image-rendering: pixelated;
+}
+
+.minecraft-shell .auth-card .border-top,
+.minecraft-shell .auth-card .border-bottom {
+  border-color: #666 !important;
+}
+
+/* Dashboard and selection screens */
+.minecraft-shell .dashboard-title {
+  background: var(--mc-charcoal);
+  border: 3px solid var(--mc-ink);
+  box-shadow: inset 0 0 0 2px #d8d8d8;
+  color: var(--mc-white) !important;
+  padding: 1rem;
+  text-shadow: 2px 2px 0 #111;
+}
+
+.minecraft-shell .dashboard-card .card-icon {
+  align-items: center;
+  background: var(--mc-charcoal);
+  border: 3px solid var(--mc-ink);
+  box-shadow: inset 0 0 0 3px #d7d7d7;
+  color: var(--mc-lime);
+  display: flex;
+  height: 82px;
+  justify-content: center;
+  width: 82px;
+}
+
+.minecraft-shell .dashboard-card .card-icon i {
+  color: var(--mc-lime) !important;
+}
+
+.minecraft-shell .lesson-scroll-wrapper,
+.minecraft-shell .game-right-col {
+  max-height: 430px;
+  overflow-y: auto;
+  scrollbar-color: var(--mc-charcoal) #d0d0d0;
+  scrollbar-width: auto;
+}
+
+.minecraft-shell .border-end-md {
+  border-color: var(--mc-ink) !important;
+}
+
+/* Supplied pixel-heart assets */
+.mc-lives {
+  align-items: center;
+  display: inline-flex;
+  gap: .3rem;
+}
+
+.mc-heart {
+  clip-path: polygon(8% 18%, 22% 18%, 22% 8%, 43% 8%, 50% 18%, 57% 8%, 78% 8%, 78% 18%, 92% 18%, 92% 57%, 82% 57%, 82% 69%, 70% 69%, 70% 80%, 58% 80%, 58% 92%, 42% 92%, 42% 80%, 30% 80%, 30% 69%, 18% 69%, 18% 57%, 8% 57%);
+  height: 34px;
+  image-rendering: pixelated;
+  object-fit: contain;
+  width: 34px;
+}
+
+.mc-game-list {
+  display: grid;
+  gap: .8rem;
+}
+
+.mc-game-row {
+  align-items: center;
+  background: #b4b4b4;
+  border: 2px solid var(--mc-ink);
+  box-shadow: inset 2px 2px 0 #e2e2e2;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: .8rem;
+}
+
+.mc-game-row p,
+.mc-game-row span {
+  font-size: .68rem;
+}
+
+.mc-game-block {
+  align-items: center;
+  background: var(--mc-blue);
+  border: 3px solid var(--mc-ink);
+  box-shadow: inset 0 0 0 5px #d7d7d7;
+  display: flex;
+  font-size: 1.2rem;
+  height: 64px;
+  justify-content: center;
+  width: 64px;
+}
+
+.mc-quiz-status {
+  align-items: center;
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(180px, 1fr) minmax(220px, 1.25fr) auto;
+}
+
+.mc-question-progress {
+  width: 100%;
+}
+
+.mc-question-board {
+  background: var(--mc-stone-mid);
+  border: 2px solid var(--mc-ink);
+  box-shadow: inset 2px 2px 0 #dedede;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.mc-answer-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mc-answer-card {
+  background: #a9a9a9;
+  border: 2px solid #555;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  min-height: 175px;
+  padding: .8rem;
+}
+
+.mc-answer-card:has(input:checked) {
+  box-shadow: 0 0 0 3px var(--mc-white), 0 0 0 6px var(--mc-ink);
+}
+
+.mc-answer-choice {
+  align-items: center;
+  cursor: pointer;
+  display: grid;
+  flex: 1;
+  gap: .8rem;
+  grid-template-columns: auto auto minmax(0, 1fr);
+}
+
+.mc-answer-choice input {
+  accent-color: var(--mc-lime-dark);
+  height: 20px;
+  width: 20px;
+}
+
+.mc-answer-block {
+  align-items: center;
+  background: var(--mc-blue);
+  border: 3px solid var(--mc-ink);
+  box-shadow: inset 0 0 0 5px #d7d7d7;
+  display: flex;
+  font-size: 1.15rem;
+  height: 64px;
+  justify-content: center;
+  width: 64px;
+}
+
+.mc-answer-card:nth-child(odd) .mc-answer-block {
+  background: var(--mc-red);
+}
+
+.mc-quiz-support-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+/* Results design */
+.minecraft-shell .result-card {
+  max-width: 980px;
+  padding: clamp(1rem, 3vw, 2rem);
+  text-align: left;
+}
+
+.mc-result-xp {
+  max-width: 420px;
+}
+
+.mc-stage-tabs {
+  display: grid;
+  gap: .65rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 1rem 0 1.5rem;
+}
+
+.mc-stage-tabs > * {
+  background: #999;
+  border: 2px solid var(--mc-ink);
+  box-shadow: inset 3px 3px 0 #ddd, inset -3px -3px 0 #626262, 2px 2px 0 var(--mc-ink);
+  color: var(--mc-white);
+  font-size: .7rem;
+  padding: .85rem .5rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.mc-stage-tabs > .active {
+  box-shadow:
+    inset 3px 3px 0 #ddd,
+    inset -3px -3px 0 #626262,
+    0 0 0 3px var(--mc-white),
+    0 0 0 5px var(--mc-ink);
+}
+
+.mc-result-lead {
+  margin: 1.8rem 0;
+}
+
+.mc-result-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mc-result-panel {
+  background: var(--mc-stone-mid);
+  border: 2px solid var(--mc-ink);
+  box-shadow: inset 2px 2px 0 #dedede;
+  min-height: 175px;
+  padding: 1rem;
+}
+
+.mc-result-panel h2 {
+  border-bottom: 1px solid #666;
+  padding-bottom: .5rem;
+}
+
+.mc-xp-award {
+  background: var(--mc-charcoal);
+  border: 2px solid var(--mc-ink);
+  color: var(--mc-lime);
+  margin-top: .85rem;
+  padding: .55rem 1rem;
+  width: min(100%, 250px);
+}
+
+.mc-review-list {
+  margin: 0;
+}
+
+.mc-review-list > div {
+  align-items: center;
+  border: 2px solid #5e5e5e;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: .35rem;
+  min-height: 32px;
+}
+
+.mc-review-list dt,
+.mc-review-list dd {
+  font-size: .66rem;
+  margin: 0;
+  padding: .4rem .55rem;
+}
+
+.mc-review-list dd {
+  max-width: 220px;
+  overflow-wrap: anywhere;
+}
+
+.mc-review-list .review-ok,
+.mc-review-list .review-retry {
+  border-left: 2px solid var(--mc-ink);
+  min-width: 58px;
+  text-align: center;
+}
+
+.mc-review-list .review-ok {
+  background: var(--mc-lime);
+}
+
+.mc-review-list .review-retry {
+  background: var(--mc-red);
+}
+
+.mc-badge-block {
+  align-items: center;
+  background: #93c455;
+  border: 3px solid var(--mc-ink);
+  box-shadow: inset 0 0 0 5px #d7d7d7;
+  display: inline-flex;
+  flex: 0 0 70px;
+  font-size: 1.3rem;
+  height: 70px;
+  justify-content: center;
+}
+
+.mc-result-actions {
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.mc-result-actions form,
+.mc-result-actions .btn {
+  margin: 0;
+  width: 100%;
+}
+
+.minecraft-shell .result-card .score-panel {
+  align-items: center;
+  min-height: 190px;
+  justify-content: center;
+  text-align: center;
+}
+
+.minecraft-shell .result-card .score-value {
+  font-size: clamp(2rem, 7vw, 4rem);
+}
+
+.mc-stars {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: clamp(1.7rem, 4vw, 2.8rem);
+  gap: .35rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+.mc-star-earned {
+  color: #ffd540;
+  filter: drop-shadow(2px 2px 0 var(--mc-ink));
+  -webkit-text-stroke: 1px var(--mc-ink);
+}
+
+.mc-star-empty {
+  color: #6b6b6b;
+  -webkit-text-stroke: 1px var(--mc-ink);
+}
+
+/* Subscription board */
+.mc-plan-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+}
+
+.mc-lime-text {
+  color: var(--mc-lime) !important;
+}
+
+.mc-plan-grid .plan-card {
+  min-height: 380px;
+  padding: 1.15rem;
+  position: relative;
+  text-align: center;
+}
+
+.mc-plan-grid .plan-card.best-value {
+  background: #d3d3d3 !important;
+  box-shadow:
+    inset 2px 2px 0 #fff,
+    inset -2px -2px 0 #747474,
+    0 0 0 4px var(--mc-white),
+    0 0 0 7px var(--mc-ink) !important;
+}
+
+.mc-plan-ribbon {
+  background: var(--mc-gold);
+  border: 2px solid var(--mc-ink);
+  color: var(--mc-ink);
+  font-size: .62rem;
+  left: 50%;
+  padding: .3rem .7rem;
+  position: absolute;
+  top: -15px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.current-plan-ribbon {
+  background: #98c456;
+}
+
+.mc-plan-block {
+  align-items: center;
+  background: #777;
+  border: 3px solid var(--mc-ink);
+  box-shadow: inset 0 0 0 4px #d7d7d7;
+  display: flex;
+  height: 64px;
+  justify-content: center;
+  margin: .7rem auto;
+  width: 64px;
+}
+
+.mc-plan-block::after {
+  background: var(--plan-color, #a98350);
+  border: 2px solid var(--mc-ink);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .45), inset -3px -3px 0 rgba(0, 0, 0, .25);
+  content: '';
+  height: 34px;
+  width: 34px;
+}
+
+.mc-plan-grid .wood .mc-plan-block::after {
+  --plan-color: #a98350;
+}
+
+.mc-plan-grid .iron .mc-plan-block::after {
+  --plan-color: #d4d4d4;
+}
+
+.mc-plan-grid .diamond .mc-plan-block::after {
+  --plan-color: var(--mc-cyan);
+}
+
+.mc-feature-list {
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+  text-align: left;
+}
+
+.mc-feature-list li {
+  font-size: .66rem;
+  margin-bottom: .6rem;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.mc-feature-list li::before {
+  color: #238819;
+  content: '+';
+  left: 0;
+  position: absolute;
+}
+
+.mc-feature-list li.locked::before {
+  color: #9c2d2d;
+  content: '-';
+}
+
+.mc-parent-strip {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1.35fr .85fr;
+  margin-top: 1rem;
+}
+
+.mc-parent-panel {
+  background: var(--mc-stone-mid);
+  border: 2px solid var(--mc-ink);
+  padding: .8rem;
+}
+
+/* Admin workspace */
+.minecraft-shell .admin-workspace {
+  grid-template-columns: minmax(180px, 230px) minmax(0, 1fr);
+}
+
+.minecraft-shell .admin-workspace-sidebar,
+.minecraft-shell .profile-sidebar {
+  padding: 1rem;
+}
+
+.minecraft-shell .admin-workspace-heading,
+.minecraft-shell .profile-card-heading,
+.minecraft-shell .workspace-section-heading,
+.minecraft-shell .panel-heading {
+  border-bottom: 2px solid var(--mc-ink);
+  padding-bottom: .8rem;
+}
+
+.minecraft-shell .modal-header,
+.minecraft-shell .modal-footer {
+  border-color: var(--mc-ink);
+}
+
+.minecraft-shell .btn-close {
+  background-color: var(--mc-red);
+  border: 2px solid var(--mc-ink);
+  opacity: 1;
+}
+
+/* Footer */
+.minecraft-shell .custom-footer,
+.minecraft-shell .admin-footer {
+  background: var(--mc-charcoal) !important;
+  border-top: 4px solid var(--mc-ink) !important;
+  color: var(--mc-white) !important;
+  margin-top: 0 !important;
+}
+
+.minecraft-shell .custom-footer span,
+.minecraft-shell .admin-footer span,
+.minecraft-shell .custom-footer a,
+.minecraft-shell .admin-footer a {
+  color: #e6e6e6 !important;
+  font-size: .65rem;
+}
+
+.minecraft-shell .footer-logo {
+  image-rendering: pixelated;
+}
+
+@media (max-width: 991.98px) {
+  .minecraft-shell .navbar-collapse {
+    padding-top: .75rem;
+  }
+
+  .minecraft-shell .navbar-nav .nav-link {
+    width: 100%;
+  }
+
+  .minecraft-shell .admin-workspace,
+  .minecraft-shell .admin-subscriptions-page .admin-workspace,
+  .minecraft-shell .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .minecraft-shell .admin-workspace-sidebar {
+    position: static;
+  }
+
+  .mc-note-grid {
+    grid-template-columns: repeat(4, minmax(62px, 1fr));
+  }
+}
+
+@media (max-width: 767.98px) {
+  .minecraft-shell > main {
+    border-left-width: 2px;
+    border-right-width: 2px;
+    padding: .9rem;
+    width: 100%;
+  }
+
+  .minecraft-shell > main > .container,
+  .minecraft-shell > main > .container-fluid,
+  .minecraft-shell > main > main.container,
+  .minecraft-shell > main > .auth-container,
+  .minecraft-shell > main > .student-feature-page,
+  .minecraft-shell > main > .module-page {
+    box-shadow: 0 0 0 3px #ececec, 0 0 0 5px var(--mc-ink), 5px 5px 0 rgba(0, 0, 0, .35);
+    min-height: auto;
+    padding: 1rem !important;
+  }
+
+  .minecraft-shell .lesson-left-col,
+  .minecraft-shell .game-left-col,
+  .minecraft-shell .lesson-right-col,
+  .minecraft-shell .game-right-col {
+    border: 0 !important;
+    height: auto;
+  }
+
+  .minecraft-shell .lesson-left-col > div,
+  .minecraft-shell .game-left-col > div {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .minecraft-shell .lesson-left-col .btn,
+  .minecraft-shell .game-left-col .btn {
+    width: 100% !important;
+  }
+
+  .mc-parent-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .mc-result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mc-result-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .mc-quiz-status {
+    grid-template-columns: 1fr;
+  }
+
+  .mc-lesson-lower-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .minecraft-shell .student-page-toolbar,
+  .minecraft-shell .profile-form-actions,
+  .minecraft-shell .admin-workspace-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .minecraft-shell .navbar > .container {
+    padding: 0;
+  }
+
+  .minecraft-shell .btn,
+  .minecraft-shell button:not(.navbar-toggler):not(.btn-close) {
+    white-space: normal;
+  }
+
+  .minecraft-shell .lesson-left-col > div,
+  .minecraft-shell .game-left-col > div {
+    grid-template-columns: 1fr;
+  }
+
+  .minecraft-shell .game-progress-row {
+    grid-template-columns: 1fr;
+  }
+
+  .minecraft-shell .game-score {
+    text-align: left;
+  }
+
+  .mc-stage-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mc-game-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .mc-game-row .btn {
+    grid-column: 1 / -1;
+  }
+
+  .mc-answer-grid,
+  .mc-quiz-support-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mc-note-grid {
+    grid-template-columns: repeat(2, minmax(62px, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .minecraft-shell *,
+  .minecraft-shell *::before,
+  .minecraft-shell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

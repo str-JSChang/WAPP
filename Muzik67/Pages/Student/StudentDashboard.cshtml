@@ -10,9 +10,13 @@
 
     <!-- Main Content Area -->
     <main class="dashboard-main container my-5">
-        <div class="text-center mb-5">
-            <h1 class="dashboard-title display-6 fw-bold">What You Wish to Do Today ?</h1>
-        </div>
+        <header class="mc-status-bar d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center mb-5">
+            <div>
+                <p class="mb-1 text-white">HOME MAP</p>
+                <h1 class="h5 mb-0 text-white">What would you like to do today?</h1>
+            </div>
+            <span class="mc-lime-text">MUZIK 67</span>
+        </header>
 
         <div class="row justify-content-center g-4 g-lg-5">
             <!-- Card 1: Hop In My Moosik Journey -->
@@ -23,10 +27,10 @@
                             <i class="bi bi-music-note-beamed fs-1 text-dark"></i>
                         </div>
                         <h3 class="card-title fw-bold my-3">
-                            Hop In<br />My Moosik Journey
+                            Learn music<br />step by step
                         </h3>
                         <a asp-page="/Student/MusicLessonSelection" class="btn btn-storyboard btn-go text-decoration-none">
-                            GO
+                            Open lessons &gt;
                         </a>
                     </div>
                 </div>
@@ -40,10 +44,10 @@
                             <i class="bi bi-soundwave fs-1 text-dark"></i>
                         </div>
                         <h3 class="card-title fw-bold my-3">
-                            Having Fun<br />With Moosik
+                            Play sound<br />challenges
                         </h3>
                         <a asp-page="/Student/GameSelection" class="btn btn-storyboard btn-go text-decoration-none">
-                            GO
+                            Open games &gt;
                         </a>
                         <a asp-page="/Student/Progress" class="small text-dark mt-2">
                             View game progress

@@ -8,16 +8,20 @@
 
 <div class="container py-5">
 
-    <!-- Back Button-->
-    <div class="mb-2">
-        <a asp-page="/Student/StudentDashboard" class="btn btn-storyboard btn-go text-decoration-none rounded-pill fw-bold btn-back-pill shadow-sm">
-            <i class="bi bi-arrow-left fs-5"></i>
-        </a>
-    </div>
+    <header class="mc-status-bar d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center">
+        <div>
+            <p class="mb-1 text-white">LESSON MAP</p>
+            <h1 class="h5 mb-0 text-white">Choose what to learn</h1>
+        </div>
+        <span class="mc-lime-text">@Model.SelectedType · @Model.SelectedDifficulty</span>
+    </header>
 
-    <h1 class="fw-bold mb-4 font-monospace-title lesson-main-title">
-        <i class="bi bi-music-note-beamed"></i> Moosik Lesson :D
-    </h1>
+    <nav class="mc-stage-tabs" aria-label="Learning stages">
+        <span class="active">1 Learn</span>
+        <span>2 Practice</span>
+        <a asp-page="/Student/GameSelection">3 Challenge</a>
+        <span aria-disabled="true">4 Reward</span>
+    </nav>
 
     <div class="row lesson-selection-container p-4 shadow-sm rounded-4 align-items-stretch">
         
@@ -102,15 +106,8 @@
         </div>
 
     </div>
-</div>
 
-@section Scripts {
-    <script>
-        // Reset selection on browser refresh
-        if (performance.getEntriesByType('navigation')[0]?.type === 'reload' || performance.navigation.type === 1) {
-            if (window.location.search) {
-                window.location.href = window.location.pathname;
-            }
-        }
-    </script>
-}
+    <div class="mt-3">
+        <a asp-page="/Student/StudentDashboard" class="btn btn-outline-dark">&lt; Back to home map</a>
+    </div>
+</div>

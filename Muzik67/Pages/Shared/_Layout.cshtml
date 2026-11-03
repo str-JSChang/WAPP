@@ -1,4 +1,8 @@
 ﻿<!DOCTYPE html>
+@{
+    var currentPath = Context.Request.Path.Value ?? string.Empty;
+    var isLandingPage = currentPath == "/" || currentPath.Equals("/Index", StringComparison.OrdinalIgnoreCase);
+}
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -11,8 +15,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Muzik67.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/minecraft-ui.css" asp-append-version="true" />
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100 @(isLandingPage ? "landing-shell" : "minecraft-shell public-shell")">
+    <a class="skip-link" href="#mainContent">Skip to content</a>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark custom-navbar sticky-top">
             <div class="container">
@@ -37,10 +43,10 @@
                             <a class="nav-link" asp-area="" asp-page="/Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#realmNavigation">Realms</a>
+                            <a class="nav-link" href="/#realmNavigation">Realms</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#aboutSection">About Us</a>
+                            <a class="nav-link" href="/#aboutSection">About Us</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Privacy">Privacy Policy</a>
@@ -70,9 +76,12 @@
 
                     <!-- Top-Right Actions -->
                     <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
-                        <button type="button" class="btn btn-replay-intro replay-intro-trigger" title="Replay the Intro Animation">
-                            <i class="bi bi-play-circle"></i> Intro
-                        </button>
+                        @if (isLandingPage)
+                        {
+                            <button type="button" class="btn btn-replay-intro replay-intro-trigger" title="Replay the Intro Animation">
+                                <i class="bi bi-play-circle"></i> Intro
+                            </button>
+                        }
 
                         @if (!string.IsNullOrEmpty(sessionUser))
                         {
@@ -102,7 +111,7 @@
         </nav>
     </header>
 
-    <main role="main" class="flex-grow-1">
+    <main id="mainContent" role="main" class="flex-grow-1">
         @RenderBody()
     </main>
 
@@ -119,7 +128,7 @@
                 <div class="d-flex align-items-center gap-2 flex-wrap justify-content-center">
                     <a asp-page="/Privacy" class="footer-nav-link">Term and Condition</a>
                     <span class="text-muted">•</span>
-                    <a href="#aboutSection" class="footer-nav-link">About Us</a>
+                    <a href="/#aboutSection" class="footer-nav-link">About Us</a>
                     <span class="text-muted">•</span>
                     <a asp-page="/Privacy" class="footer-nav-link">Privacy Policy</a>
                 </div>

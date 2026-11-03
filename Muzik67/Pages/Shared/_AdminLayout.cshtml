@@ -9,13 +9,15 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/modules.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/minecraft-ui.css" asp-append-version="true" />
 </head>
-<body class="admin-layout d-flex flex-column min-vh-100">
+<body class="minecraft-shell admin-layout d-flex flex-column min-vh-100">
+    <a class="skip-link" href="#mainContent">Skip to content</a>
     <header>
         <nav class="navbar navbar-expand-lg bg-white border-bottom">
             <div class="container">
                 <a class="navbar-brand brand-wrapper" asp-page="/Admin/Dashboard">
-                    <img src="~/images/muzik67-logo.svg" alt="" class="nav-brand-logo" />
+                    <img src="~/images/muzik67-logo.svg" alt="Muzik 67 logo" class="nav-brand-logo" />
                     <span class="nav-brand-text">Muzik 67</span>
                     <span class="admin-label">ADMIN</span>
                 </a>
@@ -36,14 +38,14 @@
         </nav>
     </header>
 
-    <main class="flex-grow-1">
+    <main id="mainContent" class="flex-grow-1">
         @RenderBody()
     </main>
 
     <footer class="admin-footer mt-auto">
         <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
             <a class="admin-footer-brand" asp-page="/Index">
-                <img src="~/images/muzik67-logo.svg" alt="" class="footer-logo" />
+                <img src="~/images/muzik67-logo.svg" alt="Muzik 67 logo" class="footer-logo" />
                 <span>Muzik 67</span>
             </a>
             <nav class="admin-footer-links" aria-label="Footer navigation">

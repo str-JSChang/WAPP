@@ -83,7 +83,7 @@ function initIntroAnimation() {
 
         if (audioIntro) {
             chimePlayPending = true;
-            audioIntro.volume = 0.85;
+            audioIntro.volume = 0.42;
             audioIntro.currentTime = 0;
             const promise = audioIntro.play();
             if (promise !== undefined) {
