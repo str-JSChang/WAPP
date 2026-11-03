@@ -16,6 +16,9 @@ namespace Muzik67.Models
 
         public int Attempts { get; set; } = 1;
 
+        [MaxLength(20)]
+        public string Status { get; set; } = "Completed";
+
         public DateTime DateOfCompletion { get; set; } = DateTime.UtcNow;
 
         public int Score { get; set; } = 0;
