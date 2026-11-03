@@ -289,107 +289,78 @@ function initScrollReveal() {
 }
 
 // =========================================================================
-// 3. MINECRAFT AMBIENT WATER & BACKGROUND MUSIC CONTROLLERS
-//    - Background Music (C418): Volume 35% (0.35)
-//    - Environmental Ambience: Volume 45% (0.45)
-//    - Original Dive / Resurface Audio Cues (Volume 75%)
-//    - Separate Music & Ambience Controls
+// 3. MINECRAFT AMBIENCE & BACKGROUND MUSIC CONTROLLERS
+//    - C418 is an independent music layer at 35% volume.
+//    - Environmental ambience comes from the video's embedded audio at 45%.
+//      Sharing the video's media clock keeps every seek and loop synchronized.
 // =========================================================================
-const BGM_VOLUME = 0.35;      // 35% volume for C418 background music per user request
-const AMBIENT_VOLUME = 0.45;  // 45% volume for environmental ambience per user request
+const BGM_VOLUME = 0.35;
+const AMBIENT_VOLUME = 0.45;
 
 let isBgmEnabled = true;
 let isAmbientEnabled = true;
+let worldAudioUnlockBound = false;
 window.currentWaterState = 'SURFACE';
 
-const audioDive = document.getElementById("audioDive");
-const audioResurface = document.getElementById("audioResurface");
-const audioSurfaceWater = document.getElementById("audioSurfaceWater");
-const audioUnderwater = document.getElementById("audioUnderwater");
 const bgmAudio = document.getElementById("bgmAudio");
+const ambientVideo = document.getElementById("landingBgVideo");
 
-if (audioDive) audioDive.volume = 0.75;
-if (audioResurface) audioResurface.volume = 0.75;
-if (audioSurfaceWater) audioSurfaceWater.volume = AMBIENT_VOLUME;
-if (audioUnderwater) audioUnderwater.volume = AMBIENT_VOLUME;
 if (bgmAudio) bgmAudio.volume = BGM_VOLUME;
+if (ambientVideo) ambientVideo.volume = AMBIENT_VOLUME;
 
-// Original Environmental Dive & Resurface Audio Cue Trigger
-function playWaterDiveSound() {
-    if (!isAmbientEnabled) return;
-    if (audioSurfaceWater) audioSurfaceWater.pause();
-    if (audioUnderwater) audioUnderwater.pause();
+function setAmbientEnabled(enabled) {
+    isAmbientEnabled = enabled;
+    if (!ambientVideo) return;
 
-    if (audioDive) {
-        audioDive.currentTime = 0;
-        audioDive.volume = 0.75;
-        audioDive.play().catch(e => console.log("Dive play prevented:", e));
+    ambientVideo.volume = AMBIENT_VOLUME;
+    ambientVideo.muted = !enabled;
+
+    if (enabled) {
+        ambientVideo.play().catch(function () {
+            // Keep the visual moving silently until a real gesture can unlock audio.
+            ambientVideo.muted = true;
+            ambientVideo.play().catch(() => {});
+            queueWorldAudioUnlock();
+        });
     }
 }
 
-function playWaterSurfaceSound() {
-    if (!isAmbientEnabled) return;
-    if (audioUnderwater) audioUnderwater.pause();
-    if (audioSurfaceWater) audioSurfaceWater.pause();
+function queueWorldAudioUnlock() {
+    if (worldAudioUnlockBound) return;
+    worldAudioUnlockBound = true;
 
-    if (audioResurface) {
-        audioResurface.currentTime = 0;
-        audioResurface.volume = 0.75;
-        audioResurface.play().catch(e => console.log("Resurface play prevented:", e));
-    }
-}
+    const unlockWorldAudio = function () {
+        worldAudioUnlockBound = false;
 
-function updateAmbientAudio(state) {
-    if (!isAmbientEnabled) {
-        if (audioSurfaceWater) audioSurfaceWater.pause();
-        if (audioUnderwater) audioUnderwater.pause();
-        return;
-    }
-
-    if (state === 'SURFACE') {
-        if (audioUnderwater) audioUnderwater.pause();
-        if (audioSurfaceWater) {
-            audioSurfaceWater.volume = AMBIENT_VOLUME;
-            if (audioSurfaceWater.paused) {
-                audioSurfaceWater.play().catch(() => {});
-            }
+        if (isBgmEnabled && bgmAudio && bgmAudio.paused) {
+            bgmAudio.volume = BGM_VOLUME;
+            bgmAudio.play().catch(() => {});
         }
-    } else if (state === 'UNDERWATER') {
-        if (audioSurfaceWater) audioSurfaceWater.pause();
-        if (audioUnderwater) {
-            audioUnderwater.volume = AMBIENT_VOLUME;
-            if (audioUnderwater.paused) {
-                audioUnderwater.play().catch(() => {});
-            }
+
+        if (isAmbientEnabled && ambientVideo) {
+            ambientVideo.volume = AMBIENT_VOLUME;
+            ambientVideo.muted = false;
+            if (ambientVideo.paused) ambientVideo.play().catch(() => {});
         }
-    }
+
+        document.removeEventListener("pointerdown", unlockWorldAudio);
+        document.removeEventListener("keydown", unlockWorldAudio);
+    };
+
+    document.addEventListener("pointerdown", unlockWorldAudio);
+    document.addEventListener("keydown", unlockWorldAudio);
 }
 
-// Start both C418 BGM (35%) and Environmental Ambience (45%) after intro
+// Start both independent music and synchronized video ambience after the intro.
 function playWorldAudio() {
-    const bgm = document.getElementById("bgmAudio");
     const bgmToggleBtn = document.getElementById("bgmToggleBtn");
     const bgmIcon = document.getElementById("bgmIcon");
     const bgmLabel = document.getElementById("bgmLabel");
 
-    if (isBgmEnabled && bgm) {
-        bgm.volume = BGM_VOLUME;
-        if (bgm.paused) {
-            bgm.play().catch(function () {
-                const onFirstClick = function () {
-                    if (isBgmEnabled && bgm && bgm.paused) {
-                        bgm.volume = BGM_VOLUME;
-                        bgm.play().catch(() => {});
-                    }
-                    if (isAmbientEnabled) {
-                        updateAmbientAudio(window.currentWaterState || 'SURFACE');
-                    }
-                    document.removeEventListener("click", onFirstClick);
-                    document.removeEventListener("keydown", onFirstClick);
-                };
-                document.addEventListener("click", onFirstClick);
-                document.addEventListener("keydown", onFirstClick);
-            });
+    if (isBgmEnabled && bgmAudio) {
+        bgmAudio.volume = BGM_VOLUME;
+        if (bgmAudio.paused) {
+            bgmAudio.play().catch(queueWorldAudioUnlock);
         }
         if (bgmToggleBtn) bgmToggleBtn.classList.add("playing");
         if (bgmIcon) bgmIcon.className = "bi bi-disc text-success";
@@ -397,7 +368,7 @@ function playWorldAudio() {
     }
 
     if (isAmbientEnabled) {
-        updateAmbientAudio(window.currentWaterState || 'SURFACE');
+        setAmbientEnabled(true);
         const ambientToggleBtn = document.getElementById("ambientToggleBtn");
         const ambientIcon = document.getElementById("ambientIcon");
         const ambientLabel = document.getElementById("ambientLabel");
@@ -408,20 +379,14 @@ function playWorldAudio() {
 }
 
 function pauseWorldAudio() {
-    const bgm = document.getElementById("bgmAudio");
-    if (bgm) bgm.pause();
-    if (audioSurfaceWater) audioSurfaceWater.pause();
-    if (audioUnderwater) audioUnderwater.pause();
-    if (audioDive) audioDive.pause();
-    if (audioResurface) audioResurface.pause();
+    if (bgmAudio) bgmAudio.pause();
+    if (ambientVideo) ambientVideo.muted = true;
 }
 
 // =========================================================================
 // 4. FOUR-PHASE MINECRAFT VIDEO CONTROLLER
-//    Phase 1: Above water surface loop (0.5s - 9.2s) + surfacewater.m4a loop
-//    Phase 2: Diving into water transition (9.4s - 11.5s) + dive.m4a cue
-//    Phase 3: Underwater journey loop (11.8s - 24.5s) + underwater.m4a loop
-//    Phase 4: Resurface transition (24.8s - 28.0s) + resurface.m4a cue
+//    All four phases use the audio embedded in minecraft-bg.mp4. Because the
+//    picture and ambience share one media clock, currentTime seeks remain exact.
 // =========================================================================
 function initFourPhaseVideoController() {
     const video = document.getElementById("landingBgVideo");
@@ -462,7 +427,6 @@ function initFourPhaseVideoController() {
                 window.currentWaterState = currentState;
                 isTransitioning = false;
                 video.currentTime = UNDERWATER_START;
-                updateAmbientAudio('UNDERWATER');
             }
         } else if (currentState === 'UNDERWATER') {
             if (time >= UNDERWATER_END || time < UNDERWATER_START - 0.2) {
@@ -474,19 +438,16 @@ function initFourPhaseVideoController() {
                 window.currentWaterState = currentState;
                 isTransitioning = false;
                 video.currentTime = SURFACE_START;
-                updateAmbientAudio('SURFACE');
             }
         }
     });
 
-    // Dive Transition Action with original dive sound cue
+    // Dive transition: seeking the video also seeks its ambience.
     function diveUnderwater(targetScroll = true) {
         if (currentState === 'UNDERWATER' || currentState === 'DIVING') return;
         currentState = 'DIVING';
         window.currentWaterState = currentState;
         isTransitioning = true;
-        playWaterDiveSound();
-
         video.currentTime = DIVE_START;
         if (video.paused) video.play().catch(() => {});
 
@@ -498,14 +459,12 @@ function initFourPhaseVideoController() {
         }
     }
 
-    // Resurface Transition Action with original resurface sound cue
+    // Resurface transition: picture and ambience move together.
     function resurfaceToOverworld(targetScroll = true) {
         if (currentState === 'SURFACE' || currentState === 'RESURFACING') return;
         currentState = 'RESURFACING';
         window.currentWaterState = currentState;
         isTransitioning = true;
-        playWaterSurfaceSound();
-
         video.currentTime = RESURFACE_START;
         if (video.paused) video.play().catch(() => {});
 
@@ -582,7 +541,6 @@ function initFourPhaseVideoController() {
 // 5. SEPARATE AUDIO CONTROLLERS (Music & Ambience Toggles)
 // =========================================================================
 function initBgmController() {
-    const bgm = document.getElementById("bgmAudio");
     const bgmToggleBtn = document.getElementById("bgmToggleBtn");
     const bgmIcon = document.getElementById("bgmIcon");
     const bgmLabel = document.getElementById("bgmLabel");
@@ -594,17 +552,17 @@ function initBgmController() {
     // 1. Music Toggle Button
     if (bgmToggleBtn) {
         bgmToggleBtn.addEventListener("click", function () {
-            if (!bgm) return;
+            if (!bgmAudio) return;
             isBgmEnabled = !isBgmEnabled;
 
             if (isBgmEnabled) {
-                bgm.volume = BGM_VOLUME;
-                bgm.play().catch(() => {});
+                bgmAudio.volume = BGM_VOLUME;
+                bgmAudio.play().catch(queueWorldAudioUnlock);
                 bgmToggleBtn.classList.add("playing");
                 if (bgmIcon) bgmIcon.className = "bi bi-disc text-success";
                 if (bgmLabel) bgmLabel.textContent = "Music: On";
             } else {
-                bgm.pause();
+                bgmAudio.pause();
                 bgmToggleBtn.classList.remove("playing");
                 if (bgmIcon) bgmIcon.className = "bi bi-volume-mute-fill";
                 if (bgmLabel) bgmLabel.textContent = "Music: Off";
@@ -618,15 +576,12 @@ function initBgmController() {
             isAmbientEnabled = !isAmbientEnabled;
 
             if (isAmbientEnabled) {
-                updateAmbientAudio(window.currentWaterState || 'SURFACE');
+                setAmbientEnabled(true);
                 ambientToggleBtn.classList.add("playing");
                 if (ambientIcon) ambientIcon.className = "bi bi-water text-info";
                 if (ambientLabel) ambientLabel.textContent = "Ambience: On";
             } else {
-                if (audioSurfaceWater) audioSurfaceWater.pause();
-                if (audioUnderwater) audioUnderwater.pause();
-                if (audioDive) audioDive.pause();
-                if (audioResurface) audioResurface.pause();
+                setAmbientEnabled(false);
                 ambientToggleBtn.classList.remove("playing");
                 if (ambientIcon) ambientIcon.className = "bi bi-water text-muted";
                 if (ambientLabel) ambientLabel.textContent = "Ambience: Off";
