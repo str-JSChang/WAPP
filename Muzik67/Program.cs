@@ -4,7 +4,7 @@ using Muzik67.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<ModuleDataService>();
 
@@ -13,7 +13,7 @@ builder.Services.AddDbContext<MuzikDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
         ?? "Data Source=Muzik67.db"));
 
-// Configure in-memory session state for user authentication & tracking
+// Configure session state for login authentication
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -24,39 +24,18 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Auto-initialize and seed the SQLite database
+// Auto-seed the SQLite database
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<MuzikDbContext>();
-        DbInitializer.Initialize(context);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred creating or seeding the SQLite database.");
-    }
+    var context = scope.ServiceProvider.GetRequiredService<MuzikDbContext>();
+    DbInitializer.Initialize(context);
 }
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
+// Simple HTTP request pipeline (assignment style)
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseSession();
-
 app.UseAuthorization();
-
 app.MapRazorPages();
 
 app.Run();
