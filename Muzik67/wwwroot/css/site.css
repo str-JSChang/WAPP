@@ -1,3 +1,12 @@
+/* Minecraft Authentic Pixel Font */
+@font-face {
+  font-family: 'Minecraftia';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/Minecraftia.woff') format('woff');
+  font-display: swap;
+}
+
 ﻿/* Muzik 67 - Core & Custom Styles */
 
 :root {
@@ -874,3 +883,62 @@ body {
   margin-bottom: 0.5rem;
 }
 
+
+/* ======================================================================
+   MINECRAFT 3D LOGO AND ANIMATED SPLASH TEXT
+   ====================================================================== */
+.mc-logo-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 680px;
+  width: 92%;
+  margin: 1.25rem auto 1.5rem auto;
+  text-align: center;
+}
+
+.mc-title-logo {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.85));
+  transition: transform 0.3s ease;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.mc-title-logo:hover {
+  transform: scale(1.02);
+}
+
+.mc-splash-text {
+  position: absolute;
+  bottom: -10px;
+  right: 5%;
+  font-family: 'Minecraftia', 'VT323', 'Silkscreen', 'Noto Sans SC', monospace, sans-serif;
+  font-size: clamp(1.15rem, 2.6vw, 1.75rem);
+  font-weight: 700;
+  color: #ffff00;
+  text-shadow: 2px 2px 0px #3f3f00, 3px 3px 0px rgba(0, 0, 0, 0.7);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transform-origin: center center;
+  animation: mcSplashPulse 1.8s infinite ease-in-out;
+  z-index: 5;
+  transition: filter 0.15s ease, color 0.15s ease;
+}
+
+.mc-splash-text:hover {
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #3a3a3a, 3px 3px 0px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes mcSplashPulse {
+  0%, 100% {
+    transform: rotate(-18deg) scale(1);
+  }
+  50% {
+    transform: rotate(-18deg) scale(1.15);
+  }
+}

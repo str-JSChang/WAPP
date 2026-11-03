@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initScrollReveal();
     initBgmController();
     initFourPhaseVideoController();
+    initMinecraftSplash();
 });
 
 // =========================================================================
@@ -475,3 +476,35 @@ window.playTone = function (freq, btnElement) {
         console.error("Synthesizer error:", err);
     }
 };
+
+// =========================================================================
+// 7. MINECRAFT SPLASH TEXT CONTROLLER
+// Quotes matching authentic Minecraft title screen splash mechanics
+// =========================================================================
+function initMinecraftSplash() {
+    const splashEl = document.getElementById("mcSplashText");
+    if (!splashEl) return;
+
+    const quotes = [
+        "welcome to moozik",
+        "muzik 67!",
+        "67 67 67",
+        "Son.",
+        "如果我是DJ 你会爱我吗",
+        "tung tung tung sahur"
+    ];
+
+    let currentIndex = 0;
+    splashEl.textContent = quotes[0];
+
+    // Clicking splash text cycles to next quote with a bounce
+    splashEl.addEventListener("click", function () {
+        currentIndex = (currentIndex + 1) % quotes.length;
+        splashEl.textContent = quotes[currentIndex];
+
+        // Trigger a fresh pulse
+        splashEl.style.animation = "none";
+        void splashEl.offsetWidth; // Force reflow
+        splashEl.style.animation = "mcSplashPulse 1.8s infinite ease-in-out";
+    });
+}
