@@ -16,6 +16,7 @@ html {
   font-size: 15px;
   position: relative;
   min-height: 100%;
+  scroll-behavior: smooth;
 }
 
 @media (min-width: 768px) {
@@ -27,7 +28,7 @@ html {
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
   color: var(--text-main);
-  background-color: #f8fafc;
+  background-color: #0b1120;
   margin-bottom: 70px;
   overflow-x: hidden;
 }
@@ -118,27 +119,26 @@ body {
 
 .intro-btn {
   background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 30px;
-  padding: 8px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #e2e8f0;
+  padding: 8px 18px;
+  border-radius: 999px;
   font-size: 0.85rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.25s ease;
   backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
 }
 
 .intro-btn:hover {
   background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
   border-color: #ffffff;
   transform: translateY(-2px);
-  color: #ffffff;
 }
 
-/* Keyframes for Intro */
-@keyframes introLogoEnter {
+/* Keyframes for Intro Storyboard */
+@@keyframes introLogoEnter {
   0% {
     opacity: 0;
     transform: scale(0.7) translateY(20px);
@@ -149,7 +149,7 @@ body {
   }
 }
 
-@keyframes introTextEnter {
+@@keyframes introTextEnter {
   0% {
     opacity: 0;
     transform: translateY(15px);
@@ -160,7 +160,7 @@ body {
   }
 }
 
-@keyframes introLogoFadeOut {
+@@keyframes introLogoFadeOut {
   0% {
     opacity: 1;
     transform: scale(1);
@@ -168,24 +168,87 @@ body {
   }
   100% {
     opacity: 0;
-    transform: scale(1.15);
+    transform: scale(1.12);
     filter: blur(8px);
   }
 }
 
-/* Musical particles pulse animation */
+/* Floating musical notes inside intro */
 .music-note-float {
   position: absolute;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.25);
   font-size: 1.5rem;
   animation: floatNote 4s infinite ease-in-out;
 }
 
-@keyframes floatNote {
+@@keyframes floatNote {
   0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.2; }
   50% { transform: translateY(-25px) rotate(15deg); opacity: 0.6; }
 }
 
+/* ==========================================================================
+   MINECRAFT VIDEO BACKGROUND & AMBIENT CONTROLS
+   ========================================================================== */
+.landing-video-fixed-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#landingBgVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.video-tint-overlay {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 50% 35%, rgba(11, 17, 32, 0.2) 0%, rgba(11, 17, 32, 0.7) 100%),
+    linear-gradient(to bottom, rgba(11, 17, 32, 0.3) 0%, rgba(11, 17, 32, 0.75) 50%, rgba(11, 17, 32, 0.95) 100%);
+  pointer-events: none;
+}
+
+/* Floating BGM audio toggle button in corner */
+.bgm-float-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(14px);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.bgm-float-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: #10b981;
+  color: #10b981;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3);
+}
+
+.bgm-float-btn.playing {
+  border-color: #10b981;
+  color: #10b981;
+}
 
 /* ==========================================================================
    LANDING PAGE (Slide 3)
@@ -197,7 +260,6 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2.5rem 1rem;
 }
 
 /* Shift into landing page entrance animation */
@@ -219,7 +281,7 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.65;
+  opacity: 0.45;
 }
 
 .wireframe-cross-lines svg {
@@ -228,63 +290,89 @@ body {
 }
 
 .wireframe-cross-lines line {
-  stroke: #cbd5e1;
+  stroke: rgba(255, 255, 255, 0.25);
   stroke-width: 1.5;
   stroke-dasharray: 6 6;
 }
 
-/* Landing Hero Section (Slide 3 center elements) */
-.landing-hero {
+/* Landing Hero Section Fullscreen */
+.landing-hero-fullscreen {
+  min-height: calc(100vh - 80px);
   position: relative;
-  z-index: 2;
-  text-align: center;
-  max-width: 780px;
-  margin: 0 auto;
+  width: 100%;
+  padding: 4rem 1rem 2rem;
+}
+
+.hero-inner {
+  max-width: 820px;
+}
+
+.mc-tag-badge, .mc-sub-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #e2e8f0;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  padding: 6px 18px;
+  border-radius: 999px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.mc-sub-badge {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.45);
+}
+
+.text-shadow-mc {
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.8);
+}
+
+.max-w-600 {
+  max-width: 600px;
 }
 
 /* Center Pill/Box for "Muzik 67" */
 .landing-hero-card {
   display: inline-block;
-  background: #e2e8f0;
-  border: 1px solid #cbd5e1;
-  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(14px);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
   padding: 1.25rem 3.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .landing-hero-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.55);
 }
 
 .landing-title {
   font-family: 'Courier New', Courier, monospace;
-  font-size: 3.2rem;
+  font-size: clamp(2.4rem, 6vw, 3.8rem);
   font-weight: 800;
-  letter-spacing: 3px;
-  color: #1e293b;
+  letter-spacing: 4px;
+  color: #ffffff;
   margin: 0;
   line-height: 1.1;
-}
-
-@media (max-width: 576px) {
-  .landing-hero-card {
-    padding: 1rem 2rem;
-  }
-  .landing-title {
-    font-size: 2.2rem;
-  }
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
 }
 
 .landing-subtitle {
   font-size: 1.2rem;
-  color: var(--text-muted);
-  max-width: 600px;
-  margin: 0 auto 2.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 660px;
+  margin: 0 auto;
   font-weight: 400;
   line-height: 1.6;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
 /* Buttons matching Slide 3: Get Started and Learn More */
@@ -292,51 +380,248 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 2.5rem;
+  gap: 1.8rem;
   flex-wrap: wrap;
 }
 
 .btn-storyboard {
   border-radius: 30px;
-  padding: 12px 36px;
+  padding: 14px 38px;
   font-size: 1.05rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.5px;
-  min-width: 170px;
+  min-width: 175px;
   transition: all 0.25s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .btn-get-started {
-  background-color: #cbd5e1;
-  color: #1e293b;
-  border: 1px solid #94a3b8;
+  background: #10b981;
+  color: #ffffff;
+  border: 2px solid #059669;
+  box-shadow: inset -2px -4px 0px rgba(0, 0, 0, 0.35), inset 2px 2px 0px rgba(255, 255, 255, 0.45), 0 10px 25px rgba(16, 185, 129, 0.4);
 }
 
 .btn-get-started:hover {
-  background-color: #3b82f6;
+  background-color: #059669;
   color: #ffffff;
-  border-color: #3b82f6;
+  border-color: #047857;
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+  box-shadow: inset -2px -4px 0px rgba(0, 0, 0, 0.35), 0 15px 30px rgba(16, 185, 129, 0.55);
 }
 
 .btn-learn-more {
-  background-color: #e2e8f0;
-  color: #334155;
-  border: 1px solid #94a3b8;
+  background-color: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
 }
 
 .btn-learn-more:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
-  border-color: #64748b;
+  background-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  border-color: #ffffff;
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Scroll cue indicator */
+.scroll-cue-text {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 3px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.scroll-bounce-icon {
+  animation: bounceDown 2s infinite ease-in-out;
+}
+
+@@keyframes bounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+/* ==========================================================================
+   SECTION 2: REALM NAVIGATION (Glassmorphic Cards)
+   ========================================================================== */
+.realm-card {
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(16px);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  border-radius: 22px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.realm-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.55);
+}
+
+.realm-icon-box {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.bg-emerald { background: linear-gradient(135deg, #059669, #10b981); }
+.bg-gold { background: linear-gradient(135deg, #d97706, #f59e0b); }
+.bg-blue { background: linear-gradient(135deg, #2563eb, #38bdf8); }
+
+.realm-title {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  font-size: 1.45rem;
+}
+
+.border-white-10 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Minecraft blocky style buttons */
+.btn-realm {
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  border: 2px solid rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.btn-realm-green {
+  background: #10b981;
+  color: #fff;
+  box-shadow: inset -2px -4px 0 rgba(0, 0, 0, 0.35), inset 2px 2px 0 rgba(255, 255, 255, 0.4);
+}
+.btn-realm-green:hover {
+  background: #059669;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.btn-realm-gold {
+  background: #f59e0b;
+  color: #fff;
+  box-shadow: inset -2px -4px 0 rgba(0, 0, 0, 0.35), inset 2px 2px 0 rgba(255, 255, 255, 0.4);
+}
+.btn-realm-gold:hover {
+  background: #d97706;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.btn-realm-blue {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: inset -2px -4px 0 rgba(0, 0, 0, 0.35), inset 2px 2px 0 rgba(255, 255, 255, 0.4);
+}
+.btn-realm-blue:hover {
+  background: #2563eb;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   SECTION 3: NOTE BLOCK PIANO PANEL
+   ========================================================================== */
+.noteblock-piano-panel {
+  background: rgba(15, 23, 42, 0.76);
+  backdrop-filter: blur(18px);
+  border: 3px solid rgba(255, 255, 255, 0.22);
+  border-radius: 26px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+}
+
+.piano-keyboard-grid {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mc-piano-key {
+  background: #ffffff;
+  color: #1e293b;
+  border: 3px solid #0f172a;
+  border-radius: 12px;
+  width: 72px;
+  height: 135px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 14px;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: inset -2px -6px 0 rgba(0, 0, 0, 0.15), 0 8px 18px rgba(0, 0, 0, 0.35);
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.mc-piano-key:hover {
+  transform: translateY(-4px);
+  background: #f8fafc;
+  border-color: #3b82f6;
+  box-shadow: inset -2px -6px 0 rgba(59, 130, 246, 0.3), 0 12px 22px rgba(0, 0, 0, 0.45);
+}
+
+.mc-piano-key:active, .mc-piano-key.key-active {
+  transform: translateY(2px);
+  background: #38bdf8;
+  color: #fff;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.key-letter {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.key-solfege {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+/* Feature cards in section 4 */
+.feature-card-mc {
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.feature-card-mc:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+/* Scroll reveal animation */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Keyframes for Landing Shift */
-@keyframes heroPopIn {
+@@keyframes heroPopIn {
   0% {
     opacity: 0;
     transform: scale(0.9) translateY(25px);
@@ -347,7 +632,7 @@ body {
   }
 }
 
-@keyframes actionsFadeUp {
+@@keyframes actionsFadeUp {
   0% {
     opacity: 0;
     transform: translateY(20px);
@@ -358,19 +643,19 @@ body {
   }
 }
 
-@keyframes linesFadeIn {
+@@keyframes linesFadeIn {
   0% { opacity: 0; }
-  100% { opacity: 0.65; }
+  100% { opacity: 0.45; }
 }
-
 
 /* ==========================================================================
    NAVIGATION BAR & FOOTER (Slide 3)
    ========================================================================== */
 .custom-navbar {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  background-color: rgba(11, 17, 32, 0.82);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   padding: 0.75rem 0;
 }
 
@@ -379,16 +664,17 @@ body {
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .brand-wrapper:hover {
-  color: #3b82f6;
+  color: #38bdf8;
 }
 
 .nav-brand-logo {
   height: 42px;
   width: auto;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
 }
 
 .nav-brand-text {
@@ -400,22 +686,22 @@ body {
 
 .navbar-nav .nav-link {
   font-weight: 500;
-  color: #475569;
+  color: #cbd5e1;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .navbar-nav .nav-link:hover {
-  color: #3b82f6;
-  background-color: #f1f5f9;
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Nav replay animation button */
 .btn-replay-intro {
-  background: transparent;
-  border: 1px solid #cbd5e1;
-  color: #64748b;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #e2e8f0;
   border-radius: 20px;
   padding: 5px 14px;
   font-size: 0.85rem;
@@ -427,17 +713,19 @@ body {
 }
 
 .btn-replay-intro:hover {
-  background-color: #f8fafc;
-  border-color: #3b82f6;
-  color: #3b82f6;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: #38bdf8;
+  color: #ffffff;
 }
 
 /* Custom Footer */
 .custom-footer {
-  background-color: #e2e8f0;
-  border-top: 1px solid #cbd5e1;
+  background-color: rgba(11, 17, 32, 0.9);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1.25rem 0;
   margin-top: auto;
+  color: #94a3b8;
 }
 
 .footer-logo {
@@ -446,7 +734,7 @@ body {
 }
 
 .footer-nav-link {
-  color: #334155;
+  color: #cbd5e1;
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;
@@ -455,7 +743,7 @@ body {
 }
 
 .footer-nav-link:hover {
-  color: #3b82f6;
+  color: #38bdf8;
   text-decoration: underline;
 }
 
@@ -464,8 +752,6 @@ body {
    ========================================================================== */
 .auth-container {
   min-height: calc(100vh - 180px);
-  /*Comment this display flex because it fucked up the layout of the div*/
-  /*display: flex;*/
   align-items: center;
 }
 
@@ -511,30 +797,15 @@ body {
   transform: translateY(-1px);
 }
 
-/* Features preview section on landing page */
-.feature-card {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  padding: 1.5rem;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  height: 100%;
-}
-
-.feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-}
-
 .feature-icon-bubble {
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: rgba(59, 130, 246, 0.18);
+  color: #38bdf8;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }

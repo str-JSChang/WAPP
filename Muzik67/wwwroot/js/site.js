@@ -1,9 +1,14 @@
-﻿// Muzik 67 - Interactive Intro Animation & Application Script
+﻿// Muzik 67 - Interactive Intro Animation, Scroll Reveals & Web Audio Synthesizer
 
 document.addEventListener("DOMContentLoaded", function () {
     initIntroAnimation();
+    initScrollReveal();
+    initBgmController();
 });
 
+// =========================================================================
+// 1. STORYBOARD INTRO ANIMATION
+// =========================================================================
 function initIntroAnimation() {
     const overlay = document.getElementById("introOverlay");
     const introContent = document.querySelector(".intro-content");
@@ -158,3 +163,116 @@ function initIntroAnimation() {
     // Start on first visit
     startIntroSequence();
 }
+
+// =========================================================================
+// 2. SCROLL REVEAL (IntersectionObserver)
+// =========================================================================
+function initScrollReveal() {
+    const revealElements = document.querySelectorAll(".scroll-reveal");
+    if (!revealElements || revealElements.length === 0) return;
+
+    if (!("IntersectionObserver" in window)) {
+        // Fallback for older browsers
+        revealElements.forEach(el => el.classList.add("visible"));
+        return;
+    }
+
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+                obs.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.15,
+        rootMargin: "0px 0px -40px 0px"
+    });
+
+    revealElements.forEach(el => observer.observe(el));
+}
+
+// =========================================================================
+// 3. AMBIENT BGM VIDEO AUDIO CONTROLLER
+// =========================================================================
+function initBgmController() {
+    const video = document.getElementById("landingBgVideo");
+    const toggleBtn = document.getElementById("bgmToggleBtn");
+    const icon = document.getElementById("bgmIcon");
+    const label = document.getElementById("bgmLabel");
+
+    if (!video || !toggleBtn) return;
+
+    toggleBtn.addEventListener("click", function () {
+        if (video.muted) {
+            video.muted = false;
+            video.volume = 0.6;
+            video.play().catch(err => console.log("Video audio play prevented:", err));
+            toggleBtn.classList.add("playing");
+            if (icon) icon.className = "bi bi-volume-up-fill text-success";
+            if (label) label.textContent = "Ambience: On";
+        } else {
+            video.muted = true;
+            toggleBtn.classList.remove("playing");
+            if (icon) icon.className = "bi bi-volume-mute-fill";
+            if (label) label.textContent = "Play Ambience";
+        }
+    });
+}
+
+// =========================================================================
+// 4. INTERACTIVE PIANO / NOTE SYNTHESIZER (Web Audio API)
+// =========================================================================
+let pianoAudioCtx = null;
+
+window.playTone = function (freq, btnElement) {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+
+        if (!pianoAudioCtx) {
+            pianoAudioCtx = new AudioContext();
+        }
+        if (pianoAudioCtx.state === 'suspended') {
+            pianoAudioCtx.resume();
+        }
+
+        const now = pianoAudioCtx.currentTime;
+
+        // Primary tone oscillator
+        const osc1 = pianoAudioCtx.createOscillator();
+        // Warm overtone oscillator
+        const osc2 = pianoAudioCtx.createOscillator();
+        const gainNode = pianoAudioCtx.createGain();
+
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(freq, now);
+
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(freq * 2, now); // 1 octave higher overtone
+
+        // Envelope: quick attack, natural decay
+        gainNode.gain.setValueAtTime(0.001, now);
+        gainNode.gain.linearRampToValueAtTime(0.25, now + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
+        gainNode.connect(pianoAudioCtx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 1.25);
+        osc2.stop(now + 1.25);
+
+        // Visual feedback
+        if (btnElement) {
+            btnElement.classList.add("key-active");
+            setTimeout(() => {
+                btnElement.classList.remove("key-active");
+            }, 180);
+        }
+    } catch (err) {
+        console.error("Synthesizer error:", err);
+    }
+};
