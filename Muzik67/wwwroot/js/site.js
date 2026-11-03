@@ -1,4 +1,4 @@
-﻿// Muzik 67 - Interactive Intro Animation, 4-Phase Video Navigation & Web Audio Synthesizer
+﻿// Muzik 67 - Interactive Intro Animation, 4-Phase Video Navigation & Minecraft Audio System
 
 document.addEventListener("DOMContentLoaded", function () {
     initIntroAnimation();
@@ -193,11 +193,69 @@ function initScrollReveal() {
 }
 
 // =========================================================================
-// 3. FOUR-PHASE MINECRAFT VIDEO CONTROLLER
-//    Phase 1: Above water surface loop (0.5s - 9.2s)
-//    Phase 2: Diving into water transition (9.4s - 11.5s) + Dive audio cue
-//    Phase 3: Underwater journey loop (11.8s - 24.5s)
-//    Phase 4: Resurface transition (24.8s - 28.0s) + Surface audio cue
+// 3. MINECRAFT AUDIO SYSTEM (Dedicated .m4a Audio Files)
+// =========================================================================
+let isAudioEnabled = true;
+window.currentWaterState = 'SURFACE';
+
+const audioDive = document.getElementById("audioDive");
+const audioResurface = document.getElementById("audioResurface");
+const audioSurfaceWater = document.getElementById("audioSurfaceWater");
+const audioUnderwater = document.getElementById("audioUnderwater");
+
+if (audioDive) audioDive.volume = 0.9;
+if (audioResurface) audioResurface.volume = 0.9;
+if (audioSurfaceWater) audioSurfaceWater.volume = 0.55;
+if (audioUnderwater) audioUnderwater.volume = 0.55;
+
+function playWaterDiveSound() {
+    if (!isAudioEnabled) return;
+    if (audioSurfaceWater) audioSurfaceWater.pause();
+    if (audioUnderwater) audioUnderwater.pause();
+
+    if (audioDive) {
+        audioDive.currentTime = 0;
+        audioDive.play().catch(e => console.log("Dive play prevented:", e));
+    }
+}
+
+function playWaterSurfaceSound() {
+    if (!isAudioEnabled) return;
+    if (audioUnderwater) audioUnderwater.pause();
+    if (audioSurfaceWater) audioSurfaceWater.pause();
+
+    if (audioResurface) {
+        audioResurface.currentTime = 0;
+        audioResurface.play().catch(e => console.log("Resurface play prevented:", e));
+    }
+}
+
+function updateAmbientAudio(state) {
+    if (!isAudioEnabled) {
+        if (audioSurfaceWater) audioSurfaceWater.pause();
+        if (audioUnderwater) audioUnderwater.pause();
+        return;
+    }
+
+    if (state === 'SURFACE') {
+        if (audioUnderwater) audioUnderwater.pause();
+        if (audioSurfaceWater && audioSurfaceWater.paused) {
+            audioSurfaceWater.play().catch(e => console.log("Surface audio waiting for user interaction"));
+        }
+    } else if (state === 'UNDERWATER') {
+        if (audioSurfaceWater) audioSurfaceWater.pause();
+        if (audioUnderwater && audioUnderwater.paused) {
+            audioUnderwater.play().catch(e => console.log("Underwater audio waiting for user interaction"));
+        }
+    }
+}
+
+// =========================================================================
+// 4. FOUR-PHASE MINECRAFT VIDEO CONTROLLER
+//    Phase 1: Above water surface loop (0.5s - 9.2s) + surfacewater.m4a loop
+//    Phase 2: Diving into water transition (9.4s - 11.5s) + dive.m4a cue
+//    Phase 3: Underwater journey loop (11.8s - 24.5s) + underwater.m4a loop
+//    Phase 4: Resurface transition (24.8s - 28.0s) + resurface.m4a cue
 // =========================================================================
 function initFourPhaseVideoController() {
     const video = document.getElementById("landingBgVideo");
@@ -217,9 +275,11 @@ function initFourPhaseVideoController() {
 
     // 'SURFACE' | 'DIVING' | 'UNDERWATER' | 'RESURFACING'
     let currentState = 'SURFACE';
+    window.currentWaterState = currentState;
     let isTransitioning = false;
 
-    // Keep video playing
+    // Keep video playing muted in background
+    video.muted = true;
     video.play().catch(() => {});
 
     // Active playback loop controller
@@ -233,8 +293,10 @@ function initFourPhaseVideoController() {
         } else if (currentState === 'DIVING') {
             if (time >= DIVE_END) {
                 currentState = 'UNDERWATER';
+                window.currentWaterState = currentState;
                 isTransitioning = false;
                 video.currentTime = UNDERWATER_START;
+                updateAmbientAudio('UNDERWATER');
             }
         } else if (currentState === 'UNDERWATER') {
             if (time >= UNDERWATER_END || time < UNDERWATER_START - 0.2) {
@@ -243,8 +305,10 @@ function initFourPhaseVideoController() {
         } else if (currentState === 'RESURFACING') {
             if (time >= RESURFACE_END) {
                 currentState = 'SURFACE';
+                window.currentWaterState = currentState;
                 isTransitioning = false;
                 video.currentTime = SURFACE_START;
+                updateAmbientAudio('SURFACE');
             }
         }
     });
@@ -253,6 +317,7 @@ function initFourPhaseVideoController() {
     function diveUnderwater(targetScroll = true) {
         if (currentState === 'UNDERWATER' || currentState === 'DIVING') return;
         currentState = 'DIVING';
+        window.currentWaterState = currentState;
         isTransitioning = true;
         playWaterDiveSound();
 
@@ -271,6 +336,7 @@ function initFourPhaseVideoController() {
     function resurfaceToOverworld(targetScroll = true) {
         if (currentState === 'SURFACE' || currentState === 'RESURFACING') return;
         currentState = 'RESURFACING';
+        window.currentWaterState = currentState;
         isTransitioning = true;
         playWaterSurfaceSound();
 
@@ -319,125 +385,42 @@ function initFourPhaseVideoController() {
 }
 
 // =========================================================================
-// 4. WATER DIVE & SURFACE AUDIO CUES (Web Audio API)
-// =========================================================================
-function playWaterDiveSound() {
-    try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        const ctx = new AudioContext();
-        const now = ctx.currentTime;
-
-        // 1. Splash noise burst (bubble impact)
-        const bufferSize = Math.floor(ctx.sampleRate * 0.45);
-        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-        }
-
-        const noise = ctx.createBufferSource();
-        noise.buffer = buffer;
-
-        // Resonant low-pass sweep: head entering water
-        const filter = ctx.createBiquadFilter();
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(950, now);
-        filter.frequency.exponentialRampToValueAtTime(140, now + 0.4);
-
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.35, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-
-        noise.connect(filter);
-        filter.connect(gain);
-        gain.connect(ctx.destination);
-        noise.start(now);
-
-        // 2. Underwater bubble gurgles
-        [220, 165, 130].forEach((freq, idx) => {
-            const osc = ctx.createOscillator();
-            const oscGain = ctx.createGain();
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(freq, now + idx * 0.09);
-            osc.frequency.exponentialRampToValueAtTime(freq * 0.75, now + idx * 0.09 + 0.16);
-
-            oscGain.gain.setValueAtTime(0.001, now + idx * 0.09);
-            oscGain.gain.linearRampToValueAtTime(0.25, now + idx * 0.09 + 0.02);
-            oscGain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.09 + 0.18);
-
-            osc.connect(oscGain);
-            oscGain.connect(ctx.destination);
-            osc.start(now + idx * 0.09);
-            osc.stop(now + idx * 0.09 + 0.2);
-        });
-    } catch (e) {
-        console.log("Audio notice:", e);
-    }
-}
-
-function playWaterSurfaceSound() {
-    try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        const ctx = new AudioContext();
-        const now = ctx.currentTime;
-
-        const bufferSize = Math.floor(ctx.sampleRate * 0.4);
-        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-        }
-
-        const noise = ctx.createBufferSource();
-        noise.buffer = buffer;
-
-        // Bandpass sweep rising up into open air
-        const filter = ctx.createBiquadFilter();
-        filter.type = "bandpass";
-        filter.frequency.setValueAtTime(220, now);
-        filter.frequency.exponentialRampToValueAtTime(1400, now + 0.35);
-
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.28, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-
-        noise.connect(filter);
-        filter.connect(gain);
-        gain.connect(ctx.destination);
-        noise.start(now);
-    } catch (e) {
-        console.log("Audio notice:", e);
-    }
-}
-
-// =========================================================================
-// 5. AMBIENT BGM VIDEO AUDIO CONTROLLER
+// 5. AMBIENT AUDIO TOGGLE CONTROLLER
 // =========================================================================
 function initBgmController() {
-    const video = document.getElementById("landingBgVideo");
     const toggleBtn = document.getElementById("bgmToggleBtn");
     const icon = document.getElementById("bgmIcon");
     const label = document.getElementById("bgmLabel");
 
-    if (!video || !toggleBtn) return;
+    if (!toggleBtn) return;
 
     toggleBtn.addEventListener("click", function () {
-        if (video.muted) {
-            video.muted = false;
-            video.volume = 0.6;
-            video.play().catch(err => console.log("Video audio play prevented:", err));
+        isAudioEnabled = !isAudioEnabled;
+
+        if (isAudioEnabled) {
             toggleBtn.classList.add("playing");
             if (icon) icon.className = "bi bi-volume-up-fill text-success";
-            if (label) label.textContent = "Ambience: On";
+            if (label) label.textContent = "Audio: On";
+            updateAmbientAudio(window.currentWaterState || 'SURFACE');
         } else {
-            video.muted = true;
             toggleBtn.classList.remove("playing");
             if (icon) icon.className = "bi bi-volume-mute-fill";
-            if (label) label.textContent = "Play Ambience";
+            if (label) label.textContent = "Audio: Off";
+            if (audioSurfaceWater) audioSurfaceWater.pause();
+            if (audioUnderwater) audioUnderwater.pause();
+            if (audioDive) audioDive.pause();
+            if (audioResurface) audioResurface.pause();
         }
     });
+
+    // Start playing ambient audio on first user click anywhere (browser autoplay policy)
+    const enableAudioOnFirstClick = () => {
+        if (isAudioEnabled) {
+            updateAmbientAudio(window.currentWaterState || 'SURFACE');
+        }
+        document.removeEventListener("click", enableAudioOnFirstClick);
+    };
+    document.addEventListener("click", enableAudioOnFirstClick);
 }
 
 // =========================================================================
