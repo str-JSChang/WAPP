@@ -181,7 +181,7 @@ function initIntroAnimation() {
             if (landingWrapper) {
                 landingWrapper.classList.add("animate-landing-in");
             }
-            playBgmMusic();
+            playWorldAudio();
         }, 3400);
 
         // End of intro sequence
@@ -206,7 +206,7 @@ function initIntroAnimation() {
         if (audioIntro) {
             audioIntro.pause();
         }
-        playBgmMusic();
+        playWorldAudio();
 
         setTimeout(function () {
             overlay.style.display = "none";
@@ -289,11 +289,139 @@ function initScrollReveal() {
 }
 
 // =========================================================================
-// 3. MINECRAFT AMBIENCE STATE
-// The background video's own audio track is used so sound follows every seek
-// and loop on the exact same media clock as the picture.
+// 3. MINECRAFT AMBIENT WATER & BACKGROUND MUSIC CONTROLLERS
+//    - C418 Soundtrack: Volume 50% (0.50)
+//    - Water Ambience (Surface / Underwater): Volume 25% (0.25)
 // =========================================================================
+const BGM_VOLUME = 0.50;      // 50% volume for C418 background music per user request
+const AMBIENT_VOLUME = 0.25;  // 25% volume for water ambience per user request
+
+let isAudioEnabled = true;
 window.currentWaterState = 'SURFACE';
+
+const audioSurfaceWater = document.getElementById("audioSurfaceWater");
+const audioUnderwater = document.getElementById("audioUnderwater");
+const bgmAudio = document.getElementById("bgmAudio");
+
+if (audioSurfaceWater) audioSurfaceWater.volume = AMBIENT_VOLUME;
+if (audioUnderwater) audioUnderwater.volume = AMBIENT_VOLUME;
+if (bgmAudio) bgmAudio.volume = BGM_VOLUME;
+
+// Smooth crossfade between surface and underwater ambience
+function crossfadeAmbient(toState) {
+    if (!isAudioEnabled) {
+        if (audioSurfaceWater) audioSurfaceWater.pause();
+        if (audioUnderwater) audioUnderwater.pause();
+        return;
+    }
+
+    const currentToPlay = (toState === 'UNDERWATER') ? audioUnderwater : audioSurfaceWater;
+    const currentToStop = (toState === 'UNDERWATER') ? audioSurfaceWater : audioUnderwater;
+
+    if (currentToPlay) {
+        currentToPlay.volume = Math.min(currentToPlay.volume, 0.05);
+        if (currentToPlay.paused) {
+            currentToPlay.play().catch(() => {});
+        }
+    }
+
+    const steps = 10;
+    const intervalTime = 50; // 500ms smooth crossfade
+    let step = 0;
+
+    const fadeInterval = setInterval(() => {
+        step++;
+        const progress = step / steps;
+
+        if (currentToPlay) {
+            currentToPlay.volume = Math.min(AMBIENT_VOLUME, progress * AMBIENT_VOLUME);
+        }
+        if (currentToStop) {
+            currentToStop.volume = Math.max(0, (1 - progress) * AMBIENT_VOLUME);
+        }
+
+        if (step >= steps) {
+            clearInterval(fadeInterval);
+            if (currentToStop) {
+                currentToStop.pause();
+                currentToStop.volume = AMBIENT_VOLUME;
+            }
+            if (currentToPlay) {
+                currentToPlay.volume = AMBIENT_VOLUME;
+            }
+        }
+    }, intervalTime);
+}
+
+function updateAmbientAudio(state) {
+    if (!isAudioEnabled) {
+        if (audioSurfaceWater) audioSurfaceWater.pause();
+        if (audioUnderwater) audioUnderwater.pause();
+        return;
+    }
+
+    if (state === 'SURFACE') {
+        if (audioUnderwater) audioUnderwater.pause();
+        if (audioSurfaceWater) {
+            audioSurfaceWater.volume = AMBIENT_VOLUME;
+            if (audioSurfaceWater.paused) {
+                audioSurfaceWater.play().catch(() => {});
+            }
+        }
+    } else if (state === 'UNDERWATER') {
+        if (audioSurfaceWater) audioSurfaceWater.pause();
+        if (audioUnderwater) {
+            audioUnderwater.volume = AMBIENT_VOLUME;
+            if (audioUnderwater.paused) {
+                audioUnderwater.play().catch(() => {});
+            }
+        }
+    }
+}
+
+// Start both C418 background music (50%) and ambient water (25%) after intro
+function playWorldAudio() {
+    if (!isAudioEnabled) return;
+
+    const bgm = document.getElementById("bgmAudio");
+    const toggleBtn = document.getElementById("bgmToggleBtn");
+    const icon = document.getElementById("bgmIcon");
+    const label = document.getElementById("bgmLabel");
+
+    if (bgm) {
+        bgm.volume = BGM_VOLUME;
+        if (bgm.paused) {
+            bgm.play().catch(function () {
+                const onFirstClick = function () {
+                    if (isAudioEnabled) {
+                        if (bgm.paused) {
+                            bgm.volume = BGM_VOLUME;
+                            bgm.play().catch(() => {});
+                        }
+                        updateAmbientAudio(window.currentWaterState || 'SURFACE');
+                    }
+                    document.removeEventListener("click", onFirstClick);
+                    document.removeEventListener("keydown", onFirstClick);
+                };
+                document.addEventListener("click", onFirstClick);
+                document.addEventListener("keydown", onFirstClick);
+            });
+        }
+    }
+
+    updateAmbientAudio(window.currentWaterState || 'SURFACE');
+
+    if (toggleBtn) toggleBtn.classList.add("playing");
+    if (icon) icon.className = "bi bi-disc text-success";
+    if (label) label.textContent = "Audio: On";
+}
+
+function pauseWorldAudio() {
+    const bgm = document.getElementById("bgmAudio");
+    if (bgm) bgm.pause();
+    if (audioSurfaceWater) audioSurfaceWater.pause();
+    if (audioUnderwater) audioUnderwater.pause();
+}
 
 // =========================================================================
 // 4. FOUR-PHASE MINECRAFT VIDEO CONTROLLER
@@ -363,6 +491,9 @@ function initFourPhaseVideoController() {
         window.currentWaterState = currentState;
         isTransitioning = true;
 
+        // Smoothly crossfade ambience from surface water to underwater
+        crossfadeAmbient('UNDERWATER');
+
         video.currentTime = DIVE_START;
         if (video.paused) video.play().catch(() => {});
 
@@ -380,6 +511,9 @@ function initFourPhaseVideoController() {
         currentState = 'RESURFACING';
         window.currentWaterState = currentState;
         isTransitioning = true;
+
+        // Smoothly crossfade ambience from underwater back to surface water
+        crossfadeAmbient('SURFACE');
 
         video.currentTime = RESURFACE_START;
         if (video.paused) video.play().catch(() => {});
@@ -454,49 +588,8 @@ function initFourPhaseVideoController() {
 }
 
 // =========================================================================
-// 5. BACKGROUND MUSIC CONTROLLER (C418 - Volume 19%)
+// 5. MASTER AUDIO TOGGLE CONTROLLER (Controls both BGM & Ambience)
 // =========================================================================
-const BGM_VOLUME = 0.19; // Exactly 19% volume per user request
-let isBgmEnabled = true;
-
-function playBgmMusic() {
-    if (!isBgmEnabled) return;
-    const bgm = document.getElementById("bgmAudio");
-    const toggleBtn = document.getElementById("bgmToggleBtn");
-    const icon = document.getElementById("bgmIcon");
-    const label = document.getElementById("bgmLabel");
-
-    if (bgm) {
-        bgm.volume = BGM_VOLUME;
-        if (bgm.paused) {
-            bgm.play().catch(function () {
-                // If browser blocks immediate autoplay after intro, start on first click/key
-                const onFirstInteraction = function () {
-                    if (isBgmEnabled && bgm.paused) {
-                        bgm.volume = BGM_VOLUME;
-                        bgm.play().catch(function () {});
-                    }
-                    document.removeEventListener("click", onFirstInteraction);
-                    document.removeEventListener("keydown", onFirstInteraction);
-                };
-                document.addEventListener("click", onFirstInteraction);
-                document.addEventListener("keydown", onFirstInteraction);
-            });
-        }
-    }
-
-    if (toggleBtn) toggleBtn.classList.add("playing");
-    if (icon) icon.className = "bi bi-disc text-success";
-    if (label) label.textContent = "Music: On";
-}
-
-function pauseBgmMusic() {
-    const bgm = document.getElementById("bgmAudio");
-    if (bgm) {
-        bgm.pause();
-    }
-}
-
 function initBgmController() {
     const bgm = document.getElementById("bgmAudio");
     const toggleBtn = document.getElementById("bgmToggleBtn");
@@ -506,25 +599,18 @@ function initBgmController() {
     if (!toggleBtn) return;
 
     toggleBtn.addEventListener("click", function () {
-        if (!bgm) return;
+        isAudioEnabled = !isAudioEnabled;
 
-        if (bgm.paused) {
-            isBgmEnabled = true;
-            bgm.volume = BGM_VOLUME;
-            bgm.play().catch(function () {});
-            toggleBtn.classList.add("playing");
-            if (icon) icon.className = "bi bi-disc text-success";
-            if (label) label.textContent = "Music: On";
+        if (isAudioEnabled) {
+            playWorldAudio();
         } else {
-            isBgmEnabled = false;
-            bgm.pause();
+            pauseWorldAudio();
             toggleBtn.classList.remove("playing");
             if (icon) icon.className = "bi bi-volume-mute-fill";
-            if (label) label.textContent = "Music: Off";
+            if (label) label.textContent = "Audio: Off";
         }
     });
 }
-
 
 // =========================================================================
 // 6. INTERACTIVE PIANO / NOTE SYNTHESIZER (Web Audio API)

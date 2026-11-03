@@ -52,13 +52,14 @@
     <div class="video-tint-overlay"></div>
 </div>
 
-<!-- Floating Ambient Music Control (unmutes the synchronized video audio track) -->
-<!-- Background Music (C418 - Volume 19) -->
+<!-- Audio Layers: Ambient Water Loops (Volume 25%) + C418 Soundtrack (Volume 50%) -->
+<audio id="audioSurfaceWater" src="/audio/surfacewater.m4a" preload="auto" loop></audio>
+<audio id="audioUnderwater" src="/audio/underwater.m4a" preload="auto" loop></audio>
 <audio id="bgmAudio" src="/audio/C418.mp3" preload="auto" loop></audio>
 
-<button id="bgmToggleBtn" type="button" class="bgm-float-btn shadow-lg" title="Toggle Minecraft Music (C418)">
+<button id="bgmToggleBtn" type="button" class="bgm-float-btn shadow-lg" title="Toggle Music & World Ambience">
     <i class="bi bi-disc" id="bgmIcon"></i>
-    <span id="bgmLabel">Music: On</span>
+    <span id="bgmLabel">Audio: On</span>
 </button>
 
 <!-- =========================================================================
