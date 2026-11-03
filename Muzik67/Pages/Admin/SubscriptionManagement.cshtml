@@ -1,0 +1,143 @@
+@page
+@model Muzik67.Pages.Admin.SubscriptionManagementModel
+@{
+    ViewData["Title"] = "Subscription Management";
+}
+
+<link rel="stylesheet" href="~/css/management.css" asp-append-version="true" />
+
+<main class="container management-page py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-muted small fw-semibold mb-1">Administrator</p>
+            <h1 class="management-title mb-1">Subscription Management</h1>
+            <p class="text-muted mb-0">Create plans and review member subscription status.</p>
+        </div>
+        <a asp-page="/Admin/ContentManagement" class="btn btn-outline-dark rounded-pill">Manage learning content</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-info" role="status">@Model.StatusMessage</div>
+    }
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <section class="management-panel mb-4">
+        <div class="panel-heading">
+            <h2>@(Model.PlanForm.PlanId == 0 ? "Add subscription plan" : "Edit subscription plan")</h2>
+        </div>
+        <form method="post" asp-page-handler="SavePlan" class="row g-3">
+            <input type="hidden" asp-for="PlanForm.PlanId" />
+            <div class="col-md-5">
+                <label asp-for="PlanForm.PlanName" class="form-label">Plan name</label>
+                <input asp-for="PlanForm.PlanName" class="form-control" />
+                <span asp-validation-for="PlanForm.PlanName" class="text-danger"></span>
+            </div>
+            <div class="col-md-2">
+                <label asp-for="PlanForm.Price" class="form-label">Price</label>
+                <input asp-for="PlanForm.Price" class="form-control" type="number" min="0" max="10000" step="0.01" />
+                <span asp-validation-for="PlanForm.Price" class="text-danger"></span>
+            </div>
+            <div class="col-md-2">
+                <label asp-for="PlanForm.Duration" class="form-label">Billing period</label>
+                <select asp-for="PlanForm.Duration" class="form-select">
+                    <option>Monthly</option>
+                    <option>Yearly</option>
+                </select>
+                <span asp-validation-for="PlanForm.Duration" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="PlanForm.Status" class="form-label">Status</label>
+                <select asp-for="PlanForm.Status" class="form-select">
+                    <option>Active</option>
+                    <option>Inactive</option>
+                </select>
+                <span asp-validation-for="PlanForm.Status" class="text-danger"></span>
+            </div>
+            <div class="col-md-9">
+                <label asp-for="PlanForm.Description" class="form-label">Description</label>
+                <textarea asp-for="PlanForm.Description" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="PlanForm.Description" class="text-danger"></span>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button class="btn btn-primary rounded-pill px-4 mb-2" type="submit">Save plan</button>
+                @if (Model.PlanForm.PlanId > 0)
+                {
+                    <a asp-page="./SubscriptionManagement" class="btn btn-outline-secondary rounded-pill mb-2">Cancel</a>
+                }
+            </div>
+        </form>
+
+        <div class="table-responsive mt-4">
+            <table class="table align-middle">
+                <thead><tr><th>Plan</th><th>Price</th><th>Duration</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                <tbody>
+                    @foreach (var plan in Model.Plans)
+                    {
+                        <tr>
+                            <td><strong>@plan.PlanName</strong><br /><span class="text-muted small">@plan.Description</span></td>
+                            <td>@plan.Price.ToString("C")</td>
+                            <td>@plan.Duration</td>
+                            <td>@plan.Status</td>
+                            <td class="text-end text-nowrap">
+                                <a asp-page="./SubscriptionManagement" asp-route-planId="@plan.PlanId" class="btn btn-sm btn-outline-primary rounded-pill">Edit</a>
+                                <form method="post" asp-page-handler="DeletePlan" class="d-inline">
+                                    <input type="hidden" name="id" value="@plan.PlanId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this plan? Plans with subscription history must be set inactive instead.')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Plans.Count == 0)
+                    {
+                        <tr><td colspan="5" class="text-center text-muted py-3">No plans have been added.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="management-panel">
+        <div class="panel-heading">
+            <h2>Member subscriptions</h2>
+            <p class="text-muted mb-0">Most recent 100 records. Expired dates are shown even if their status was not updated.</p>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Member</th><th>Plan</th><th>Started</th><th>Expires</th><th>Status</th><th class="text-end">Action</th></tr></thead>
+                <tbody>
+                    @foreach (var subscription in Model.Subscriptions)
+                    {
+                        var status = subscription.Status == "Active" && subscription.EndDate <= DateTime.UtcNow
+                            ? "Expired"
+                            : subscription.Status;
+                        <tr>
+                            <td>@subscription.User?.Username</td>
+                            <td>@subscription.Plan?.PlanName</td>
+                            <td>@subscription.StartDate.ToLocalTime().ToString("d")</td>
+                            <td>@subscription.EndDate.ToLocalTime().ToString("d")</td>
+                            <td>@status</td>
+                            <td class="text-end">
+                                @if (subscription.Status == "Active" && subscription.EndDate > DateTime.UtcNow)
+                                {
+                                    <form method="post" asp-page-handler="CancelSubscription">
+                                        <input type="hidden" name="id" value="@subscription.SubscriptionId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Cancel this membership now?')">Cancel</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Subscriptions.Count == 0)
+                    {
+                        <tr><td colspan="6" class="text-center text-muted py-3">No subscriptions yet.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

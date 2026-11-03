@@ -44,15 +44,6 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Input.Role" class="form-label fw-semibold"></label>
-                            <select asp-for="Input.Role" class="form-select">
-                                <option value="Member">Student / Member (Child &amp; Parent)</option>
-                                <option value="Admin">Administrator</option>
-                            </select>
-                            <span asp-validation-for="Input.Role" class="text-danger small"></span>
-                        </div>
-
                         <div class="form-check mb-4">
                             <input asp-for="Input.AgreeToTerms" class="form-check-input" />
                             <label asp-for="Input.AgreeToTerms" class="form-check-label small text-muted">

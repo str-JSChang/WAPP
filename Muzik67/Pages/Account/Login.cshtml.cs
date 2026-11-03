@@ -41,8 +41,6 @@ namespace Muzik67.Pages.Account
             [Display(Name = "Remember Me")]
             public bool RememberMe { get; set; }
 
-            [Display(Name = "Sign in as")]
-            public string Role { get; set; } = "Member"; // "Member" or "Admin"
         }
 
         public void OnGet()

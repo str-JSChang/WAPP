@@ -52,10 +52,6 @@ namespace Muzik67.Pages.Account
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; } = string.Empty;
 
-            [Required(ErrorMessage = "Please select an account role.")]
-            [Display(Name = "Account Type")]
-            public string Role { get; set; } = "Member"; // "Member" (for children/parents) or "Admin"
-
             [Display(Name = "I agree to the Terms & Conditions and Privacy Policy")]
             public bool AgreeToTerms { get; set; }
         }
@@ -99,12 +95,13 @@ namespace Muzik67.Pages.Account
                 // Hash password securely with salt using PBKDF2
                 string hashedPassword = PasswordHelper.HashPassword(Input.Password);
 
+                // Newly registered users are assigned the Member role for safety
                 var newUser = new User
                 {
                     Username = normalizedUsername,
                     Email = normalizedEmail,
                     PasswordHash = hashedPassword,
-                    Role = Input.Role == "Admin" ? "Admin" : "Member",
+                    Role = "Member",
                     RegistrationDate = DateTime.UtcNow,
                     AccountStatus = "Active"
                 };
