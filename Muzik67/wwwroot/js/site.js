@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initIntroAnimation();
     initScrollReveal();
     initBgmController();
+    initScrollVideoController();
 });
 
 // =========================================================================
@@ -172,7 +173,6 @@ function initScrollReveal() {
     if (!revealElements || revealElements.length === 0) return;
 
     if (!("IntersectionObserver" in window)) {
-        // Fallback for older browsers
         revealElements.forEach(el => el.classList.add("visible"));
         return;
     }
@@ -193,7 +193,80 @@ function initScrollReveal() {
 }
 
 // =========================================================================
-// 3. AMBIENT BGM VIDEO AUDIO CONTROLLER
+// 3. SCROLL-DRIVEN VIDEO CONTROLLER (Above-water loop + underwater dive on scroll)
+// =========================================================================
+function initScrollVideoController() {
+    const video = document.getElementById("landingBgVideo");
+    if (!video) return;
+
+    // Timeline markers in the 28.5s cut video:
+    // 0.0s to 9.0s: Above water (lake, clouds, shaders)
+    // 9.2s to 11.5s: Submerging down underwater
+    // 11.5s to 24.5s: Underwater path with squid and seagrass
+    // 25.0s to 28.2s: Rising back up and splashing above water
+    const SURFACE_LOOP_START = 0.5;
+    const SURFACE_LOOP_END = 9.0;
+    const DIVE_START = 9.2;
+    const RESURFACE_END = 28.2;
+
+    let targetTime = 0;
+    let isTicking = false;
+
+    // When at the top: loop peaceful above-water scene continuously
+    video.addEventListener("timeupdate", function () {
+        if (window.scrollY <= 60) {
+            if (video.currentTime >= SURFACE_LOOP_END || video.currentTime < SURFACE_LOOP_START - 0.2) {
+                video.currentTime = SURFACE_LOOP_START;
+            }
+        }
+    });
+
+    function handleScroll() {
+        const scrollY = window.scrollY;
+        const maxScroll = (document.documentElement.scrollHeight - window.innerHeight) || 1;
+
+        if (scrollY <= 60) {
+            // At the top / hero section: ensure video plays naturally in ambient loop
+            if (video.paused) {
+                video.play().catch(() => {});
+            }
+            return;
+        }
+
+        // As user scrolls down, pause natural play so scroll position drives video
+        if (!video.paused) {
+            video.pause();
+        }
+
+        // Calculate scroll progress from 0% (past hero) to 100% (bottom of page)
+        const progress = Math.min(Math.max((scrollY - 60) / (maxScroll - 60), 0), 1);
+
+        // Map progress to the diving -> underwater -> resurfacing timeline
+        targetTime = DIVE_START + progress * (RESURFACE_END - DIVE_START);
+
+        if (!isTicking) {
+            isTicking = true;
+            requestAnimationFrame(smoothUpdate);
+        }
+    }
+
+    function smoothUpdate() {
+        const diff = targetTime - video.currentTime;
+        if (Math.abs(diff) > 0.08) {
+            // Smooth lerp seeking
+            video.currentTime = Math.min(Math.max(video.currentTime + diff * 0.35, 0), 28.3);
+            requestAnimationFrame(smoothUpdate);
+        } else {
+            video.currentTime = targetTime;
+            isTicking = false;
+        }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+}
+
+// =========================================================================
+// 4. AMBIENT BGM VIDEO AUDIO CONTROLLER
 // =========================================================================
 function initBgmController() {
     const video = document.getElementById("landingBgVideo");
@@ -221,7 +294,7 @@ function initBgmController() {
 }
 
 // =========================================================================
-// 4. INTERACTIVE PIANO / NOTE SYNTHESIZER (Web Audio API)
+// 5. INTERACTIVE PIANO / NOTE SYNTHESIZER (Web Audio API)
 // =========================================================================
 let pianoAudioCtx = null;
 
@@ -239,9 +312,7 @@ window.playTone = function (freq, btnElement) {
 
         const now = pianoAudioCtx.currentTime;
 
-        // Primary tone oscillator
         const osc1 = pianoAudioCtx.createOscillator();
-        // Warm overtone oscillator
         const osc2 = pianoAudioCtx.createOscillator();
         const gainNode = pianoAudioCtx.createGain();
 
@@ -249,9 +320,8 @@ window.playTone = function (freq, btnElement) {
         osc1.frequency.setValueAtTime(freq, now);
 
         osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(freq * 2, now); // 1 octave higher overtone
+        osc2.frequency.setValueAtTime(freq * 2, now);
 
-        // Envelope: quick attack, natural decay
         gainNode.gain.setValueAtTime(0.001, now);
         gainNode.gain.linearRampToValueAtTime(0.25, now + 0.02);
         gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
@@ -265,7 +335,6 @@ window.playTone = function (freq, btnElement) {
         osc1.stop(now + 1.25);
         osc2.stop(now + 1.25);
 
-        // Visual feedback
         if (btnElement) {
             btnElement.classList.add("key-active");
             setTimeout(() => {
