@@ -30,6 +30,10 @@ x86/
 *.db-wal
 *.db-shm
 
+## Reference zip archives and extracted reference folders
+*.zip
+LabReference/
+
 ## User secrets and configuration overrides (Crucial for Razor Pages apps)
 appsettings.Development.json
 
