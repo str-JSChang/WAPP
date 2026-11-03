@@ -52,15 +52,24 @@
     <div class="video-tint-overlay"></div>
 </div>
 
-<!-- Audio Layers: Ambient Water Loops (Volume 25%) + C418 Soundtrack (Volume 50%) -->
+<!-- Audio Layers: Ambient Water Loops + Dive/Resurface Sound Cues + C418 Soundtrack -->
+<audio id="audioDive" src="/audio/dive.m4a" preload="auto"></audio>
+<audio id="audioResurface" src="/audio/resurface.m4a" preload="auto"></audio>
 <audio id="audioSurfaceWater" src="/audio/surfacewater.m4a" preload="auto" loop></audio>
 <audio id="audioUnderwater" src="/audio/underwater.m4a" preload="auto" loop></audio>
 <audio id="bgmAudio" src="/audio/C418.mp3" preload="auto" loop></audio>
 
-<button id="bgmToggleBtn" type="button" class="bgm-float-btn shadow-lg" title="Toggle Music & World Ambience">
-    <i class="bi bi-disc" id="bgmIcon"></i>
-    <span id="bgmLabel">Audio: On</span>
-</button>
+<!-- Separate Floating Audio Controllers: Music & Ambience -->
+<div class="floating-audio-dock">
+    <button id="bgmToggleBtn" type="button" class="bgm-float-btn shadow-lg playing" title="Toggle Minecraft Music (C418 - Volume 35%)">
+        <i class="bi bi-disc text-success" id="bgmIcon"></i>
+        <span id="bgmLabel">Music: On</span>
+    </button>
+    <button id="ambientToggleBtn" type="button" class="bgm-float-btn shadow-lg playing" title="Toggle Environmental Ambience (Volume 45%)">
+        <i class="bi bi-water text-info" id="ambientIcon"></i>
+        <span id="ambientLabel">Ambience: On</span>
+    </button>
+</div>
 
 <!-- =========================================================================
      LANDING PAGE CONTENT & 4-PHASE SECTIONS

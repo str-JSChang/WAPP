@@ -991,3 +991,18 @@ body {
     transform: translateY(-4px);
   }
 }
+
+/* Floating Audio Dock with Separate Music & Ambience Controls */
+.floating-audio-dock {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.floating-audio-dock .bgm-float-btn {
+  position: static;
+}
