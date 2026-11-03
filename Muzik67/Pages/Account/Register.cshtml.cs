@@ -52,12 +52,7 @@ namespace Muzik67.Pages.Account
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; } = string.Empty;
 
-            [Required(ErrorMessage = "Please select an account role.")]
-            [Display(Name = "Account Type")]
-            public string Role { get; set; } = "Member"; // "Member" (for children/parents) or "Admin"
-
             [Display(Name = "I agree to the Terms & Conditions and Privacy Policy")]
-            [Range(typeof(bool), "true", "true", ErrorMessage = "You must agree to the Terms & Conditions.")]
             public bool AgreeToTerms { get; set; }
         }
 
@@ -68,6 +63,11 @@ namespace Muzik67.Pages.Account
 
         public async Task<IActionResult> OnPostAsync()
         {
+            if (!Input.AgreeToTerms)
+            {
+                ModelState.AddModelError("Input.AgreeToTerms", "You must agree to the Terms & Conditions.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();
@@ -99,7 +99,7 @@ namespace Muzik67.Pages.Account
                     Username = normalizedUsername,
                     Email = normalizedEmail,
                     PasswordHash = hashedPassword,
-                    Role = Input.Role == "Admin" ? "Admin" : "Member",
+                    Role = "Member",
                     RegistrationDate = DateTime.UtcNow,
                     AccountStatus = "Active"
                 };

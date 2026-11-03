@@ -1,0 +1,248 @@
+@page
+@model Muzik67.Pages.Admin.ContentManagementModel
+@{
+    ViewData["Title"] = "Content Management";
+}
+
+<link rel="stylesheet" href="~/css/management.css" asp-append-version="true" />
+
+<main class="container management-page py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-muted small fw-semibold mb-1">Administrator</p>
+            <h1 class="management-title mb-1">Game &amp; Learning Content</h1>
+            <p class="text-muted mb-0">Manage lesson materials, games, and their quiz questions.</p>
+        </div>
+        <a asp-page="/Admin/SubscriptionManagement" class="btn btn-outline-dark rounded-pill">Manage subscriptions</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-info" role="status">@Model.StatusMessage</div>
+    }
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <section class="management-panel mb-4">
+        <div class="panel-heading">
+            <h2>@(Model.ContentForm.ContentId == 0 ? "Add learning material" : "Edit learning material")</h2>
+        </div>
+        <form method="post" asp-page-handler="SaveContent" class="row g-3">
+            <input type="hidden" asp-for="ContentForm.ContentId" />
+            <div class="col-md-6">
+                <label asp-for="ContentForm.Title" class="form-label">Title</label>
+                <input asp-for="ContentForm.Title" class="form-control" />
+                <span asp-validation-for="ContentForm.Title" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="ContentForm.ContentType" class="form-label">Type</label>
+                <select asp-for="ContentForm.ContentType" class="form-select">
+                    <option value="Theory">Music theory</option>
+                    <option value="EarTraining">Ear training</option>
+                    <option value="Instrument">Instrument</option>
+                </select>
+                <span asp-validation-for="ContentForm.ContentType" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="ContentForm.DifficultyLevel" class="form-label">Difficulty</label>
+                <select asp-for="ContentForm.DifficultyLevel" class="form-select">
+                    <option>Easy</option>
+                    <option>Medium</option>
+                    <option>Hard</option>
+                </select>
+                <span asp-validation-for="ContentForm.DifficultyLevel" class="text-danger"></span>
+            </div>
+            <div class="col-md-9">
+                <label asp-for="ContentForm.Description" class="form-label">Description</label>
+                <textarea asp-for="ContentForm.Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="ContentForm.Description" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="ContentForm.Status" class="form-label">Visibility</label>
+                <select asp-for="ContentForm.Status" class="form-select">
+                    <option value="Active">Free content</option>
+                    <option value="Premium">Paid subscribers</option>
+                    <option value="Inactive">Hidden</option>
+                </select>
+                <span asp-validation-for="ContentForm.Status" class="text-danger"></span>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button class="btn btn-primary rounded-pill px-4" type="submit">Save material</button>
+                @if (Model.ContentForm.ContentId > 0)
+                {
+                    <a asp-page="./ContentManagement" class="btn btn-outline-secondary rounded-pill">Cancel edit</a>
+                }
+            </div>
+        </form>
+
+        <div class="table-responsive mt-4">
+            <table class="table align-middle">
+                <thead><tr><th>Title</th><th>Type</th><th>Level</th><th>Access</th><th class="text-end">Actions</th></tr></thead>
+                <tbody>
+                    @foreach (var content in Model.Contents)
+                    {
+                        <tr>
+                            <td>@content.Title</td>
+                            <td>@content.ContentType</td>
+                            <td>@content.DifficultyLevel</td>
+                            <td>@(content.Status == "Premium" ? "Premium" : content.Status)</td>
+                            <td class="text-end text-nowrap">
+                                <a asp-page="./ContentManagement" asp-route-contentId="@content.ContentId" class="btn btn-sm btn-outline-primary rounded-pill">Edit</a>
+                                <form method="post" asp-page-handler="DeleteContent" class="d-inline">
+                                    <input type="hidden" name="id" value="@content.ContentId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this learning material?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Contents.Count == 0)
+                    {
+                        <tr><td colspan="5" class="text-center text-muted py-3">No learning materials yet.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="management-panel mb-4">
+        <div class="panel-heading">
+            <h2>@(Model.GameForm.GameId == 0 ? "Add Music Game" : "Edit Music Game")</h2>
+        </div>
+        <form method="post" asp-page-handler="SaveGame" class="row g-3">
+            <input type="hidden" asp-for="GameForm.GameId" />
+            <div class="col-12">
+                <label class="form-label">Game ID</label>
+                <input class="form-control" value="@(Model.GameForm.GameId == 0 ? "Assigned after saving" : Model.GameForm.GameId.ToString())" readonly />
+            </div>
+            <div class="col-12">
+                <label asp-for="GameForm.GameName" class="form-label">Game Name</label>
+                <input asp-for="GameForm.GameName" class="form-control" />
+                <span asp-validation-for="GameForm.GameName" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="GameForm.Description" class="form-label">Description</label>
+                <textarea asp-for="GameForm.Description" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="GameForm.Description" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="GameForm.DifficultyLevel" class="form-label">Difficulty</label>
+                <select asp-for="GameForm.DifficultyLevel" class="form-select">
+                    <option>Easy</option><option>Medium</option><option>Hard</option>
+                </select>
+                <span asp-validation-for="GameForm.DifficultyLevel" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="GameForm.Status" class="form-label">Status</label>
+                <select asp-for="GameForm.Status" class="form-select">
+                    <option value="Active">Active (free)</option>
+                    <option value="Premium">Premium (subscribers)</option>
+                    <option value="Inactive">Inactive (hidden)</option>
+                </select>
+                <span asp-validation-for="GameForm.Status" class="text-danger"></span>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button class="btn btn-primary rounded-pill px-4" type="submit">@(Model.GameForm.GameId == 0 ? "Add" : "Edit")</button>
+                @if (Model.GameForm.GameId > 0)
+                {
+                    <a asp-page="./ContentManagement" class="btn btn-outline-secondary rounded-pill">Cancel edit</a>
+                }
+            </div>
+        </form>
+
+        <div class="table-responsive mt-4">
+            <table class="table align-middle">
+                <thead><tr><th>Game</th><th>Difficulty</th><th>Access</th><th class="text-end">Actions</th></tr></thead>
+                <tbody>
+                    @foreach (var game in Model.Games)
+                    {
+                        <tr>
+                            <td>@game.GameName</td><td>@game.DifficultyLevel</td><td>@game.Status</td>
+                            <td class="text-end text-nowrap">
+                                <a asp-page="./ContentManagement" asp-route-gameId="@game.GameId" class="btn btn-sm btn-outline-primary rounded-pill">Edit</a>
+                                <form method="post" asp-page-handler="DeleteGame" class="d-inline">
+                                    <input type="hidden" name="id" value="@game.GameId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this game and its questions?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Games.Count == 0)
+                    {
+                        <tr><td colspan="4" class="text-center text-muted py-3">No games yet.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="management-panel">
+        <div class="panel-heading">
+            <h2>@(Model.QuestionForm.QuestionId == 0 ? "Add game question" : "Edit game question")</h2>
+            <p class="text-muted mb-0">Write answer choices separated by commas, then select the correct answer.</p>
+        </div>
+        <form method="post" asp-page-handler="SaveQuestion" class="row g-3">
+            <input type="hidden" asp-for="QuestionForm.QuestionId" />
+            <div class="col-md-4">
+                <label asp-for="QuestionForm.GameId" class="form-label">Game</label>
+                <select asp-for="QuestionForm.GameId" class="form-select">
+                    <option value="0">Choose a game</option>
+                    @foreach (var game in Model.Games)
+                    {
+                        <option value="@game.GameId">@game.GameName</option>
+                    }
+                </select>
+                <span asp-validation-for="QuestionForm.GameId" class="text-danger"></span>
+            </div>
+            <div class="col-md-8">
+                <label asp-for="QuestionForm.QuestionText" class="form-label">Question</label>
+                <input asp-for="QuestionForm.QuestionText" class="form-control" />
+                <span asp-validation-for="QuestionForm.QuestionText" class="text-danger"></span>
+            </div>
+            <div class="col-md-8">
+                <label asp-for="QuestionForm.AnswerOptions" class="form-label">Answer choices</label>
+                <input asp-for="QuestionForm.AnswerOptions" class="form-control" placeholder="C, D, E, F" />
+                <span asp-validation-for="QuestionForm.AnswerOptions" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="QuestionForm.CorrectAnswer" class="form-label">Correct answer</label>
+                <input asp-for="QuestionForm.CorrectAnswer" class="form-control" />
+                <span asp-validation-for="QuestionForm.CorrectAnswer" class="text-danger"></span>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button class="btn btn-primary rounded-pill px-4" type="submit">Save question</button>
+                @if (Model.QuestionForm.QuestionId > 0)
+                {
+                    <a asp-page="./ContentManagement" class="btn btn-outline-secondary rounded-pill">Cancel edit</a>
+                }
+            </div>
+        </form>
+
+        <div class="table-responsive mt-4">
+            <table class="table align-middle">
+                <thead><tr><th>Game</th><th>Question</th><th>Choices</th><th>Answer</th><th class="text-end">Actions</th></tr></thead>
+                <tbody>
+                    @foreach (var question in Model.Questions)
+                    {
+                        <tr>
+                            <td>@question.Game?.GameName</td><td>@question.QuestionText</td><td>@question.AnswerOptions</td><td>@question.CorrectAnswer</td>
+                            <td class="text-end text-nowrap">
+                                <a asp-page="./ContentManagement" asp-route-questionId="@question.QuestionId" class="btn btn-sm btn-outline-primary rounded-pill">Edit</a>
+                                <form method="post" asp-page-handler="DeleteQuestion" class="d-inline">
+                                    <input type="hidden" name="id" value="@question.QuestionId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this question?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Questions.Count == 0)
+                    {
+                        <tr><td colspan="5" class="text-center text-muted py-3">No game questions yet.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
+using Muzik67.Helpers;
 using Muzik67.Models;
 
 namespace Muzik67.Pages.Student
@@ -18,13 +19,21 @@ namespace Muzik67.Pages.Student
         public IList<Game> Games { get; set; } = new List<Game>();
 
         [BindProperty(SupportsGet = true, Name = "difficulty")]
-        public string SelectedDifficulty { get; set; }
+        public string SelectedDifficulty { get; set; } = "All";
 
         public async Task<IActionResult> OnGetAsync(string difficulty)
         {
             SelectedDifficulty = string.IsNullOrEmpty(difficulty) ? "All" : difficulty;
 
-            var query = _context.Games.AsQueryable();
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var subscription = userId.HasValue
+                ? await SubscriptionAccess.GetActiveAsync(_context, userId.Value)
+                : null;
+            var hasPremiumAccess = subscription?.Plan?.Price > 0;
+
+            var query = _context.Games
+                .Where(game => game.Status == "Active"
+                    || hasPremiumAccess && game.Status == "Premium");
 
             if (SelectedDifficulty != "All")
             {

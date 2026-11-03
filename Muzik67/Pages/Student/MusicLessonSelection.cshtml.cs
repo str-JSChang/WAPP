@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
+using Muzik67.Helpers;
 using Muzik67.Models;
 
 
@@ -19,18 +20,26 @@ namespace Muzik67.Pages.Student
         public IList<LearningContent> Lessons { get; set; } = new List<LearningContent>();
 
         [BindProperty(SupportsGet = true, Name = "type")]
-        public string SelectedType { get; set; }
+        public string SelectedType { get; set; } = "All";
 
 
         [BindProperty(SupportsGet = true, Name = "difficulty")]
-        public string SelectedDifficulty { get; set; }
+        public string SelectedDifficulty { get; set; } = "All";
 
         public async Task<IActionResult> OnGetAsync(string? type, string? difficulty)
         {
             SelectedType = string.IsNullOrEmpty(type) ? "All" : type;
             SelectedDifficulty = string.IsNullOrEmpty(difficulty) ? "All" : difficulty;
 
-            var query = _context.LearningContents.AsQueryable();
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var subscription = userId.HasValue
+                ? await SubscriptionAccess.GetActiveAsync(_context, userId.Value)
+                : null;
+            var hasPremiumAccess = subscription?.Plan?.Price > 0;
+
+            var query = _context.LearningContents
+                .Where(content => content.Status == "Active"
+                    || hasPremiumAccess && content.Status == "Premium");
 
             if (SelectedType != "All")
             {

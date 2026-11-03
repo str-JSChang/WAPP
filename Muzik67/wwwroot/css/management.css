@@ -1,0 +1,106 @@
+.management-page,
+.subscription-page {
+    color: #1e293b;
+}
+
+.management-title {
+    color: #1a1a1a;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 800;
+}
+
+.management-panel,
+.plan-card,
+.checkout-card,
+.current-subscription {
+    background: #fff;
+    border: 2px solid #212529;
+    border-radius: 22px;
+    padding: 1.5rem;
+}
+
+.panel-heading {
+    margin-bottom: 1.25rem;
+}
+
+.panel-heading h2 {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: .35rem;
+}
+
+.management-panel .table {
+    margin-bottom: 0;
+}
+
+.management-panel .table thead th {
+    color: #475569;
+    font-size: .85rem;
+    white-space: nowrap;
+}
+
+.plan-card {
+    display: flex;
+    flex-direction: column;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.plan-card:hover {
+    box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .1);
+    transform: translateY(-3px);
+}
+
+.plan-price {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.plan-price span {
+    color: #64748b;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: .95rem;
+    font-weight: 400;
+}
+
+.current-subscription {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.subscription-detail {
+    align-items: flex-start;
+}
+
+.demo-payment-note {
+    background: #f1f5f9;
+    border-radius: 12px;
+    color: #475569;
+    padding: .8rem 1rem;
+}
+
+.checkout-card {
+    max-width: 560px;
+}
+
+.checkout-summary {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+}
+
+@media (max-width: 575.98px) {
+    .management-panel,
+    .plan-card,
+    .checkout-card,
+    .current-subscription {
+        border-radius: 16px;
+        padding: 1rem;
+    }
+}

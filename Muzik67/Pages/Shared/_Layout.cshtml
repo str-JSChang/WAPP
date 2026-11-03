@@ -25,6 +25,10 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="mainNavbar">
+                    @{
+                        var sessionUser = Context.Session.GetString("Username");
+                        var sessionRole = Context.Session.GetString("Role");
+                    }
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Index">Home</a>
@@ -35,6 +39,24 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Privacy">Privacy Policy</a>
                         </li>
+                        @if (sessionRole == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Admin/ContentManagement">Content Management</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Admin/SubscriptionManagement">Subscriptions</a>
+                            </li>
+                        }
+                        else if (sessionRole == "Member")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Subscription/Plans">Subscription Plans</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Student/Subscription">My Subscription</a>
+                            </li>
+                        }
                     </ul>
 
                     <!-- Top-Right Actions matching Storyboard Slide 3 -->
@@ -42,11 +64,6 @@
                         <button type="button" class="btn btn-replay-intro replay-intro-trigger" title="Replay the Intro Animation">
                             <i class="bi bi-play-circle"></i> Replay Intro
                         </button>
-
-                        @{
-                            var sessionUser = Context.Session.GetString("Username");
-                            var sessionRole = Context.Session.GetString("Role");
-                        }
 
                         @if (!string.IsNullOrEmpty(sessionUser))
                         {

@@ -31,15 +31,22 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Privacy">Privacy Policy</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Subscription/Plans">Subscription Plans</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Student/Subscription">My Subscription</a>
+                        </li>
                     </ul>
 
                     <!-- Top-Right Actions matching Storyboard Slide 3 -->
                     <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
                         <!-- Profile Icon -->
                         <div class="d-flex align-items-center gap-2 ms-auto">
-                            <a asp-page="/Student/Profile" class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 40px; height: 40px;" title="My Profile">
+                            <a asp-page="/Student/Subscription" class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 40px; height: 40px;" title="My Subscription">
                                 <i class="bi bi-person-circle fs-4"></i>
                             </a>
+                            <a asp-page="/Account/Login" asp-page-handler="Logout" class="btn btn-outline-danger btn-sm">Sign Out</a>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,62 @@
+@page
+@model Muzik67.Pages.Student.SubscriptionModel
+@{
+    ViewData["Title"] = "My Subscription";
+}
+
+<link rel="stylesheet" href="~/css/management.css" asp-append-version="true" />
+
+<main class="container subscription-page py-5">
+    <a asp-page="/Student/StudentDashboard" class="btn btn-outline-dark rounded-pill mb-4">← Return</a>
+    <div class="text-center mb-4">
+        <p class="text-uppercase text-muted small fw-semibold mb-1">Student profile</p>
+        <h1 class="management-title">My Subscription</h1>
+    </div>
+
+    <section class="current-subscription subscription-detail mb-4">
+        @if (Model.CurrentSubscription is not null)
+        {
+            <div>
+                <span class="badge text-bg-success mb-2">Active</span>
+                <h2 class="h3">@Model.CurrentSubscription.Plan?.PlanName</h2>
+                <p class="mb-1"><strong>Price:</strong> @Model.CurrentSubscription.Plan?.Price.ToString("C") / @Model.CurrentSubscription.Plan?.Duration.ToLowerInvariant()</p>
+                <p class="mb-1"><strong>Start date:</strong> @Model.CurrentSubscription.StartDate.ToLocalTime().ToString("d")</p>
+                <p class="mb-0"><strong>Expiry date:</strong> @Model.CurrentSubscription.EndDate.ToLocalTime().ToString("d")</p>
+            </div>
+            <a asp-page="/Subscription/Plans" class="btn btn-primary rounded-pill">View plans</a>
+        }
+        else
+        {
+            <div>
+                <h2 class="h4">No active subscription</h2>
+                <p class="text-muted mb-0">Choose a plan to unlock premium lessons and games.</p>
+            </div>
+            <a asp-page="/Subscription/Plans" class="btn btn-primary rounded-pill">View plans</a>
+        }
+    </section>
+
+    <section class="management-panel">
+        <div class="panel-heading"><h2>Recent subscription history</h2></div>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Plan</th><th>Start date</th><th>Expiry date</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var item in Model.History)
+                    {
+                        var status = item.Status == "Active" && item.EndDate <= DateTime.UtcNow ? "Expired" : item.Status;
+                        <tr>
+                            <td>@item.Plan?.PlanName</td>
+                            <td>@item.StartDate.ToLocalTime().ToString("d")</td>
+                            <td>@item.EndDate.ToLocalTime().ToString("d")</td>
+                            <td>@status</td>
+                        </tr>
+                    }
+                    @if (Model.History.Count == 0)
+                    {
+                        <tr><td colspan="4" class="text-center text-muted py-3">No subscription history yet.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
