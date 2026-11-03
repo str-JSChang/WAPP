@@ -1,0 +1,569 @@
+.admin-layout {
+  background: #fff;
+}
+
+.admin-layout .navbar {
+  background: #dedede;
+  min-height: 88px;
+}
+
+.admin-label {
+  background: #eff6ff;
+  border-radius: 999px;
+  color: #1d4ed8;
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-left: 0.5rem;
+  padding: 0.3rem 0.55rem;
+}
+
+.admin-page {
+  max-width: 1050px;
+  padding-bottom: 3rem;
+  padding-top: 1.3rem;
+}
+
+.admin-dashboard-heading {
+  margin: 0 0 1.5rem;
+  text-align: center;
+}
+
+.admin-dashboard-heading .module-eyebrow {
+  margin-bottom: 0.2rem;
+}
+
+.admin-dashboard-heading h1 {
+  color: #171717;
+  font-size: clamp(2rem, 4vw, 2.7rem);
+  font-weight: 700;
+  margin: 0;
+}
+
+.admin-dashboard-cards {
+  margin-inline: auto;
+  max-width: 920px;
+}
+
+.admin-module-card {
+  background: linear-gradient(145deg, #fff 60%, #f7faff);
+  border: 1px solid #dbe5f3;
+  border-radius: 1.25rem;
+  box-shadow: 0 0.4rem 1.2rem rgb(23 37 84 / 5%);
+  color: #172554;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: clamp(280px, 42vh, 360px);
+  padding: 1.25rem 1.4rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.admin-module-card:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 0.75rem 1.6rem rgb(23 37 84 / 9%);
+  transform: translateY(-2px);
+}
+
+.admin-module-card-heading {
+  align-items: center;
+  display: flex;
+  gap: 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
+.admin-module-icon {
+  align-items: center;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 0.85rem;
+  color: #2563eb;
+  display: inline-flex;
+  flex: 0 0 2.8rem;
+  height: 2.8rem;
+  justify-content: center;
+  width: 2.8rem;
+}
+
+.admin-module-icon i {
+  font-size: 1.15rem;
+}
+
+.admin-module-kicker {
+  color: #64748b;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  margin: 0 0 0.15rem;
+}
+
+.admin-module-card h2 {
+  color: #172554;
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.admin-module-card ul {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-evenly;
+  margin: 0;
+  padding: 0.6rem 0 0.6rem 3.7rem;
+  width: 100%;
+}
+
+.admin-module-card li {
+  color: #475569;
+  line-height: 1.55;
+  padding-left: 0.15rem;
+}
+
+.admin-module-card li a {
+  border-radius: 0.25rem;
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-module-card li a:hover,
+.admin-module-card li a:focus-visible {
+  color: #1e40af;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.admin-workspace {
+  align-items: start;
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  grid-template-columns: minmax(155px, 190px) minmax(0, 1fr);
+}
+
+.admin-subscriptions-page {
+  max-width: 1180px;
+}
+
+.admin-subscriptions-page .admin-workspace {
+  gap: clamp(1.75rem, 3.5vw, 3rem);
+  grid-template-columns: minmax(205px, 235px) minmax(0, 1fr);
+}
+
+.admin-workspace-sidebar {
+  position: sticky;
+  top: 1rem;
+}
+
+.admin-subscriptions-page .admin-workspace-sidebar {
+  background: #f8faff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.15rem 0.9rem;
+}
+
+.workspace-return {
+  align-items: center;
+  color: #263552;
+  display: inline-flex;
+  font-size: 0.9rem;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+  text-decoration: none;
+}
+
+.admin-subscriptions-page .workspace-return {
+  margin: 0 0 1.35rem 0.35rem;
+}
+
+.workspace-return:hover,
+.workspace-return:focus-visible {
+  color: #1d4ed8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.workspace-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-subscriptions-page .workspace-nav {
+  gap: 0.65rem;
+}
+
+.workspace-nav-heading {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.35rem 0.85rem;
+  text-transform: uppercase;
+}
+
+.admin-subscriptions-page .workspace-nav-heading {
+  margin: 0 0 0.2rem 0.65rem;
+}
+
+.workspace-nav-item {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  color: #334155;
+  display: block;
+  padding: 0.75rem 0.85rem;
+  text-decoration: none;
+}
+
+.admin-subscriptions-page .workspace-nav-item {
+  padding: 0.9rem 0.85rem;
+}
+
+.workspace-nav-item[aria-disabled="true"] {
+  color: #64748b;
+}
+
+.workspace-nav-item.active,
+.workspace-nav-item[aria-current="page"] {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+a.workspace-nav-item:hover,
+a.workspace-nav-item:focus-visible {
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.admin-workspace-main {
+  min-width: 0;
+}
+
+.admin-workspace-heading {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin: 0 0 1.5rem;
+}
+
+.admin-workspace-heading h1 {
+  color: #172554;
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+}
+
+.admin-workspace-heading .module-eyebrow {
+  margin-bottom: 0.35rem;
+}
+
+.workspace-section-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.workspace-section-heading h2 {
+  color: #172554;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.workspace-section-heading p {
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+.subscription-plan-card {
+  height: 100%;
+}
+
+.plan-card-topline {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.plan-icon,
+.profile-avatar {
+  align-items: center;
+  background: #eff6ff;
+  border-radius: 0.8rem;
+  color: #2563eb;
+  display: inline-flex;
+  height: 2.8rem;
+  justify-content: center;
+  width: 2.8rem;
+}
+
+.plan-icon i {
+  font-size: 1.3rem;
+}
+
+.subscription-plan-card h3 {
+  color: #172554;
+  font-size: 1.12rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.plan-price {
+  color: #1d4ed8;
+  font-size: 1.45rem;
+  font-weight: 750;
+  margin-bottom: 0.45rem;
+}
+
+.plan-description {
+  color: #64748b;
+  min-height: 2.5rem;
+}
+
+.plan-subscriber-count {
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+.plan-card-actions {
+  border-top: 1px solid #edf1f7;
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.plan-card-actions form {
+  margin: 0;
+}
+
+.subscription-status-card {
+  margin-top: 1.5rem;
+}
+
+.profile-layout {
+  align-items: start;
+  display: grid;
+  gap: clamp(1.25rem, 4vw, 3rem);
+  grid-template-columns: minmax(150px, 210px) minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: 920px;
+}
+
+.profile-layout-admin {
+  display: grid;
+  grid-template-columns: minmax(100px, 140px) minmax(0, 1fr);
+  max-width: 760px;
+  padding-top: 1rem;
+}
+
+.profile-admin-avatar {
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+}
+
+.profile-admin-avatar .profile-avatar {
+  height: 6rem;
+  width: 6rem;
+}
+
+.profile-admin-avatar .profile-avatar i {
+  font-size: 2.5rem;
+}
+
+.profile-sidebar {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1rem;
+}
+
+.profile-sidebar-name {
+  color: #172554;
+  font-weight: 700;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.profile-sidebar .workspace-nav {
+  align-self: stretch;
+  margin-top: 0.6rem;
+}
+
+.profile-card-heading {
+  align-items: center;
+  border-bottom: 1px solid #edf1f7;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+}
+
+.profile-card-heading h1 {
+  color: #172554;
+  font-size: 1.55rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.profile-card-heading .module-eyebrow {
+  margin-bottom: 0.3rem;
+}
+
+.profile-details,
+.profile-readonly-fields {
+  margin: 0 0 1rem;
+}
+
+.profile-detail {
+  border-bottom: 1px solid #edf1f7;
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: minmax(120px, 0.7fr) minmax(0, 1.3fr);
+  padding: 0.8rem 0;
+}
+
+.profile-detail dt,
+.profile-detail span {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.profile-detail dd,
+.profile-detail strong {
+  color: #263552;
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.profile-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.admin-footer a {
+  color: #263552;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.admin-footer {
+  background: #dedede;
+  border-top: 0;
+  color: #263552;
+  font-size: 0.9rem;
+  padding: 1.1rem 0;
+}
+
+.admin-footer-brand {
+  align-items: center;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 0.6rem;
+  text-decoration: none !important;
+}
+
+.admin-footer-brand .footer-logo {
+  height: 34px;
+  width: 42px;
+}
+
+.admin-footer-links {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 4vw, 2.5rem);
+  justify-content: center;
+}
+
+.admin-footer-links a {
+  text-decoration: none;
+}
+
+.admin-footer-links a:hover,
+.admin-footer-links a:focus-visible {
+  text-decoration: underline;
+}
+
+.plan-form-card {
+  position: sticky;
+  top: 1.25rem;
+}
+
+@media (max-width: 991.98px) {
+  .plan-form-card {
+    position: static;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .admin-module-card {
+    min-height: 240px;
+  }
+
+  .admin-subscriptions-page .admin-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-subscriptions-page .admin-workspace-sidebar {
+    position: static;
+  }
+
+  .admin-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-workspace-sidebar {
+    position: static;
+  }
+
+  .workspace-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .workspace-nav-heading {
+    flex-basis: 100%;
+  }
+
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-sidebar {
+    align-items: flex-start;
+  }
+
+  .profile-sidebar .workspace-nav {
+    width: 100%;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .admin-workspace-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profile-detail {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}

@@ -1,0 +1,54 @@
+@page
+@model Muzik67.Pages.Admin.DashboardModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<link rel="stylesheet" href="~/css/modules.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+
+<div class="container module-page admin-page">
+    <div class="admin-dashboard-heading">
+        <h1>Admin Dashboard</h1>
+    </div>
+
+    <section class="row g-4 justify-content-center admin-dashboard-cards" aria-label="Administration modules">
+        <div class="col-12 col-md-6">
+            <article class="admin-module-card">
+                <header class="admin-module-card-heading">
+                    <span class="admin-module-icon" aria-hidden="true">
+                        <i class="bi bi-people-fill"></i>
+                    </span>
+                    <div>
+                        <p class="admin-module-kicker">MEMBERS &amp; ACCOUNTS</p>
+                        <h2>User Management</h2>
+                    </div>
+                </header>
+                <ul>
+                    <li>User List</li>
+                    <li>User Progress Tracking</li>
+                    <li>
+                        <a asp-page="/Admin/Subscriptions">Subscription Management</a>
+                    </li>
+                </ul>
+            </article>
+        </div>
+        <div class="col-12 col-md-6">
+            <article class="admin-module-card">
+                <header class="admin-module-card-heading">
+                    <span class="admin-module-icon" aria-hidden="true">
+                        <i class="bi bi-music-note-list"></i>
+                    </span>
+                    <div>
+                        <p class="admin-module-kicker">LESSONS &amp; ACTIVITIES</p>
+                        <h2>Content Management</h2>
+                    </div>
+                </header>
+                <ul>
+                    <li>Music Lesson Management</li>
+                    <li>Music Game Management</li>
+                </ul>
+            </article>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Muzik 67 Admin</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modules.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body class="admin-layout d-flex flex-column min-vh-100">
+    <header>
+        <nav class="navbar navbar-expand-lg bg-white border-bottom">
+            <div class="container">
+                <a class="navbar-brand brand-wrapper" asp-page="/Admin/Dashboard">
+                    <img src="~/images/muzik67-logo.svg" alt="" class="nav-brand-logo" />
+                    <span class="nav-brand-text">Muzik 67</span>
+                    <span class="admin-label">ADMIN</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar"
+                        aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle admin navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="adminNavbar">
+                    <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                        <a class="nav-link" asp-page="/Admin/Dashboard">Dashboard</a>
+                        <a class="nav-link" asp-page="/Admin/Subscriptions">Subscriptions</a>
+                        <a class="btn btn-outline-primary btn-sm ms-lg-2" asp-page="/Account/Profile">
+                            <i class="bi bi-person-circle me-1" aria-hidden="true"></i>My profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <footer class="admin-footer mt-auto">
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <a class="admin-footer-brand" asp-page="/Index">
+                <img src="~/images/muzik67-logo.svg" alt="" class="footer-logo" />
+                <span>Muzik 67</span>
+            </a>
+            <nav class="admin-footer-links" aria-label="Footer navigation">
+                <a asp-page="/Privacy">Terms and Conditions</a>
+                <a href="/#aboutSection">About Us</a>
+                <a asp-page="/Privacy">Privacy Policy</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

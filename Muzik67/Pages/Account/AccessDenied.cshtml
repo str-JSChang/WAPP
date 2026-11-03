@@ -1,0 +1,13 @@
+@page
+@{
+    ViewData["Title"] = "Access denied";
+}
+
+<div class="container py-5 text-center">
+    <div class="mx-auto" style="max-width: 34rem;">
+        <i class="bi bi-shield-lock display-4 text-primary" aria-hidden="true"></i>
+        <h1 class="h2 mt-3">Admin access required</h1>
+        <p class="text-muted">This page is available only to an administrator account.</p>
+        <a asp-page="/Index" class="btn btn-primary">Return to home</a>
+    </div>
+</div>

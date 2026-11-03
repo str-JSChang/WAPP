@@ -1,0 +1,134 @@
+@page
+@model Muzik67.Pages.Account.ProfileModel
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = string.Equals(Model.Role, "Admin", StringComparison.OrdinalIgnoreCase)
+        ? "_AdminLayout"
+        : "_StudentLayout";
+    var isAdmin = string.Equals(Model.Role, "Admin", StringComparison.OrdinalIgnoreCase);
+}
+
+<link rel="stylesheet" href="~/css/modules.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+
+<div class="container module-page profile-page">
+    <a asp-page="@(isAdmin ? "/Admin/Dashboard" : "/Student/StudentDashboard")" class="workspace-return profile-return">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i> Return
+    </a>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success" role="status">@Model.StatusMessage</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.ProfileAvailable)
+    {
+        <div class="profile-layout @(isAdmin ? "profile-layout-admin" : "")">
+            @if (isAdmin)
+            {
+                <aside class="profile-admin-avatar" aria-label="Administrator profile">
+                    <div class="profile-avatar" aria-hidden="true">
+                        <i class="bi bi-person"></i>
+                    </div>
+                </aside>
+            }
+            else
+            {
+                <aside class="profile-sidebar" aria-label="Profile navigation">
+                    <div class="profile-avatar" aria-hidden="true">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <span class="profile-sidebar-name">@Model.Input.Username</span>
+                    <nav class="workspace-nav" aria-label="My account">
+                        <a asp-page="/Account/Profile" class="workspace-nav-item active" aria-current="page">Profile</a>
+                        <span class="workspace-nav-item" aria-disabled="true">Subscription</span>
+                        <span class="workspace-nav-item" aria-disabled="true">Progress</span>
+                    </nav>
+                </aside>
+            }
+
+            <section class="module-card profile-card" aria-labelledby="profile-heading">
+                <div class="profile-card-heading">
+                    <div>
+                        <p class="module-eyebrow">YOUR ACCOUNT</p>
+                        <h1 id="profile-heading">Profile</h1>
+                    </div>
+                    <span class="role-badge">@Model.Role</span>
+                </div>
+
+                @if (Model.ShowEditForm)
+                {
+                    <form method="post" asp-page-handler="Save">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <div class="profile-readonly-fields">
+                            <div class="profile-detail">
+                                <span>User ID</span>
+                                <strong>@Model.UserId</strong>
+                            </div>
+                            <div class="profile-detail">
+                                <span>Role</span>
+                                <strong>@Model.Role</strong>
+                            </div>
+                            <div class="profile-detail">
+                                <span>Registration date</span>
+                                <strong>@Model.RegistrationDate?.ToString("dd MMM yyyy")</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Input.Username" class="form-label">Username</label>
+                            <input asp-for="Input.Username" class="form-control" autocomplete="username" maxlength="50" />
+                            <span asp-validation-for="Input.Username" class="text-danger"></span>
+                        </div>
+                        <div class="mb-4">
+                            <label asp-for="Input.Email" class="form-label">Email address</label>
+                            <input asp-for="Input.Email" class="form-control" type="email" autocomplete="email" maxlength="100" />
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+                        <div class="profile-form-actions">
+                            <a asp-page="/Account/Profile" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <dl class="profile-details">
+                        <div class="profile-detail">
+                            <dt>User ID</dt>
+                            <dd>@Model.UserId</dd>
+                        </div>
+                        <div class="profile-detail">
+                            <dt>Username</dt>
+                            <dd>@Model.Input.Username</dd>
+                        </div>
+                        <div class="profile-detail">
+                            <dt>Email</dt>
+                            <dd>@Model.Input.Email</dd>
+                        </div>
+                        <div class="profile-detail">
+                            <dt>Registration date</dt>
+                            <dd>@Model.RegistrationDate?.ToString("dd MMM yyyy")</dd>
+                        </div>
+                        <div class="profile-detail">
+                            <dt>Role</dt>
+                            <dd>@Model.Role</dd>
+                        </div>
+                    </dl>
+                    <div class="profile-form-actions">
+                        <a asp-page="/Account/Profile" asp-route-edit="true" class="btn btn-primary">
+                            <i class="bi bi-pencil me-1" aria-hidden="true"></i> Edit profile
+                        </a>
+                    </div>
+                }
+            </section>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

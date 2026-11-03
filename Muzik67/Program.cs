@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using Muzik67;
 using Muzik67.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<ModuleDataService>();
 
 // Configure SQLite database context
 builder.Services.AddDbContext<MuzikDbContext>(options =>

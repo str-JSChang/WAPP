@@ -1,0 +1,206 @@
+@page
+@model Muzik67.Pages.Admin.SubscriptionsModel
+@{
+    ViewData["Title"] = "Subscription Management";
+}
+
+<link rel="stylesheet" href="~/css/modules.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+
+<div class="container module-page admin-page admin-subscriptions-page">
+    <div class="admin-workspace">
+        <aside class="admin-workspace-sidebar" aria-label="User management navigation">
+            <a asp-page="/Admin/Dashboard" class="workspace-return">
+                <i class="bi bi-arrow-left" aria-hidden="true"></i> Return
+            </a>
+            <nav class="workspace-nav" aria-label="User management">
+                <span class="workspace-nav-heading">User Management</span>
+                <span class="workspace-nav-item" aria-disabled="true">User List</span>
+                <span class="workspace-nav-item" aria-disabled="true">User Progress</span>
+                <a asp-page="/Admin/Subscriptions" class="workspace-nav-item active" aria-current="page">
+                    Subscription
+                </a>
+            </nav>
+        </aside>
+
+        <div class="admin-workspace-main">
+            <div class="admin-workspace-heading">
+                <div>
+                    <p class="module-eyebrow">USER MANAGEMENT</p>
+                    <h1>Subscription Management</h1>
+                    <p class="text-muted mb-0">Manage plans and monitor member subscription status.</p>
+                </div>
+                <a asp-page="/Admin/Subscriptions" asp-route-add="true" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Add plan
+                </a>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+            {
+                <div class="alert alert-success" role="status">@Model.StatusMessage</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+            }
+
+            <section aria-labelledby="plans-heading">
+                <div class="workspace-section-heading">
+                    <div>
+                        <h2 id="plans-heading">Subscription plans</h2>
+                        <p class="text-muted">Plans with member subscriptions are protected from deletion.</p>
+                    </div>
+                    <span class="count-badge">@Model.Plans.Count plans</span>
+                </div>
+
+                @if (Model.Plans.Count == 0)
+                {
+                    <p class="empty-state">No plans have been created yet. Select “Add plan” to get started.</p>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach (var plan in Model.Plans)
+                        {
+                            <div class="col-12 col-xl-6">
+                                <article class="module-card subscription-plan-card">
+                                    <div class="plan-card-topline">
+                                        <span class="plan-icon" aria-hidden="true">
+                                            <i class="bi bi-music-note-list"></i>
+                                        </span>
+                                        <span class="role-badge">@plan.Duration</span>
+                                    </div>
+                                    <h3>@plan.PlanName</h3>
+                                    <p class="plan-price">RM @plan.Price.ToString("0.00")</p>
+                                    <p class="plan-description">@plan.Description</p>
+                                    <p class="plan-subscriber-count">
+                                        <i class="bi bi-people" aria-hidden="true"></i>
+                                        @plan.ActiveSubscribers active @(plan.ActiveSubscribers == 1 ? "member" : "members")
+                                    </p>
+                                    <div class="plan-card-actions">
+                                        <a asp-page="/Admin/Subscriptions"
+                                           asp-route-editId="@plan.PlanId"
+                                           class="btn btn-outline-primary">Edit</a>
+                                        <form method="post" asp-page-handler="Delete"
+                                              onsubmit="return confirm('Delete this plan? Plans with subscriptions cannot be deleted.');">
+                                            <input type="hidden" name="planId" value="@plan.PlanId" />
+                                            <button type="submit" class="btn btn-outline-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </article>
+                            </div>
+                        }
+                    </div>
+                }
+            </section>
+
+            <section class="module-card subscription-status-card" aria-labelledby="memberships-heading">
+                <div class="workspace-section-heading">
+                    <div>
+                        <h2 id="memberships-heading">Member subscriptions</h2>
+                        <p class="text-muted">The latest 100 subscription records.</p>
+                    </div>
+                </div>
+                @if (Model.MemberSubscriptions.Count == 0)
+                {
+                    <p class="empty-state mb-0">There are no member subscriptions to display.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table align-middle module-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Member</th>
+                                    <th scope="col">Plan</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Start date</th>
+                                    <th scope="col">End date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var subscription in Model.MemberSubscriptions)
+                                {
+                                    <tr>
+                                        <td>@subscription.Username</td>
+                                        <td>@subscription.PlanName</td>
+                                        <td>
+                                            <span class="subscription-status @(string.Equals(subscription.Status, "Active", StringComparison.OrdinalIgnoreCase) ? "status-active" : "status-inactive")">
+                                                @subscription.Status
+                                            </span>
+                                        </td>
+                                        <td>@subscription.StartDate.ToString("dd MMM yyyy")</td>
+                                        <td>@(subscription.EndDate?.ToString("dd MMM yyyy") ?? "No end date")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="planFormModal" tabindex="-1" aria-labelledby="planFormTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Save">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="planFormTitle">
+                        @(Model.Input.PlanId == 0 ? "Add subscription plan" : "Edit subscription plan")
+                    </h2>
+                    <a asp-page="/Admin/Subscriptions" class="btn-close" aria-label="Close"></a>
+                </div>
+                <div class="modal-body">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    <input asp-for="Input.PlanId" type="hidden" />
+                    <div class="mb-3">
+                        <label asp-for="Input.PlanName" class="form-label">Plan name</label>
+                        <input asp-for="Input.PlanName" class="form-control" maxlength="80" />
+                        <span asp-validation-for="Input.PlanName" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Input.Price" class="form-label">Price (MYR)</label>
+                        <input asp-for="Input.Price" class="form-control" type="number" min="0" max="99999.99" step="0.01" />
+                        <span asp-validation-for="Input.Price" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Input.Duration" class="form-label">Billing period</label>
+                        <select asp-for="Input.Duration" class="form-select">
+                            <option value="Monthly">Monthly</option>
+                            <option value="Yearly">Yearly</option>
+                        </select>
+                        <span asp-validation-for="Input.Duration" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Input.Description" class="form-label">Description</label>
+                        <textarea asp-for="Input.Description" class="form-control" rows="3" maxlength="500"></textarea>
+                        <span asp-validation-for="Input.Description" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a asp-page="/Admin/Subscriptions" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        @(Model.Input.PlanId == 0 ? "Create plan" : "Save changes")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    @if (Model.ShowPlanForm)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const formModal = document.getElementById("planFormModal");
+                if (formModal) {
+                    bootstrap.Modal.getOrCreateInstance(formModal).show();
+                }
+            });
+        </script>
+    }
+}

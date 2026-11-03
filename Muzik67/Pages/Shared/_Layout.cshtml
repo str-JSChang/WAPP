@@ -55,6 +55,14 @@
                                 <span>@sessionUser</span>
                                 <span class="badge bg-primary text-white ms-1">@sessionRole</span>
                             </span>
+                            @if (string.Equals(sessionRole, "Admin", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <a class="btn btn-outline-primary btn-sm px-3" asp-page="/Admin/Dashboard">Admin Dashboard</a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-outline-primary btn-sm px-3" asp-page="/Account/Profile">My Profile</a>
+                            }
                             <a class="btn btn-outline-danger btn-sm px-3" asp-page="/Account/Login" asp-page-handler="Logout">Sign Out</a>
                         }
                         else
