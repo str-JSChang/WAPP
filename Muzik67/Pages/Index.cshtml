@@ -11,6 +11,10 @@
      Slide 3: Animation shifts smoothly into the landing page.
      ========================================================================= -->
 <div id="introOverlay">
+    <audio id="audioIntro" src="/audio/intro-chime.m4a" preload="auto"></audio>
+    <div id="introTapPrompt" class="intro-tap-prompt" title="Click for audio">
+        <i class="bi bi-volume-up-fill me-1"></i> Click anywhere for sound
+    </div>
     <!-- Floating background musical particles -->
     <span class="music-note-float" style="top: 20%; left: 15%;">♪</span>
     <span class="music-note-float" style="top: 28%; right: 20%; animation-delay: 1s;">♫</span>
@@ -49,8 +53,6 @@
 </div>
 
 <!-- Floating Ambient Music Control (Allows unmuting the video's audio track) -->
-<audio id="audioDive" src="/audio/dive.m4a" preload="auto"></audio>
-<audio id="audioResurface" src="/audio/resurface.m4a" preload="auto"></audio>
 <audio id="audioSurfaceWater" src="/audio/surfacewater.m4a" preload="auto" loop></audio>
 <audio id="audioUnderwater" src="/audio/underwater.m4a" preload="auto" loop></audio>
 

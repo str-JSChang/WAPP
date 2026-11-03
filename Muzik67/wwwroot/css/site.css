@@ -85,7 +85,7 @@ body {
   width: 130px;
   height: 150px;
   color: #ffffff;
-  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.45));
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.85)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.45));
 }
 
 .intro-title {
@@ -940,5 +940,45 @@ body {
   }
   50% {
     transform: rotate(-18deg) scale(1.15);
+  }
+}
+
+/* Tap to Enable Sound Prompt on Intro */
+.intro-tap-prompt {
+  position: absolute;
+  top: 25px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  padding: 7px 18px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  z-index: 20;
+  user-select: none;
+  animation: promptFloat 2s infinite ease-in-out;
+}
+
+.intro-tap-prompt.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.intro-tap-prompt.fade-out {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+@keyframes promptFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
   }
 }
