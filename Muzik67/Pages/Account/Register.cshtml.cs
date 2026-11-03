@@ -57,17 +57,22 @@ namespace Muzik67.Pages.Account
             public string Role { get; set; } = "Member"; // "Member" (for children/parents) or "Admin"
 
             [Display(Name = "I agree to the Terms & Conditions and Privacy Policy")]
-            [Range(typeof(bool), "true", "true", ErrorMessage = "You must agree to the Terms & Conditions.")]
             public bool AgreeToTerms { get; set; }
         }
 
         public void OnGet()
         {
-            // Initialise register page
+            // Initialise register page (runs on HTTP GET when page is first loaded)
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // Validate Terms & Conditions agreement explicitly
+            if (!Input.AgreeToTerms)
+            {
+                ModelState.AddModelError("Input.AgreeToTerms", "You must agree to the Terms & Conditions and Privacy Policy.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();

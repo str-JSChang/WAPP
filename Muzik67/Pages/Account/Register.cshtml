@@ -56,7 +56,7 @@
                         <div class="form-check mb-4">
                             <input asp-for="Input.AgreeToTerms" class="form-check-input" />
                             <label asp-for="Input.AgreeToTerms" class="form-check-label small text-muted">
-                                I agree to the <a asp-page="/Privacy" class="text-decoration-none">Terms and Conditions</a> and Privacy Policy
+                                I agree to the <a asp-page="/Privacy" class="text-decoration-none" target="_blank">Terms and Conditions</a> and Privacy Policy
                             </label>
                             <div>
                                 <span asp-validation-for="Input.AgreeToTerms" class="text-danger small"></span>
@@ -70,7 +70,7 @@
 
                     <div class="text-center mt-4 pt-2 border-top">
                         <p class="text-muted small mb-0">
-                            Already have an account? 
+                            Already have an account?
                             <a asp-page="/Account/Login" class="text-primary fw-semibold text-decoration-none">Sign in here</a>
                         </p>
                     </div>
