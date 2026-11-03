@@ -30,9 +30,16 @@ function initIntroAnimation() {
     let audioCtx = null;
     let isIntroPlaying = true;
     let introAudioPlayed = false;
+    let chimePlayPending = false;
     let timer1 = null;
     let timer2 = null;
     let timer3 = null;
+
+    // Begin fetching/decoding the chime before the visual sequence needs it.
+    if (audioIntro) {
+        audioIntro.preload = "auto";
+        audioIntro.load();
+    }
 
     // Harmonic chime arpeggio fallback using Web Audio API
     function playIntroChordSynth() {
@@ -71,58 +78,76 @@ function initIntroAnimation() {
     }
 
     // Play chime via audio element or synth
-    function playChimeSound() {
-        if (!soundEnabled || introAudioPlayed) return;
+    function playChimeSound(userInitiated = false) {
+        if (!soundEnabled || introAudioPlayed || chimePlayPending) return;
 
-        let started = false;
         if (audioIntro) {
+            chimePlayPending = true;
             audioIntro.volume = 0.85;
             audioIntro.currentTime = 0;
             const promise = audioIntro.play();
             if (promise !== undefined) {
                 promise.then(() => {
+                    chimePlayPending = false;
                     introAudioPlayed = true;
-                    if (tapPrompt) tapPrompt.classList.add("fade-out");
+                    if (tapPrompt) {
+                        tapPrompt.classList.remove("visible");
+                        tapPrompt.classList.add("fade-out");
+                    }
                 }).catch(() => {
-                    // Autoplay blocked by browser policy; prompt user gesture
+                    chimePlayPending = false;
+                    // A real user gesture can use the synth if the file failed to decode/play.
+                    if (userInitiated) {
+                        playIntroChordSynth();
+                        introAudioPlayed = true;
+                        if (tapPrompt) tapPrompt.classList.add("fade-out");
+                        return;
+                    }
+
+                    // Autoplay is commonly blocked until the first user gesture.
                     if (tapPrompt && isIntroPlaying) {
+                        tapPrompt.classList.remove("fade-out");
                         tapPrompt.classList.add("visible");
                     }
                 });
-                started = true;
+                return;
             }
+
+            chimePlayPending = false;
         }
 
-        if (!started) {
-            playIntroChordSynth();
-            introAudioPlayed = true;
-            if (tapPrompt) tapPrompt.classList.add("fade-out");
-        }
+        playIntroChordSynth();
+        introAudioPlayed = true;
+        if (tapPrompt) tapPrompt.classList.add("fade-out");
     }
 
     // User gesture unlock for audio (pointerdown, click, or keypress anywhere)
     function onUserGesture() {
         if (!introAudioPlayed && isIntroPlaying) {
-            playChimeSound();
+            playChimeSound(true);
         }
-        if (tapPrompt) tapPrompt.classList.add("fade-out");
-        document.removeEventListener("pointerdown", onUserGesture);
-        document.removeEventListener("keydown", onUserGesture);
     }
     document.addEventListener("pointerdown", onUserGesture);
     document.addEventListener("keydown", onUserGesture);
 
     // Storyboard Animation Sequence
-    function startIntroSequence() {
+    function startIntroSequence(userInitiated = false) {
         isIntroPlaying = true;
         introAudioPlayed = false;
+        chimePlayPending = false;
         clearTimeout(timer1);
         clearTimeout(timer2);
         clearTimeout(timer3);
 
+        if (audioIntro) {
+            audioIntro.pause();
+            audioIntro.currentTime = 0;
+        }
+
         // Reset overlay states
         overlay.style.display = "flex";
         overlay.classList.remove("fade-out");
+        overlay.classList.remove("intro-sequence-active");
         if (introContent) {
             introContent.classList.remove("logo-fade-out");
         }
@@ -130,8 +155,16 @@ function initIntroAnimation() {
             landingWrapper.classList.remove("animate-landing-in");
         }
 
-        // Try playing harmonic chime
-        playChimeSound();
+        if (tapPrompt) {
+            tapPrompt.classList.remove("visible", "fade-out");
+        }
+
+        // Force a style flush so the CSS entrance animations restart on replay.
+        void overlay.offsetWidth;
+        overlay.classList.add("intro-sequence-active");
+
+        // Try the preloaded recording; a user gesture fallback remains available.
+        playChimeSound(userInitiated);
 
         // Slide 1 -> Slide 2: Logo fades out after ~2.4 seconds
         timer1 = setTimeout(function () {
@@ -153,6 +186,7 @@ function initIntroAnimation() {
         // End of intro sequence
         timer3 = setTimeout(function () {
             overlay.style.display = "none";
+            overlay.classList.remove("intro-sequence-active");
             isIntroPlaying = false;
         }, 4600);
     }
@@ -184,9 +218,10 @@ function initIntroAnimation() {
             soundEnabled = !soundEnabled;
             soundToggleBtn.textContent = soundEnabled ? "🔊 Sound: On" : "🔇 Sound: Off";
             if (soundEnabled && !introAudioPlayed) {
-                playChimeSound();
+                playChimeSound(true);
             } else if (!soundEnabled && audioIntro) {
                 audioIntro.pause();
+                chimePlayPending = false;
             }
         });
     }
@@ -201,7 +236,7 @@ function initIntroAnimation() {
     if (tapPrompt) {
         tapPrompt.addEventListener("click", function (e) {
             e.stopPropagation();
-            playChimeSound();
+            playChimeSound(true);
         });
     }
 
@@ -214,7 +249,7 @@ function initIntroAnimation() {
     replayBtns.forEach(function (btn) {
         btn.addEventListener("click", function () {
             window.scrollTo({ top: 0, behavior: "smooth" });
-            startIntroSequence();
+            startIntroSequence(true);
         });
     });
 
@@ -234,7 +269,7 @@ function initScrollReveal() {
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add("revealed");
+                        entry.target.classList.add("visible");
                         observer.unobserve(entry.target);
                     }
                 });
@@ -247,89 +282,16 @@ function initScrollReveal() {
 
         revealElements.forEach((el) => observer.observe(el));
     } else {
-        revealElements.forEach((el) => el.classList.add("revealed"));
+        revealElements.forEach((el) => el.classList.add("visible"));
     }
 }
 
 // =========================================================================
-// 3. MINECRAFT AMBIENT WATER AUDIO CONTROLLER
-// Seamless crossfade between surfacewater.m4a and underwater.m4a loops
+// 3. MINECRAFT AMBIENCE STATE
+// The background video's own audio track is used so sound follows every seek
+// and loop on the exact same media clock as the picture.
 // =========================================================================
-let isAudioEnabled = true;
 window.currentWaterState = 'SURFACE';
-
-const audioSurfaceWater = document.getElementById("audioSurfaceWater");
-const audioUnderwater = document.getElementById("audioUnderwater");
-
-const TARGET_AMBIENT_VOL = 0.55;
-if (audioSurfaceWater) audioSurfaceWater.volume = TARGET_AMBIENT_VOL;
-if (audioUnderwater) audioUnderwater.volume = TARGET_AMBIENT_VOL;
-
-// Smooth crossfade between surface and underwater ambience
-function crossfadeAmbient(toState) {
-    if (!isAudioEnabled) {
-        if (audioSurfaceWater) audioSurfaceWater.pause();
-        if (audioUnderwater) audioUnderwater.pause();
-        return;
-    }
-
-    const currentToPlay = (toState === 'UNDERWATER') ? audioUnderwater : audioSurfaceWater;
-    const currentToStop = (toState === 'UNDERWATER') ? audioSurfaceWater : audioUnderwater;
-
-    if (currentToPlay) {
-        currentToPlay.volume = Math.min(currentToPlay.volume, 0.05);
-        if (currentToPlay.paused) {
-            currentToPlay.play().catch(() => {});
-        }
-    }
-
-    const steps = 10;
-    const intervalTime = 50; // 500ms total
-    let step = 0;
-
-    const fadeInterval = setInterval(() => {
-        step++;
-        const progress = step / steps;
-
-        if (currentToPlay) {
-            currentToPlay.volume = Math.min(TARGET_AMBIENT_VOL, progress * TARGET_AMBIENT_VOL);
-        }
-        if (currentToStop) {
-            currentToStop.volume = Math.max(0, (1 - progress) * TARGET_AMBIENT_VOL);
-        }
-
-        if (step >= steps) {
-            clearInterval(fadeInterval);
-            if (currentToStop) {
-                currentToStop.pause();
-                currentToStop.volume = TARGET_AMBIENT_VOL;
-            }
-            if (currentToPlay) {
-                currentToPlay.volume = TARGET_AMBIENT_VOL;
-            }
-        }
-    }, intervalTime);
-}
-
-function updateAmbientAudio(state) {
-    if (!isAudioEnabled) {
-        if (audioSurfaceWater) audioSurfaceWater.pause();
-        if (audioUnderwater) audioUnderwater.pause();
-        return;
-    }
-
-    if (state === 'SURFACE') {
-        if (audioUnderwater) audioUnderwater.pause();
-        if (audioSurfaceWater && audioSurfaceWater.paused) {
-            audioSurfaceWater.play().catch(() => {});
-        }
-    } else if (state === 'UNDERWATER') {
-        if (audioSurfaceWater) audioSurfaceWater.pause();
-        if (audioUnderwater && audioUnderwater.paused) {
-            audioUnderwater.play().catch(() => {});
-        }
-    }
-}
 
 // =========================================================================
 // 4. FOUR-PHASE MINECRAFT VIDEO CONTROLLER
@@ -399,9 +361,6 @@ function initFourPhaseVideoController() {
         window.currentWaterState = currentState;
         isTransitioning = true;
 
-        // Smoothly crossfade from surface ambience to underwater ambience
-        crossfadeAmbient('UNDERWATER');
-
         video.currentTime = DIVE_START;
         if (video.paused) video.play().catch(() => {});
 
@@ -419,9 +378,6 @@ function initFourPhaseVideoController() {
         currentState = 'RESURFACING';
         window.currentWaterState = currentState;
         isTransitioning = true;
-
-        // Smoothly crossfade from underwater ambience back to surface ambience
-        crossfadeAmbient('SURFACE');
 
         video.currentTime = RESURFACE_START;
         if (video.paused) video.play().catch(() => {});
@@ -499,37 +455,28 @@ function initFourPhaseVideoController() {
 // 5. AMBIENCE TOGGLE CONTROLLER
 // =========================================================================
 function initBgmController() {
+    const video = document.getElementById("landingBgVideo");
     const toggleBtn = document.getElementById("bgmToggleBtn");
     const icon = document.getElementById("bgmIcon");
     const label = document.getElementById("bgmLabel");
 
-    if (!toggleBtn) return;
+    if (!video || !toggleBtn) return;
 
     toggleBtn.addEventListener("click", function () {
-        isAudioEnabled = !isAudioEnabled;
-
-        if (isAudioEnabled) {
+        if (video.muted) {
+            video.muted = false;
+            video.volume = 0.55;
+            video.play().catch(() => {});
             toggleBtn.classList.add("playing");
             if (icon) icon.className = "bi bi-volume-up-fill text-success";
-            if (label) label.textContent = "Audio: On";
-            updateAmbientAudio(window.currentWaterState || 'SURFACE');
+            if (label) label.textContent = "Ambience: On";
         } else {
+            video.muted = true;
             toggleBtn.classList.remove("playing");
             if (icon) icon.className = "bi bi-volume-mute-fill";
-            if (label) label.textContent = "Audio: Off";
-            if (audioSurfaceWater) audioSurfaceWater.pause();
-            if (audioUnderwater) audioUnderwater.pause();
+            if (label) label.textContent = "Play Ambience";
         }
     });
-
-    // First user gesture triggers initial ambient audio
-    const enableAudioOnFirstClick = () => {
-        if (isAudioEnabled) {
-            updateAmbientAudio(window.currentWaterState || 'SURFACE');
-        }
-        document.removeEventListener("click", enableAudioOnFirstClick);
-    };
-    document.addEventListener("click", enableAudioOnFirstClick);
 }
 
 // =========================================================================
