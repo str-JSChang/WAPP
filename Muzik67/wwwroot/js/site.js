@@ -181,6 +181,7 @@ function initIntroAnimation() {
             if (landingWrapper) {
                 landingWrapper.classList.add("animate-landing-in");
             }
+            playBgmMusic();
         }, 3400);
 
         // End of intro sequence
@@ -205,6 +206,7 @@ function initIntroAnimation() {
         if (audioIntro) {
             audioIntro.pause();
         }
+        playBgmMusic();
 
         setTimeout(function () {
             overlay.style.display = "none";
@@ -452,32 +454,77 @@ function initFourPhaseVideoController() {
 }
 
 // =========================================================================
-// 5. AMBIENCE TOGGLE CONTROLLER
+// 5. BACKGROUND MUSIC CONTROLLER (C418 - Volume 19%)
 // =========================================================================
-function initBgmController() {
-    const video = document.getElementById("landingBgVideo");
+const BGM_VOLUME = 0.19; // Exactly 19% volume per user request
+let isBgmEnabled = true;
+
+function playBgmMusic() {
+    if (!isBgmEnabled) return;
+    const bgm = document.getElementById("bgmAudio");
     const toggleBtn = document.getElementById("bgmToggleBtn");
     const icon = document.getElementById("bgmIcon");
     const label = document.getElementById("bgmLabel");
 
-    if (!video || !toggleBtn) return;
+    if (bgm) {
+        bgm.volume = BGM_VOLUME;
+        if (bgm.paused) {
+            bgm.play().catch(function () {
+                // If browser blocks immediate autoplay after intro, start on first click/key
+                const onFirstInteraction = function () {
+                    if (isBgmEnabled && bgm.paused) {
+                        bgm.volume = BGM_VOLUME;
+                        bgm.play().catch(function () {});
+                    }
+                    document.removeEventListener("click", onFirstInteraction);
+                    document.removeEventListener("keydown", onFirstInteraction);
+                };
+                document.addEventListener("click", onFirstInteraction);
+                document.addEventListener("keydown", onFirstInteraction);
+            });
+        }
+    }
+
+    if (toggleBtn) toggleBtn.classList.add("playing");
+    if (icon) icon.className = "bi bi-disc text-success";
+    if (label) label.textContent = "Music: On";
+}
+
+function pauseBgmMusic() {
+    const bgm = document.getElementById("bgmAudio");
+    if (bgm) {
+        bgm.pause();
+    }
+}
+
+function initBgmController() {
+    const bgm = document.getElementById("bgmAudio");
+    const toggleBtn = document.getElementById("bgmToggleBtn");
+    const icon = document.getElementById("bgmIcon");
+    const label = document.getElementById("bgmLabel");
+
+    if (!toggleBtn) return;
 
     toggleBtn.addEventListener("click", function () {
-        if (video.muted) {
-            video.muted = false;
-            video.volume = 0.55;
-            video.play().catch(() => {});
+        if (!bgm) return;
+
+        if (bgm.paused) {
+            isBgmEnabled = true;
+            bgm.volume = BGM_VOLUME;
+            bgm.play().catch(function () {});
             toggleBtn.classList.add("playing");
-            if (icon) icon.className = "bi bi-volume-up-fill text-success";
-            if (label) label.textContent = "Ambience: On";
+            if (icon) icon.className = "bi bi-disc text-success";
+            if (label) label.textContent = "Music: On";
         } else {
-            video.muted = true;
+            isBgmEnabled = false;
+            bgm.pause();
             toggleBtn.classList.remove("playing");
             if (icon) icon.className = "bi bi-volume-mute-fill";
-            if (label) label.textContent = "Play Ambience";
+            if (label) label.textContent = "Music: Off";
         }
     });
 }
+
 
 // =========================================================================
 // 6. INTERACTIVE PIANO / NOTE SYNTHESIZER (Web Audio API)
