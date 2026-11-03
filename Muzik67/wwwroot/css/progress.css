@@ -1,0 +1,107 @@
+.progress-page {
+    color: #1e293b;
+    max-width: 1080px;
+}
+
+.progress-title {
+    color: #1a1a1a;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 800;
+}
+
+.progress-summary,
+.progress-panel {
+    background: #fff;
+    border: 2px solid #212529;
+    border-radius: 20px;
+}
+
+.progress-summary {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    padding: 1.25rem;
+}
+
+.progress-icon,
+.section-icon {
+    align-items: center;
+    background: #eef4ff;
+    border-radius: 50%;
+    color: #2563eb;
+    display: inline-flex;
+    flex: 0 0 48px;
+    font-size: 1.4rem;
+    height: 48px;
+    justify-content: center;
+    width: 48px;
+}
+
+.summary-label {
+    color: #64748b;
+    font-size: .9rem;
+    margin-bottom: .15rem;
+}
+
+.summary-value {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.65rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.summary-note {
+    color: #64748b;
+    font-size: .75rem;
+}
+
+.progress-panel {
+    padding: 1.5rem;
+}
+
+.panel-heading {
+    align-items: center;
+    display: flex;
+    gap: .9rem;
+    margin-bottom: 1.25rem;
+}
+
+.panel-heading h2 {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: .25rem;
+}
+
+.progress-empty {
+    background: #f8fafc;
+    border-radius: 14px;
+    color: #475569;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.progress-empty > i {
+    color: #64748b;
+    display: block;
+    font-size: 1.5rem;
+    margin-bottom: .6rem;
+}
+
+.progress-table thead th {
+    color: #475569;
+    font-size: .85rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .progress-panel {
+        padding: 1rem;
+    }
+
+    .progress-empty {
+        padding: 1.25rem 1rem;
+    }
+}
