@@ -55,7 +55,8 @@ public class SubscriptionsModel : SessionPageModel
             PlanName = plan.PlanName,
             Price = plan.Price,
             Duration = plan.Duration,
-            Description = plan.Description
+            Description = plan.Description,
+            Status = plan.Status
         };
     }
 
@@ -74,7 +75,8 @@ public class SubscriptionsModel : SessionPageModel
             PlanName = Input.PlanName.Trim(),
             Price = Input.Price,
             Duration = Input.Duration,
-            Description = Input.Description.Trim()
+            Description = Input.Description.Trim(),
+            Status = Input.Status
         };
 
         try
@@ -155,6 +157,14 @@ public class SubscriptionsModel : SessionPageModel
         return Page();
     }
 
+    public async Task<IActionResult> OnPostCancelAsync(int subscriptionId)
+    {
+        StatusMessage = await _data.CancelSubscriptionAsync(subscriptionId)
+            ? "Subscription cancelled."
+            : "That subscription could not be found.";
+        return RedirectToPage();
+    }
+
     private async Task LoadPageDataAsync()
     {
         try
@@ -192,5 +202,9 @@ public class SubscriptionsModel : SessionPageModel
         [Required]
         [StringLength(500)]
         public string Description { get; set; } = string.Empty;
+
+        [Required]
+        [RegularExpression("^(Active|Inactive)$", ErrorMessage = "Choose Active or Inactive.")]
+        public string Status { get; set; } = "Active";
     }
 }

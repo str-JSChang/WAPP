@@ -1,0 +1,24 @@
+@page
+@model Muzik67.Pages.Admin.UsersModel
+@{ ViewData["Title"] = "User Management"; }
+<link rel="stylesheet" href="~/css/management.css" asp-append-version="true" />
+<main class="container management-page py-5">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4"><div><p class="text-uppercase text-muted small fw-semibold mb-1">Administrator</p><h1 class="management-title">User Management</h1><p class="text-muted">Create, update, suspend, or remove member and administrator accounts.</p></div><a asp-page="/Admin/UserProgress" class="btn btn-outline-dark">View learner progress</a></div>
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage)) { <div class="alert alert-info" role="status">@Model.StatusMessage</div> }
+    <section class="management-panel mb-4">
+        <div class="panel-heading"><h2>@(Model.Input.UserId == 0 ? "Add account" : "Edit account")</h2></div>
+        <form method="post" asp-page-handler="Save" class="row g-3">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div><input asp-for="Input.UserId" type="hidden" />
+            <div class="col-md-4"><label asp-for="Input.Username" class="form-label"></label><input asp-for="Input.Username" class="form-control" /><span asp-validation-for="Input.Username" class="text-danger"></span></div>
+            <div class="col-md-4"><label asp-for="Input.Email" class="form-label"></label><input asp-for="Input.Email" class="form-control" /><span asp-validation-for="Input.Email" class="text-danger"></span></div>
+            <div class="col-md-4"><label asp-for="Input.Password" class="form-label">@(Model.Input.UserId == 0 ? "Password" : "New password (optional)")</label><input asp-for="Input.Password" class="form-control" autocomplete="new-password" /><span asp-validation-for="Input.Password" class="text-danger"></span></div>
+            <div class="col-md-3"><label asp-for="Input.Role" class="form-label"></label><select asp-for="Input.Role" class="form-select"><option>Member</option><option>Admin</option></select></div>
+            <div class="col-md-3"><label asp-for="Input.AccountStatus" class="form-label">Status</label><select asp-for="Input.AccountStatus" class="form-select"><option>Active</option><option>Suspended</option></select></div>
+            <div class="col-md-6 d-flex align-items-end gap-2"><button class="btn btn-primary" type="submit">Save account</button>@if(Model.Input.UserId > 0){<a asp-page="/Admin/Users" class="btn btn-outline-secondary">Cancel</a>}</div>
+        </form>
+    </section>
+    <section class="management-panel"><div class="panel-heading"><h2>Accounts</h2></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Registered</th><th class="text-end">Actions</th></tr></thead><tbody>
+    @foreach(var user in Model.Users){<tr><td>@user.Username</td><td>@user.Email</td><td>@user.Role</td><td>@user.AccountStatus</td><td>@user.RegistrationDate.ToLocalTime().ToString("dd MMM yyyy")</td><td class="text-end text-nowrap"><a asp-page="/Admin/Users" asp-route-editId="@user.UserId" class="btn btn-sm btn-outline-primary">Edit</a> @if(user.UserId != HttpContext.Session.GetInt32("UserId")){<form method="post" asp-page-handler="Delete" class="d-inline"><input type="hidden" name="id" value="@user.UserId"/><button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this account and all linked progress?')">Delete</button></form>}</td></tr>}
+    </tbody></table></div></section>
+</main>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

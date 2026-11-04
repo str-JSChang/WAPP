@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
 using Muzik67.Models;
+using Muzik67.Pages.Shared;
 
 namespace Muzik67.Pages.Student
 {
-    public class GameSelectionModel : PageModel
+    public class GameSelectionModel : SessionPageModel
     {
          readonly MuzikDbContext _context;
         public GameSelectionModel(MuzikDbContext context)
@@ -17,18 +17,19 @@ namespace Muzik67.Pages.Student
 
         /* Pending for DB */
         public IList<Game> Games { get; set; } = new List<Game>();
+        protected override bool MemberOnly => true;
 
         [BindProperty(SupportsGet = true, Name = "difficulty")]
         public string SelectedDifficulty { get; set; } = "All";
 
-        public async Task<IActionResult> OnGetAsync(string difficulty)
+        public async Task<IActionResult> OnGetAsync(string? difficulty)
         {
-            SelectedDifficulty = string.IsNullOrEmpty(difficulty) ? "All" : difficulty;
+            var allowedDifficulties = new[] { "All", "Easy", "Medium", "Hard" };
+            SelectedDifficulty = allowedDifficulties.Contains(difficulty, StringComparer.OrdinalIgnoreCase)
+                ? allowedDifficulties.First(item => string.Equals(item, difficulty, StringComparison.OrdinalIgnoreCase))
+                : "All";
 
-            var userId = HttpContext.Session.GetInt32("UserId");
-            var subscription = userId.HasValue
-                ? await SubscriptionAccess.GetActiveAsync(_context, userId.Value)
-                : null;
+            var subscription = await SubscriptionAccess.GetActiveAsync(_context, CurrentUserId);
             var hasPremiumAccess = subscription?.Plan?.Price > 0;
 
             var query = _context.Games
@@ -40,7 +41,7 @@ namespace Muzik67.Pages.Student
                 query = query.Where(g => g.DifficultyLevel == SelectedDifficulty);
             }
 
-            Games = await query.ToListAsync();
+            Games = await query.OrderBy(g => g.DifficultyLevel).ThenBy(g => g.GameName).ToListAsync();
             
             return Page();
         }

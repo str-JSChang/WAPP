@@ -41,6 +41,9 @@
                             <a class="nav-link @(currentPath.Contains("Game") ? "active" : "")" asp-page="/Student/GameSelection">Games</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link @(currentPath.Contains("Instrument") ? "active" : "")" asp-page="/Student/Instrument">Instrument</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link @(currentPath.Contains("Progress") ? "active" : "")" asp-page="/Student/Progress">Progress</a>
                         </li>
                         <li class="nav-item">
@@ -54,7 +57,9 @@
                             <a asp-page="/Account/Profile" class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 40px; height: 40px;" title="My Profile">
                                 <i class="bi bi-person-circle fs-4"></i>
                             </a>
-                            <a asp-page="/Account/Login" asp-page-handler="Logout" class="btn btn-outline-danger btn-sm">Sign Out</a>
+                            <form method="post" asp-page="/Account/Login" asp-page-handler="Logout" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Sign Out</button>
+                            </form>
                         </div>
                     </div>
                 </div>

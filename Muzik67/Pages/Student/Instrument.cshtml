@@ -1,0 +1,30 @@
+@page
+@model Muzik67.Pages.Student.InstrumentModel
+@{ ViewData["Title"] = "Virtual Instrument"; }
+<link rel="stylesheet" href="~/css/lesson-content.css" asp-append-version="true" />
+<div class="container py-4 py-lg-5 mc-lesson-page">
+    <header class="mc-status-bar d-flex justify-content-between align-items-center gap-3"><div><p class="mb-1 text-white">VIRTUAL INSTRUMENT</p><h1 class="h5 mb-0 text-white">Keyboard &amp; Rhythm Pads</h1></div><a asp-page="/Student/StudentDashboard" class="btn btn-outline-light">Home map</a></header>
+    <section class="mc-note-board mt-4"><div class="d-flex justify-content-between gap-2"><div><h2 class="h5">Play the keyboard</h2><p>Use the buttons or press A, S, D, F, G, H, J, K.</p></div><button class="btn btn-outline-dark" type="button" id="instrumentHelp">Read instructions</button></div>
+        <div class="mc-note-grid mt-3" id="instrumentKeys">
+            <button class="mc-note-key red" data-frequency="261.63" data-key="a"><span class="mc-note-cube"></span><strong>C · A</strong></button>
+            <button class="mc-note-key pink" data-frequency="293.66" data-key="s"><span class="mc-note-cube"></span><strong>D · S</strong></button>
+            <button class="mc-note-key purple" data-frequency="329.63" data-key="d"><span class="mc-note-cube"></span><strong>E · D</strong></button>
+            <button class="mc-note-key blue" data-frequency="349.23" data-key="f"><span class="mc-note-cube"></span><strong>F · F</strong></button>
+            <button class="mc-note-key green" data-frequency="392" data-key="g"><span class="mc-note-cube"></span><strong>G · G</strong></button>
+            <button class="mc-note-key lime" data-frequency="440" data-key="h"><span class="mc-note-cube"></span><strong>A · H</strong></button>
+            <button class="mc-note-key gold" data-frequency="493.88" data-key="j"><span class="mc-note-cube"></span><strong>B · J</strong></button>
+            <button class="mc-note-key orange" data-frequency="523.25" data-key="k"><span class="mc-note-cube"></span><strong>C · K</strong></button>
+        </div>
+    </section>
+    <section class="mc-result-panel mt-4"><h2 class="h5">Rhythm pads</h2><p>Build a beat with low and high sounds.</p><div class="d-flex flex-wrap gap-3"><button type="button" class="btn btn-primary btn-lg" data-pad="110">Low drum</button><button type="button" class="btn btn-warning btn-lg" data-pad="220">Mid drum</button><button type="button" class="btn btn-info btn-lg" data-pad="660">High bell</button></div></section>
+</div>
+@section Scripts {
+<script>
+const instrumentKeys = Array.from(document.querySelectorAll("#instrumentKeys [data-frequency]"));
+function playInstrumentKey(key) { playTone(Number(key.dataset.frequency), key); }
+instrumentKeys.forEach(key => key.addEventListener("click", () => playInstrumentKey(key)));
+document.querySelectorAll("[data-pad]").forEach(key => key.addEventListener("click", () => playTone(Number(key.dataset.pad), key)));
+document.addEventListener("keydown", event => { if (event.repeat || event.target.matches("input, textarea, select")) return; const key = instrumentKeys.find(item => item.dataset.key === event.key.toLowerCase()); if (key) playInstrumentKey(key); });
+document.getElementById("instrumentHelp")?.addEventListener("click", () => { if ("speechSynthesis" in window) { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance("Press the colorful note blocks or use keys A through K to play the musical scale.")); } });
+</script>
+}

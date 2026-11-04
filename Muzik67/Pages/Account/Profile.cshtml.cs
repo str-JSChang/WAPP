@@ -41,6 +41,15 @@ public class ProfileModel : SessionPageModel
 
     public async Task<IActionResult> OnPostSaveAsync()
     {
+        if (await _data.IsUsernameInUseAsync(CurrentUserId, Input.Username.Trim()))
+        {
+            ModelState.AddModelError("Input.Username", "That username is already in use.");
+        }
+        if (await _data.IsEmailInUseAsync(CurrentUserId, Input.Email.Trim()))
+        {
+            ModelState.AddModelError("Input.Email", "That email address is already in use.");
+        }
+
         if (!ModelState.IsValid)
         {
             ShowEditForm = true;
@@ -59,6 +68,7 @@ public class ProfileModel : SessionPageModel
                 return NotFound();
             }
 
+            HttpContext.Session.SetString("Username", Input.Username.Trim());
             StatusMessage = "Your profile was updated.";
             return RedirectToPage();
         }
@@ -66,9 +76,7 @@ public class ProfileModel : SessionPageModel
             exception.InnerException is SqliteException sqliteException &&
             sqliteException.SqliteErrorCode == 19)
         {
-            ModelState.AddModelError(
-                "Input.Email",
-                "That username or email address is already in use.");
+            ModelState.AddModelError(string.Empty, "That username or email address is already in use.");
             ShowEditForm = true;
             await LoadProfileAsync(preserveInput: true);
             return Page();

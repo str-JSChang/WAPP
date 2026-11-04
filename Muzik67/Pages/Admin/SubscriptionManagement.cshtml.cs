@@ -1,16 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
 using Muzik67.Models;
+using Muzik67.Pages.Shared;
 
 namespace Muzik67.Pages.Admin
 {
-    public class SubscriptionManagementModel : PageModel
+    public class SubscriptionManagementModel : SessionPageModel
     {
         private readonly MuzikDbContext _context;
+        protected override bool AdminOnly => true;
 
         public SubscriptionManagementModel(MuzikDbContext context)
         {
@@ -50,37 +51,7 @@ namespace Muzik67.Pages.Admin
             public string Status { get; set; } = "Active";
         }
 
-        public async Task<IActionResult> OnGetAsync()
-        {
-            var access = SessionAuthorization.RequireAdmin(this);
-            if (access is not null)
-            {
-                return access;
-            }
-
-            await LoadListsAsync();
-
-            if (PlanId.HasValue)
-            {
-                var plan = await _context.SubscriptionPlans.FindAsync(PlanId.Value);
-                if (plan is null)
-                {
-                    return NotFound();
-                }
-
-                PlanForm = new PlanInput
-                {
-                    PlanId = plan.PlanId,
-                    PlanName = plan.PlanName,
-                    Price = plan.Price,
-                    Duration = plan.Duration,
-                    Description = plan.Description,
-                    Status = plan.Status
-                };
-            }
-
-            return Page();
-        }
+        public IActionResult OnGet() => RedirectToPage("/Admin/Subscriptions");
 
         public async Task<IActionResult> OnPostSavePlanAsync(
             [Bind(Prefix = "PlanForm")] PlanInput form)

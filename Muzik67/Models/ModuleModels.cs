@@ -30,9 +30,11 @@ public sealed record SubscriptionPlanView(
     decimal Price,
     string Duration,
     string Description,
+    string Status,
     int ActiveSubscribers);
 
 public sealed record MemberSubscription(
+    int SubscriptionId,
     string Username,
     string PlanName,
     string Status,

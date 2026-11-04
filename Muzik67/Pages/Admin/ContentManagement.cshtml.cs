@@ -1,16 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
 using Muzik67.Models;
+using Muzik67.Pages.Shared;
 
 namespace Muzik67.Pages.Admin
 {
-    public class ContentManagementModel : PageModel
+    public class ContentManagementModel : SessionPageModel
     {
         private readonly MuzikDbContext _context;
+        protected override bool AdminOnly => true;
 
         public ContentManagementModel(MuzikDbContext context)
         {

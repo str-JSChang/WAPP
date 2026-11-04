@@ -1,0 +1,9 @@
+@page
+@model Muzik67.Pages.Admin.UserProgressModel
+@{ ViewData["Title"] = "Learner Progress"; }
+<link rel="stylesheet" href="~/css/management.css" asp-append-version="true" />
+<main class="container management-page py-5"><div class="d-flex justify-content-between align-items-center mb-4"><div><p class="text-uppercase text-muted small fw-semibold mb-1">Administrator</p><h1 class="management-title">Learner Progress</h1><p class="text-muted">Monitor lessons, verified game attempts, mastery, and badges.</p></div><a asp-page="/Admin/Users" class="btn btn-outline-dark">Manage accounts</a></div>
+<section class="management-panel"><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Member</th><th>Status</th><th>Game attempts</th><th>Average mastery</th><th>Lessons</th><th>Badges</th><th>Last activity</th></tr></thead><tbody>
+@foreach(var member in Model.Members){<tr><td><a asp-page="/Admin/Users" asp-route-editId="@member.UserId">@member.Username</a></td><td>@member.Status</td><td>@member.GameAttempts</td><td>@member.AverageScore%</td><td>@member.LessonsCompleted</td><td>@member.BadgesEarned</td><td>@(member.LastActivity?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt") ?? "No activity")</td></tr>}
+@if(Model.Members.Count == 0){<tr><td colspan="7" class="text-center text-muted py-4">No member accounts found.</td></tr>}
+</tbody></table></div></section></main>

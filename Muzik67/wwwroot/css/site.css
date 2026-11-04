@@ -901,7 +901,7 @@ body {
   display: inline-block;
   max-width: 680px;
   width: 92%;
-  margin: 1.25rem auto 1.5rem auto;
+  margin: 1.25rem auto 3.75rem auto;
   text-align: center;
 }
 
@@ -921,7 +921,7 @@ body {
 
 .mc-splash-text {
   position: absolute;
-  bottom: -10px;
+  bottom: -1.75rem;
   right: 5%;
   font-family: 'Minecraftia', 'VT323', 'Silkscreen', 'Noto Sans SC', monospace, sans-serif;
   font-size: clamp(1.15rem, 2.6vw, 1.75rem);
@@ -936,6 +936,21 @@ body {
   animation: mcSplashPulse 1.8s infinite ease-in-out;
   z-index: 5;
   transition: filter 0.15s ease, color 0.15s ease;
+}
+
+@media (max-width: 991.98px) {
+  .mc-logo-wrapper {
+    margin-bottom: 2rem;
+  }
+
+  .mc-splash-text {
+    position: static;
+    display: inline-block;
+    margin-top: .75rem;
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.25;
+  }
 }
 
 .mc-splash-text:hover {

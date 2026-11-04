@@ -41,6 +41,12 @@ public sealed class ModuleDataService
         return true;
     }
 
+    public Task<bool> IsUsernameInUseAsync(int userId, string username) =>
+        _context.Users.AnyAsync(user => user.UserId != userId && user.Username.ToLower() == username.ToLower());
+
+    public Task<bool> IsEmailInUseAsync(int userId, string email) =>
+        _context.Users.AnyAsync(user => user.UserId != userId && user.Email.ToLower() == email.ToLower());
+
     public async Task<AdminDashboardSummary> GetAdminDashboardSummaryAsync()
     {
         var today = DateTime.UtcNow.Date;
@@ -84,6 +90,7 @@ public sealed class ModuleDataService
                 plan.Price,
                 plan.Duration,
                 plan.Description,
+                plan.Status,
                 subscriberCounts.GetValueOrDefault(plan.PlanId)))
             .ToList();
     }
@@ -117,6 +124,7 @@ public sealed class ModuleDataService
                 }
 
                 return new MemberSubscription(
+                    subscription.SubscriptionId,
                     subscription.User!.Username,
                     subscription.Plan!.PlanName,
                     status,
@@ -144,8 +152,26 @@ public sealed class ModuleDataService
         existingPlan.Price = plan.Price;
         existingPlan.Duration = plan.Duration;
         existingPlan.Description = plan.Description;
+        existingPlan.Status = plan.Status;
 
         await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> CancelSubscriptionAsync(int subscriptionId)
+    {
+        var subscription = await _context.UserSubscriptions.FindAsync(subscriptionId);
+        if (subscription is null)
+        {
+            return false;
+        }
+
+        if (subscription.Status == "Active")
+        {
+            subscription.Status = "Cancelled";
+            await _context.SaveChangesAsync();
+        }
+
         return true;
     }
 

@@ -14,10 +14,10 @@
         </div>
         <div>
             <p class="mc-lime-text mb-1">LIVES</p>
-            <div class="mc-lives" aria-label="Two lives remaining out of three">
+            <div class="mc-lives" aria-label="Each game starts with three lives">
                 <img src="~/images/full-heart.jpeg" class="mc-heart" alt="Full life" />
                 <img src="~/images/full-heart.jpeg" class="mc-heart" alt="Full life" />
-                <img src="~/images/empty-heart.jpeg" class="mc-heart" alt="Empty life" />
+                <img src="~/images/full-heart.jpeg" class="mc-heart" alt="Full life" />
             </div>
         </div>
     </header>
@@ -30,6 +30,11 @@
     </nav>
 
     <p class="mb-4">GOAL: Pick a game, listen carefully, and answer every music question.</p>
+
+    @if (TempData["GameMessage"] is string gameMessage)
+    {
+        <div class="alert alert-info" role="status">@gameMessage</div>
+    }
 
     <section class="row game-selection-container p-3 p-lg-4 align-items-stretch" aria-label="Game browser">
         <aside class="col-12 col-md-4 game-left-col border-end-md py-3" aria-label="Difficulty filters">

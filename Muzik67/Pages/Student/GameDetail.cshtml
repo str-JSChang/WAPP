@@ -53,15 +53,15 @@
             <span class="small">Choose one answer</span>
         </div>
 
-        <button type="button" class="btn btn-outline-dark mb-3" onclick="playTone(392, this)">
-            ♪ Hear the question cue
-        </button>
+        @if (Model.AudioCueFrequency.HasValue)
+        {
+            <button type="button" class="btn btn-outline-dark mb-3" onclick="playTone(@Model.AudioCueFrequency.Value, this)">
+                ♪ Hear the question sound
+            </button>
+        }
 
         <form method="post" asp-page-handler="Answer">
             <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="QuestionNumber" />
-            <input type="hidden" asp-for="Score" />
-            <input type="hidden" asp-for="Lives" />
 
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
             <span asp-validation-for="SelectedAnswer" class="text-danger"></span>
@@ -70,16 +70,12 @@
                 @for (var index = 0; index < Model.AnswerOptions.Count; index++)
                 {
                     var option = Model.AnswerOptions[index];
-                    var noteFrequency = 261.63 + index * 65.4;
                     <div class="mc-answer-card">
                         <label class="mc-answer-choice">
                             <input asp-for="SelectedAnswer" type="radio" value="@option" />
                             <span class="mc-answer-block">@((char)('A' + index))</span>
                             <strong>@option</strong>
                         </label>
-                        <button type="button" class="btn btn-outline-dark" onclick="playTone(@noteFrequency, this);">
-                            &gt; Play sound
-                        </button>
                     </div>
                 }
             </div>
@@ -103,9 +99,6 @@
 
     <form method="post" asp-page-handler="Skip" class="mt-3">
         <input type="hidden" asp-for="Id" />
-        <input type="hidden" asp-for="QuestionNumber" />
-        <input type="hidden" asp-for="Score" />
-        <input type="hidden" asp-for="Lives" />
         <button type="submit" class="btn btn-outline-dark">&lt; Skip</button>
     </form>
 </div>

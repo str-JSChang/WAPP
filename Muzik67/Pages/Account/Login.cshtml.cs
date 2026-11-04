@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Muzik67.Pages.Account
 {
+    [EnableRateLimiting("login")]
     public class LoginModel : PageModel
     {
         private readonly MuzikDbContext _context;
@@ -38,13 +40,14 @@ namespace Muzik67.Pages.Account
             [Display(Name = "Password")]
             public string Password { get; set; } = string.Empty;
 
-            [Display(Name = "Remember Me")]
-            public bool RememberMe { get; set; }
-
         }
 
-        public IActionResult OnGet()
+        public IActionResult OnGet(bool accountDisabled = false)
         {
+            if (accountDisabled)
+            {
+                ErrorMessage = "This account is suspended. Contact an administrator for help.";
+            }
             return RedirectSignedInUser() ?? Page();
         }
 
@@ -97,7 +100,7 @@ namespace Muzik67.Pages.Account
             }
         }
 
-        public IActionResult OnGetLogout()
+        public IActionResult OnPostLogout()
         {
             HttpContext.Session.Clear();
             SuccessMessage = "You have been logged out successfully.";

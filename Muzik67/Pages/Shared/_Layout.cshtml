@@ -57,7 +57,7 @@
                                 <a class="nav-link" asp-page="/Admin/ContentManagement">Content</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-page="/Admin/SubscriptionManagement">Subscriptions</a>
+                                <a class="nav-link" asp-page="/Admin/Subscriptions">Subscriptions</a>
                             </li>
                         }
                         else if (sessionRole == "Member")
@@ -98,7 +98,9 @@
                             {
                                 <a class="btn btn-outline-primary btn-sm px-3" asp-page="/Account/Profile">Profile</a>
                             }
-                            <a class="btn btn-outline-danger btn-sm px-3" asp-page="/Account/Login" asp-page-handler="Logout">Sign Out</a>
+                            <form method="post" asp-page="/Account/Login" asp-page-handler="Logout" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm px-3">Sign Out</button>
+                            </form>
                         }
                         else
                         {

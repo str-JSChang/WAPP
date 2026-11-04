@@ -15,8 +15,8 @@
             </a>
             <nav class="workspace-nav" aria-label="User management">
                 <span class="workspace-nav-heading">User Management</span>
-                <span class="workspace-nav-item" aria-disabled="true">User List</span>
-                <span class="workspace-nav-item" aria-disabled="true">User Progress</span>
+                <a asp-page="/Admin/Users" class="workspace-nav-item">User List</a>
+                <a asp-page="/Admin/UserProgress" class="workspace-nav-item">User Progress</a>
                 <a asp-page="/Admin/Subscriptions" class="workspace-nav-item active" aria-current="page">
                     Subscription
                 </a>
@@ -73,6 +73,7 @@
                                     <h3>@plan.PlanName</h3>
                                     <p class="plan-price">RM @plan.Price.ToString("0.00")</p>
                                     <p class="plan-description">@plan.Description</p>
+                                    <p><span class="subscription-status @(plan.Status == "Active" ? "status-active" : "status-inactive")">@plan.Status</span></p>
                                     <p class="plan-subscriber-count">
                                         <i class="bi bi-people" aria-hidden="true"></i>
                                         @plan.ActiveSubscribers active @(plan.ActiveSubscribers == 1 ? "member" : "members")
@@ -116,6 +117,7 @@
                                     <th scope="col">Status</th>
                                     <th scope="col">Start date</th>
                                     <th scope="col">End date</th>
+                                    <th scope="col">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -131,6 +133,15 @@
                                         </td>
                                         <td>@subscription.StartDate.ToString("dd MMM yyyy")</td>
                                         <td>@(subscription.EndDate?.ToString("dd MMM yyyy") ?? "No end date")</td>
+                                        <td>
+                                            @if (string.Equals(subscription.Status, "Active", StringComparison.OrdinalIgnoreCase) && (!subscription.EndDate.HasValue || subscription.EndDate > DateTime.UtcNow))
+                                            {
+                                                <form method="post" asp-page-handler="Cancel" onsubmit="return confirm('Cancel this subscription now?');">
+                                                    <input type="hidden" name="subscriptionId" value="@subscription.SubscriptionId" />
+                                                    <button class="btn btn-sm btn-outline-danger" type="submit">Cancel</button>
+                                                </form>
+                                            }
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -177,6 +188,11 @@
                         <label asp-for="Input.Description" class="form-label">Description</label>
                         <textarea asp-for="Input.Description" class="form-control" rows="3" maxlength="500"></textarea>
                         <span asp-validation-for="Input.Description" class="text-danger"></span>
+                    </div>
+                    <div class="mt-3">
+                        <label asp-for="Input.Status" class="form-label">Status</label>
+                        <select asp-for="Input.Status" class="form-select"><option>Active</option><option>Inactive</option></select>
+                        <span asp-validation-for="Input.Status" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="modal-footer">

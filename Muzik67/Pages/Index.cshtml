@@ -11,7 +11,7 @@
      Slide 3: Animation shifts smoothly into the landing page.
      ========================================================================= -->
 <div id="introOverlay">
-    <audio id="audioIntro" src="/audio/intro-chime.m4a" type="audio/mp4" preload="auto"></audio>
+    <audio id="audioIntro" src="/audio/intro-chime.m4a" type="audio/mp4" preload="metadata"></audio>
     <div id="introTapPrompt" class="intro-tap-prompt" title="Click for audio">
         <i class="bi bi-volume-up-fill me-1"></i> Click anywhere for sound
     </div>
@@ -46,7 +46,7 @@
      4-Phase Scene: Surface Loop -> Diving Transition -> Underwater Loop -> Resurface
      ========================================================================= -->
 <div class="landing-video-fixed-bg" aria-hidden="true">
-    <video id="landingBgVideo" autoplay muted loop playsinline preload="auto">
+    <video id="landingBgVideo" muted loop playsinline preload="metadata">
         <source src="~/videos/minecraft-bg.mp4" type="video/mp4" />
     </video>
     <div class="video-tint-overlay"></div>
@@ -54,7 +54,7 @@
 
 <!-- The video's embedded audio is the synchronized environmental ambience. -->
 <!-- C418 remains an independent music layer with its own control. -->
-<audio id="bgmAudio" src="/audio/C418.mp3" preload="auto" loop></audio>
+<audio id="bgmAudio" src="/audio/C418.mp3" preload="none" loop></audio>
 
 <!-- Separate Floating Audio Controllers: Music & Ambience -->
 <div class="floating-audio-dock">

@@ -37,11 +37,13 @@ namespace Muzik67.Pages.Account
 
             [Required(ErrorMessage = "Email address is required.")]
             [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+            [StringLength(100, ErrorMessage = "Email address cannot exceed 100 characters.")]
             [Display(Name = "Email Address")]
             public string Email { get; set; } = string.Empty;
 
             [Required(ErrorMessage = "Password is required.")]
-            [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long.")]
+            [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long.")]
+            [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "Password must include uppercase, lowercase, and a number.")]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; } = string.Empty;

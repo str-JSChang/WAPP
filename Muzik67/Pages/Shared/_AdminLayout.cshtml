@@ -28,10 +28,16 @@
                 <div class="collapse navbar-collapse" id="adminNavbar">
                     <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                         <a class="nav-link" asp-page="/Admin/Dashboard">Dashboard</a>
+                        <a class="nav-link" asp-page="/Admin/Users">Users</a>
+                        <a class="nav-link" asp-page="/Admin/UserProgress">Progress</a>
+                        <a class="nav-link" asp-page="/Admin/ContentManagement">Content</a>
                         <a class="nav-link" asp-page="/Admin/Subscriptions">Subscriptions</a>
                         <a class="btn btn-outline-primary btn-sm ms-lg-2" asp-page="/Account/Profile">
                             <i class="bi bi-person-circle me-1" aria-hidden="true"></i>My profile
                         </a>
+                        <form method="post" asp-page="/Account/Login" asp-page-handler="Logout" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Sign Out</button>
+                        </form>
                     </div>
                 </div>
             </div>

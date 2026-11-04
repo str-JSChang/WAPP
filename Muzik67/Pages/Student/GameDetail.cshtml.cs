@@ -1,38 +1,33 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
 using Muzik67.Models;
+using Muzik67.Pages.Shared;
 
 namespace Muzik67.Pages.Student;
 
-public class GameDetailModel : PageModel
+public class GameDetailModel : SessionPageModel
 {
     private readonly MuzikDbContext _context;
+    private const string StateKeyPrefix = "GameState:";
 
-    public GameDetailModel(MuzikDbContext context)
-    {
-        _context = context;
-    }
+    public GameDetailModel(MuzikDbContext context) => _context = context;
+
+    protected override bool MemberOnly => true;
 
     public Game? Game { get; private set; }
-    public IReadOnlyList<GameQuiz> Questions { get; private set; } = Array.Empty<GameQuiz>();
+    public IReadOnlyList<GameQuiz> Questions { get; private set; } = [];
     public GameQuiz? CurrentQuestion => Questions.ElementAtOrDefault(QuestionNumber - 1);
     public IReadOnlyList<string> AnswerOptions => ParseOptions(CurrentQuestion?.AnswerOptions);
+    public int QuestionNumber { get; private set; } = 1;
+    public int Score { get; private set; }
+    public int Lives { get; private set; } = 3;
+    public double? AudioCueFrequency => GetAudioCueFrequency(CurrentQuestion);
 
-    [BindProperty(SupportsGet = true)]
+    [BindProperty]
     public int Id { get; set; }
-
-    [BindProperty(SupportsGet = true)]
-    public int QuestionNumber { get; set; } = 1;
-
-    [BindProperty(SupportsGet = true)]
-    public int Score { get; set; }
-
-    [BindProperty(SupportsGet = true)]
-    public int Lives { get; set; } = 3;
 
     [BindProperty]
     public string? SelectedAnswer { get; set; }
@@ -43,102 +38,124 @@ public class GameDetailModel : PageModel
     [TempData]
     public bool FeedbackWasCorrect { get; set; }
 
-    public async Task<IActionResult> OnGetAsync()
+    public async Task<IActionResult> OnGetAsync(int id, bool restart = false)
     {
-        var access = SessionAuthorization.RequireMember(this);
-        if (access is not null)
-        {
-            return access;
-        }
-
+        Id = id;
         if (!await LoadGameAsync())
         {
+            TempData["GameMessage"] = "That game is unavailable for your account.";
             return RedirectToPage("/Student/GameSelection");
         }
 
-        QuestionNumber = Math.Clamp(QuestionNumber, 1, Math.Max(Questions.Count, 1));
-        Score = Math.Clamp(Score, 0, Questions.Count);
-        Lives = Math.Clamp(Lives, 0, 3);
+        var state = restart ? null : ReadState();
+        if (state is null || state.GameId != Id || state.QuestionIndex < 0 || state.QuestionIndex >= Questions.Count)
+        {
+            state = new GameSessionState { GameId = Id };
+            WriteState(state);
+        }
+
+        ApplyState(state);
         return Page();
     }
 
     public async Task<IActionResult> OnPostAnswerAsync()
     {
-        var access = SessionAuthorization.RequireMember(this);
-        if (access is not null)
-        {
-            return access;
-        }
-
-        if (!await LoadGameAsync() || CurrentQuestion is null)
-        {
-            return RedirectToPage("/Student/GameSelection");
-        }
-
-        if (string.IsNullOrWhiteSpace(SelectedAnswer))
-        {
-            ModelState.AddModelError(nameof(SelectedAnswer), "Choose one answer before checking.");
-            return Page();
-        }
-
-        var correct = string.Equals(
-            SelectedAnswer.Trim(),
-            CurrentQuestion.CorrectAnswer.Trim(),
-            StringComparison.OrdinalIgnoreCase);
-
-        if (correct)
-        {
-            Score++;
-            FeedbackMessage = "+20 XP — correct answer.";
-            FeedbackWasCorrect = true;
-        }
-        else
-        {
-            Lives = Math.Max(0, Lives - 1);
-            FeedbackMessage = $"Not quite. The correct answer was {CurrentQuestion.CorrectAnswer}.";
-            FeedbackWasCorrect = false;
-        }
-
-        return ContinueOrFinish();
-    }
-
-    public async Task<IActionResult> OnPostSkipAsync()
-    {
-        var access = SessionAuthorization.RequireMember(this);
-        if (access is not null)
-        {
-            return access;
-        }
-
         if (!await LoadGameAsync())
         {
             return RedirectToPage("/Student/GameSelection");
         }
 
-        FeedbackMessage = "Question skipped. You can replay the quiz later.";
-        FeedbackWasCorrect = false;
-        return ContinueOrFinish();
-    }
-
-    private IActionResult ContinueOrFinish()
-    {
-        if (QuestionNumber >= Questions.Count || Lives <= 0)
+        var state = ReadState();
+        if (!IsValidState(state))
         {
-            return RedirectToPage("/Student/GameResult", new
-            {
-                GameId = Id,
-                Score,
-                Attempts = 1
-            });
+            TempData["GameMessage"] = "That game session expired. Please start the game again.";
+            return RedirectToPage(new { id = Id, restart = true });
         }
 
-        return RedirectToPage(new
+        ApplyState(state!);
+        if (string.IsNullOrWhiteSpace(SelectedAnswer) ||
+            !AnswerOptions.Contains(SelectedAnswer.Trim(), StringComparer.OrdinalIgnoreCase))
         {
-            id = Id,
-            QuestionNumber = QuestionNumber + 1,
-            Score,
-            Lives
-        });
+            ModelState.AddModelError(nameof(SelectedAnswer), "Choose one of the available answers before checking.");
+            return Page();
+        }
+
+        var correct = string.Equals(
+            SelectedAnswer.Trim(),
+            CurrentQuestion!.CorrectAnswer.Trim(),
+            StringComparison.OrdinalIgnoreCase);
+
+        if (correct)
+        {
+            state!.Score++;
+            FeedbackMessage = "Correct — great listening!";
+            FeedbackWasCorrect = true;
+        }
+        else
+        {
+            state!.Lives = Math.Max(0, state.Lives - 1);
+            FeedbackMessage = $"Not quite. The correct answer was {CurrentQuestion.CorrectAnswer}.";
+            FeedbackWasCorrect = false;
+        }
+
+        return await AdvanceOrFinishAsync(state);
+    }
+
+    public async Task<IActionResult> OnPostSkipAsync()
+    {
+        if (!await LoadGameAsync())
+        {
+            return RedirectToPage("/Student/GameSelection");
+        }
+
+        var state = ReadState();
+        if (!IsValidState(state))
+        {
+            TempData["GameMessage"] = "That game session expired. Please start the game again.";
+            return RedirectToPage(new { id = Id, restart = true });
+        }
+
+        FeedbackMessage = "Question skipped. You can replay the quiz later.";
+        FeedbackWasCorrect = false;
+        return await AdvanceOrFinishAsync(state!);
+    }
+
+    private async Task<IActionResult> AdvanceOrFinishAsync(GameSessionState state)
+    {
+        if (state.QuestionIndex >= Questions.Count - 1 || state.Lives <= 0)
+        {
+            var progress = new GameProgress
+            {
+                UserId = CurrentUserId,
+                GameId = Id,
+                Attempts = 1,
+                Score = state.Score,
+                Status = "Completed",
+                DateOfCompletion = DateTime.UtcNow
+            };
+            _context.GameProgresses.Add(progress);
+
+            var percentage = Questions.Count == 0 ? 0 : state.Score * 100 / Questions.Count;
+            if (percentage >= 80 && !await _context.UserBadges.AnyAsync(b =>
+                    b.UserId == CurrentUserId && b.BadgeCode == "sound-explorer"))
+            {
+                _context.UserBadges.Add(new UserBadge
+                {
+                    UserId = CurrentUserId,
+                    BadgeCode = "sound-explorer",
+                    BadgeName = "Sound Explorer",
+                    EarnedAt = DateTime.UtcNow
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            HttpContext.Session.Remove(StateKeyPrefix + CurrentUserId);
+            return RedirectToPage("/Student/GameResult", new { progressId = progress.ProgressId });
+        }
+
+        state.QuestionIndex++;
+        WriteState(state);
+        return RedirectToPage(new { id = Id });
     }
 
     private async Task<bool> LoadGameAsync()
@@ -152,17 +169,12 @@ public class GameDetailModel : PageModel
             .AsNoTracking()
             .Include(game => game.Quizzes)
             .FirstOrDefaultAsync(game => game.GameId == Id);
-
         if (Game is null)
         {
             return false;
         }
 
-        var userId = HttpContext.Session.GetInt32("UserId");
-        var subscription = userId.HasValue
-            ? await SubscriptionAccess.GetActiveAsync(_context, userId.Value)
-            : null;
-
+        var subscription = await SubscriptionAccess.GetActiveAsync(_context, CurrentUserId);
         if (!SubscriptionAccess.CanAccess(Game.Status, subscription))
         {
             return false;
@@ -172,22 +184,57 @@ public class GameDetailModel : PageModel
         return Questions.Count > 0;
     }
 
-    private static IReadOnlyList<string> ParseOptions(string? answerOptions)
+    private GameSessionState? ReadState()
     {
-        if (string.IsNullOrWhiteSpace(answerOptions))
+        var json = HttpContext.Session.GetString(StateKeyPrefix + CurrentUserId);
+        if (string.IsNullOrWhiteSpace(json))
         {
-            return Array.Empty<string>();
+            return null;
         }
 
+        try
+        {
+            return JsonSerializer.Deserialize<GameSessionState>(json);
+        }
+        catch (JsonException)
+        {
+            HttpContext.Session.Remove(StateKeyPrefix + CurrentUserId);
+            return null;
+        }
+    }
+
+    private void WriteState(GameSessionState state) =>
+        HttpContext.Session.SetString(StateKeyPrefix + CurrentUserId, JsonSerializer.Serialize(state));
+
+    private bool IsValidState(GameSessionState? state) =>
+        state is not null &&
+        state.GameId == Id &&
+        state.QuestionIndex >= 0 &&
+        state.QuestionIndex < Questions.Count &&
+        state.Lives is >= 0 and <= 3 &&
+        state.Score is >= 0 &&
+        state.Score <= state.QuestionIndex &&
+        state.StartedAt > DateTime.UtcNow.AddHours(-2);
+
+    private void ApplyState(GameSessionState state)
+    {
+        QuestionNumber = state.QuestionIndex + 1;
+        Score = state.Score;
+        Lives = state.Lives;
+    }
+
+    private static IReadOnlyList<string> ParseOptions(string? answerOptions)
+    {
+        if (string.IsNullOrWhiteSpace(answerOptions)) return [];
         if (answerOptions.TrimStart().StartsWith('['))
         {
             try
             {
-                return JsonSerializer.Deserialize<string[]>(answerOptions) ?? Array.Empty<string>();
+                return JsonSerializer.Deserialize<string[]>(answerOptions) ?? [];
             }
             catch (JsonException)
             {
-                // Fall back to the comma-separated format used by the current admin form.
+                // Older records use comma-separated values.
             }
         }
 
@@ -195,5 +242,14 @@ public class GameDetailModel : PageModel
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Where(option => option.Length > 0)
             .ToArray();
+    }
+
+    private static double? GetAudioCueFrequency(GameQuiz? question)
+    {
+        if (question is null) return null;
+        var text = $"{question.QuestionText} {question.CorrectAnswer}".ToLowerInvariant();
+        if (text.Contains("bird") || text.Contains("high pitch")) return 880;
+        if (text.Contains("low pitch")) return 196;
+        return null;
     }
 }

@@ -11,15 +11,8 @@ namespace Muzik67.Data
             // Creates the database and all tables if they do not exist
             context.Database.EnsureCreated();
 
-            // Self-healing schema safeguard: ensure Status column exists in GameProgress if database was created prior to commit f0fb180
-            try
-            {
-                context.Database.ExecuteSqlRaw("ALTER TABLE \"GameProgress\" ADD COLUMN \"Status\" TEXT DEFAULT 'Completed';");
-            }
-            catch
-            {
-                // Column already exists, safe to ignore
-            }
+            EnsureStatusColumn(context);
+            CreateProgressTables(context);
 
             // 1. Seed Users
             if (!context.Users.Any())
@@ -173,6 +166,72 @@ namespace Muzik67.Data
                 context.GamesQuizzes.AddRange(quizzes);
                 context.SaveChanges();
             }
+        }
+
+        private static void EnsureStatusColumn(MuzikDbContext context)
+        {
+            var connection = context.Database.GetDbConnection();
+            var shouldClose = connection.State != System.Data.ConnectionState.Open;
+            if (shouldClose)
+            {
+                connection.Open();
+            }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = "PRAGMA table_info('GameProgress');";
+                using var reader = command.ExecuteReader();
+                var hasStatus = false;
+                while (reader.Read())
+                {
+                    if (string.Equals(reader.GetString(1), "Status", StringComparison.OrdinalIgnoreCase))
+                    {
+                        hasStatus = true;
+                        break;
+                    }
+                }
+
+                reader.Close();
+                if (!hasStatus)
+                {
+                    command.CommandText = "ALTER TABLE \"GameProgress\" ADD COLUMN \"Status\" TEXT NOT NULL DEFAULT 'Completed';";
+                    command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                if (shouldClose)
+                {
+                    connection.Close();
+                }
+            }
+        }
+
+        private static void CreateProgressTables(MuzikDbContext context)
+        {
+            context.Database.ExecuteSqlRaw("""
+                CREATE TABLE IF NOT EXISTS "LessonProgress" (
+                    "LessonProgressId" INTEGER NOT NULL CONSTRAINT "PK_LessonProgress" PRIMARY KEY AUTOINCREMENT,
+                    "UserId" INTEGER NOT NULL,
+                    "ContentId" INTEGER NOT NULL,
+                    "CompletedAt" TEXT NOT NULL,
+                    CONSTRAINT "FK_LessonProgress_Users_UserId" FOREIGN KEY ("UserId") REFERENCES "Users" ("UserId") ON DELETE CASCADE,
+                    CONSTRAINT "FK_LessonProgress_LearningContent_ContentId" FOREIGN KEY ("ContentId") REFERENCES "LearningContent" ("ContentId") ON DELETE CASCADE
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS "IX_LessonProgress_UserId_ContentId" ON "LessonProgress" ("UserId", "ContentId");
+                CREATE INDEX IF NOT EXISTS "IX_LessonProgress_ContentId" ON "LessonProgress" ("ContentId");
+
+                CREATE TABLE IF NOT EXISTS "UserBadges" (
+                    "UserBadgeId" INTEGER NOT NULL CONSTRAINT "PK_UserBadges" PRIMARY KEY AUTOINCREMENT,
+                    "UserId" INTEGER NOT NULL,
+                    "BadgeCode" TEXT NOT NULL,
+                    "BadgeName" TEXT NOT NULL,
+                    "EarnedAt" TEXT NOT NULL,
+                    CONSTRAINT "FK_UserBadges_Users_UserId" FOREIGN KEY ("UserId") REFERENCES "Users" ("UserId") ON DELETE CASCADE
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS "IX_UserBadges_UserId_BadgeCode" ON "UserBadges" ("UserId", "BadgeCode");
+                """);
         }
     }
 }

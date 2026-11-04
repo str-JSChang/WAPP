@@ -1,50 +1,100 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
 using Muzik67.Models;
+using Muzik67.Pages.Shared;
 
-namespace wapp.Muzik67.Pages.Student
+namespace Muzik67.Pages.Student;
+
+public class LessonContentModel : SessionPageModel
 {
-    public class LessonContentModel : PageModel
+    private readonly MuzikDbContext _context;
+
+    public LessonContentModel(MuzikDbContext context) => _context = context;
+
+    protected override bool MemberOnly => true;
+
+    public LearningContent Lesson { get; private set; } = new();
+    public bool IsCompleted { get; private set; }
+    public int? NextLessonId { get; private set; }
+
+    [TempData]
+    public string? StatusMessage { get; set; }
+
+    public async Task<IActionResult> OnGetAsync(int? id)
     {
-        private  readonly MuzikDbContext _context;
-
-        public LessonContentModel(MuzikDbContext context)
+        if (!id.HasValue || !await LoadLessonAsync(id.Value))
         {
-            _context = context;
+            return RedirectToPage("/Student/MusicLessonSelection");
         }
 
-        public LearningContent Lesson { get; set; } = new();
+        return Page();
+    }
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+    public async Task<IActionResult> OnPostCompleteAsync(int id)
+    {
+        if (!await LoadLessonAsync(id))
         {
-            if (id == null)
-            {
-                return RedirectToPage("/Student/StudentDashboard");
-            }
-
-            var lesson = await _context.LearningContents.FirstOrDefaultAsync(l => l.ContentId == id);
-
-            if (lesson is null)
-            {
-                return NotFound();
-            }
-
-            Lesson = lesson;
-
-            var userId = HttpContext.Session.GetInt32("UserId");
-            var subscription = userId.HasValue
-                ? await SubscriptionAccess.GetActiveAsync(_context, userId.Value)
-                : null;
-            if (!SubscriptionAccess.CanAccess(Lesson.Status, subscription))
-            {
-                return RedirectToPage("/Subscription/Plans");
-            }
-            
-            return Page();
+            return RedirectToPage("/Student/MusicLessonSelection");
         }
 
+        if (!IsCompleted)
+        {
+            _context.LessonProgresses.Add(new LessonProgress
+            {
+                UserId = CurrentUserId,
+                ContentId = id,
+                CompletedAt = DateTime.UtcNow
+            });
+
+            if (!await _context.UserBadges.AnyAsync(b =>
+                    b.UserId == CurrentUserId && b.BadgeCode == "first-lesson"))
+            {
+                _context.UserBadges.Add(new UserBadge
+                {
+                    UserId = CurrentUserId,
+                    BadgeCode = "first-lesson",
+                    BadgeName = "First Steps",
+                    EarnedAt = DateTime.UtcNow
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        StatusMessage = IsCompleted ? "This lesson was already completed." : "Lesson completed — your progress and badge were saved.";
+        return RedirectToPage(new { id });
+    }
+
+    private async Task<bool> LoadLessonAsync(int id)
+    {
+        if (id <= 0) return false;
+
+        var lesson = await _context.LearningContents
+            .AsNoTracking()
+            .FirstOrDefaultAsync(content => content.ContentId == id);
+        if (lesson is null) return false;
+
+        var subscription = await SubscriptionAccess.GetActiveAsync(_context, CurrentUserId);
+        if (!SubscriptionAccess.CanAccess(lesson.Status, subscription))
+        {
+            return false;
+        }
+
+        Lesson = lesson;
+        IsCompleted = await _context.LessonProgresses
+            .AnyAsync(progress => progress.UserId == CurrentUserId && progress.ContentId == id);
+
+        NextLessonId = await _context.LearningContents
+            .AsNoTracking()
+            .Where(content => content.ContentId > id &&
+                (content.Status == "Active" ||
+                 content.Status == "Premium" && subscription != null && subscription.Plan != null && subscription.Plan.Price > 0))
+            .OrderBy(content => content.ContentId)
+            .Select(content => (int?)content.ContentId)
+            .FirstOrDefaultAsync();
+
+        return true;
     }
 }

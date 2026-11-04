@@ -16,6 +16,8 @@ namespace Muzik67.Data
         public DbSet<GameProgress> GameProgresses => Set<GameProgress>();
         public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
         public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
+        public DbSet<LessonProgress> LessonProgresses => Set<LessonProgress>();
+        public DbSet<UserBadge> UserBadges => Set<UserBadge>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -89,6 +91,32 @@ namespace Muzik67.Data
                 entity.HasOne(e => e.Plan)
                       .WithMany()
                       .HasForeignKey(e => e.PlanId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<LessonProgress>(entity =>
+            {
+                entity.ToTable("LessonProgress");
+                entity.HasKey(e => e.LessonProgressId);
+                entity.HasIndex(e => new { e.UserId, e.ContentId }).IsUnique();
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Content)
+                      .WithMany()
+                      .HasForeignKey(e => e.ContentId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<UserBadge>(entity =>
+            {
+                entity.ToTable("UserBadges");
+                entity.HasKey(e => e.UserBadgeId);
+                entity.HasIndex(e => new { e.UserId, e.BadgeCode }).IsUnique();
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
         }

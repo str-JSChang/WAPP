@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
 using Muzik67.Models;
+using Muzik67.Pages.Shared;
 
 namespace Muzik67.Pages.Subscription
 {
-    public class PlansModel : PageModel
+    public class PlansModel : SessionPageModel
     {
         private readonly MuzikDbContext _context;
 
@@ -17,6 +17,7 @@ namespace Muzik67.Pages.Subscription
         }
 
         public IList<SubscriptionPlan> Plans { get; private set; } = new List<SubscriptionPlan>();
+        protected override bool MemberOnly => true;
         public UserSubscription? CurrentSubscription { get; private set; }
 
         [TempData]
@@ -24,13 +25,7 @@ namespace Muzik67.Pages.Subscription
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var access = SessionAuthorization.RequireMember(this);
-            if (access is not null)
-            {
-                return access;
-            }
-
-            var userId = HttpContext.Session.GetInt32("UserId")!.Value;
+            var userId = CurrentUserId;
             var plans = await _context.SubscriptionPlans
                 .Where(plan => plan.Status == "Active")
                 .ToListAsync();

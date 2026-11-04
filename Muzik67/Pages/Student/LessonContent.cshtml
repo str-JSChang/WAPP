@@ -1,5 +1,5 @@
 @page "{id:int}"
-@model wapp.Muzik67.Pages.Student.LessonContentModel
+@model Muzik67.Pages.Student.LessonContentModel
 @{
     var lesson = Model.Lesson;
     ViewData["Title"] = lesson.Title;
@@ -25,80 +25,120 @@
             <h1 class="h5 mb-0 text-white">@lesson.Title</h1>
         </div>
         <div class="mc-result-xp">
-            <p class="mc-lime-text mb-1 text-lg-end">XP 40 / 100</p>
-            <div class="mc-xp-track" aria-label="40 out of 100 lesson XP">
-                <span class="mc-xp-fill xp-40"></span>
+            <p class="mc-lime-text mb-1 text-lg-end">@(Model.IsCompleted ? "COMPLETED" : "IN PROGRESS")</p>
+            <div class="mc-xp-track" aria-label="@(Model.IsCompleted ? "Lesson completed" : "Lesson in progress")">
+                <span class="mc-xp-fill" style="width:@(Model.IsCompleted ? 100 : 35)%"></span>
             </div>
         </div>
     </header>
 
     <nav class="mc-stage-tabs" aria-label="Lesson stages">
-        <span class="active">1 Learn</span>
-        <span>2 Practice</span>
-        <a asp-page="/Student/GameSelection">3 Challenge</a>
-        <span aria-disabled="true">4 Reward</span>
+        <span class="active">1 Learn</span><span>2 Practice</span><a asp-page="/Student/GameSelection">3 Challenge</a><span class="@(Model.IsCompleted ? "active" : "")">4 Reward</span>
     </nav>
 
-    <p class="mc-lesson-goal"><strong>GOAL:</strong> @lesson.Description</p>
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success" role="status">@Model.StatusMessage</div>
+    }
 
-    <section class="mc-note-board" aria-labelledby="practice-title">
-        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-3">
-            <h2 id="practice-title" class="h6 mb-0">Practice: note-block hotbar</h2>
-            <span class="small">Color = pitch height</span>
-        </div>
-
-        <div class="mc-note-grid">
-            @for (var index = 0; index < notes.Length; index++)
-            {
-                var note = notes[index];
-                <button type="button" class="mc-note-key @note.Color" data-frequency="@note.Frequency" onclick="playTone(@note.Frequency, this)">
-                    <span class="mc-note-cube" aria-hidden="true"></span>
-                    <strong>@note.Name</strong>
-                </button>
-            }
-        </div>
-
-        <div class="d-flex justify-content-between small mt-2"><span>Low</span><span>High</span></div>
-        <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3 mt-3">
-            <button type="button" class="btn btn-outline-dark" id="playScaleBtn">Play the scale</button>
-            <span class="small">Click a block to hear it.</span>
+    <section class="mc-result-panel mb-3">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center">
+            <div><h2 class="h6">LESSON GOAL</h2><p id="lessonText" class="mb-0">@lesson.Description</p></div>
+            <button type="button" class="btn btn-outline-dark text-nowrap" id="readLessonBtn"><i class="bi bi-volume-up"></i> Read to me</button>
         </div>
     </section>
 
+    @if (lesson.Title.Contains("Rhythm", StringComparison.OrdinalIgnoreCase))
+    {
+        <section class="mc-note-board" aria-labelledby="rhythm-title">
+            <h2 id="rhythm-title" class="h6">Practice: quarter notes and half notes</h2>
+            <p>A quarter note lasts for one beat. A half note lasts for two beats. Tap the blocks, then play the pattern.</p>
+            <div class="mc-note-grid" id="rhythmPattern">
+                <button type="button" class="mc-note-key red" data-beats="1"><span class="mc-note-cube"></span><strong>♩ 1 beat</strong></button>
+                <button type="button" class="mc-note-key blue" data-beats="2"><span class="mc-note-cube"></span><strong>𝅗𝅥 2 beats</strong></button>
+                <button type="button" class="mc-note-key red" data-beats="1"><span class="mc-note-cube"></span><strong>♩ 1 beat</strong></button>
+                <button type="button" class="mc-note-key blue" data-beats="2"><span class="mc-note-cube"></span><strong>𝅗𝅥 2 beats</strong></button>
+            </div>
+            <button type="button" class="btn btn-outline-dark mt-3" id="playRhythmBtn">Play rhythm pattern</button>
+        </section>
+    }
+    else
+    {
+        <section class="mc-note-board" aria-labelledby="practice-title">
+            <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-3">
+                <h2 id="practice-title" class="h6 mb-0">@(lesson.ContentType == "Instrument" ? "Practice: keyboard groups" : "Practice: note-block scale")</h2>
+                <span class="small">Low pitch → high pitch</span>
+            </div>
+            <div class="mc-note-grid">
+            @foreach (var note in notes)
+            {
+                <button type="button" class="mc-note-key @note.Color" data-frequency="@note.Frequency" onclick="playTone(@note.Frequency, this)">
+                    <span class="mc-note-cube" aria-hidden="true"></span><strong>@note.Name</strong>
+                </button>
+            }
+            </div>
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3 mt-3">
+                <button type="button" class="btn btn-outline-dark" id="playScaleBtn">Play the scale</button>
+                <span class="small">Click each block to hear its pitch.</span>
+            </div>
+        </section>
+    }
+
     <div class="mc-lesson-lower-grid">
         <section class="mc-result-panel">
-            <h2 class="h6">CHALLENGE: Which is higher?</h2>
-            <div class="d-flex gap-3">
-                <button type="button" class="mc-mini-note red" onclick="playTone(261.63, this)" aria-label="Play low C"><span></span></button>
-                <button type="button" class="mc-mini-note blue" onclick="playTone(523.25, this)" aria-label="Play high C"><span></span></button>
-            </div>
-            <a asp-page="/Student/GameSelection" class="btn btn-primary mt-3">Try a challenge &gt;</a>
+            <h2 class="h6">WHAT TO REMEMBER</h2>
+            @if (lesson.Title.Contains("Rhythm", StringComparison.OrdinalIgnoreCase))
+            {
+                <p class="mb-0">Count a steady “1, 2, 3, 4”. Hold half notes for two counts.</p>
+            }
+            else if (lesson.ContentType == "Instrument")
+            {
+                <p class="mb-0">Black keys repeat in groups of two and three. Use them to find every C.</p>
+            }
+            else
+            {
+                <p class="mb-0">The notes rise from C to B, then repeat at a higher C.</p>
+            }
         </section>
-
         <section class="mc-result-panel">
             <h2 class="h6">REWARD</h2>
-            <div class="d-flex align-items-center gap-3">
-                <span class="mc-badge-block" aria-hidden="true">?</span>
-                <p class="mb-0">Finish a challenge to unlock a music explorer badge.</p>
-            </div>
+            <div class="d-flex align-items-center gap-3"><span class="mc-badge-block">@(Model.IsCompleted ? "★" : "?")</span><p class="mb-0">@(Model.IsCompleted ? "First Steps badge progress saved." : "Complete this lesson to save progress and earn a badge.")</p></div>
         </section>
     </div>
 
     <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-3">
-        <a asp-page="/Student/MusicLessonSelection" class="btn btn-outline-dark">&lt; Back</a>
-        <a asp-page="/Student/MusicLessonSelection" class="btn btn-primary">Next lesson &gt;</a>
+        <a asp-page="/Student/MusicLessonSelection" class="btn btn-outline-dark">&lt; Back to lessons</a>
+        <div class="d-flex gap-2">
+            @if (!Model.IsCompleted)
+            {
+                <form method="post" asp-page-handler="Complete"><input type="hidden" name="id" value="@lesson.ContentId" /><button type="submit" class="btn btn-primary">Mark lesson complete</button></form>
+            }
+            @if (Model.NextLessonId.HasValue)
+            {
+                <a asp-page="/Student/LessonContent" asp-route-id="@Model.NextLessonId" class="btn btn-outline-dark">Next lesson &gt;</a>
+            }
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        document.getElementById("playScaleBtn")?.addEventListener("click", function () {
-            const keys = Array.from(document.querySelectorAll(".mc-note-key"));
-            keys.forEach(function (key, index) {
-                window.setTimeout(function () {
-                    playTone(Number(key.dataset.frequency), key);
-                }, index * 280);
-            });
-        });
-    </script>
+<script>
+document.getElementById("readLessonBtn")?.addEventListener("click", function () {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById("lessonText")?.textContent || ""));
+});
+document.getElementById("playScaleBtn")?.addEventListener("click", function () {
+    const keys = Array.from(document.querySelectorAll(".mc-note-key[data-frequency]"));
+    keys.forEach(function (key, index) { window.setTimeout(function () { playTone(Number(key.dataset.frequency), key); }, index * 280); });
+});
+document.getElementById("playRhythmBtn")?.addEventListener("click", function () {
+    const keys = Array.from(document.querySelectorAll("#rhythmPattern .mc-note-key"));
+    let delay = 0;
+    keys.forEach(function (key) {
+        window.setTimeout(function () { playTone(392, key); }, delay);
+        delay += Number(key.dataset.beats) * 420;
+    });
+});
+</script>
 }

@@ -17,7 +17,7 @@
     </header>
 
     <p class="demo-payment-note text-center mb-4">
-        7-day free trial on paid plans. Demo checkout only—no card details are collected.
+        Demonstration subscription activation only—no card details are collected.
     </p>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
@@ -67,10 +67,10 @@
                 <p class="small mb-2">@(isFree ? "forever" : $"per {plan.Duration.ToLowerInvariant().Replace("ly", "")}")</p>
 
                 <ul class="mc-feature-list flex-grow-1">
-                    <li>Music lesson previews</li>
-                    <li>@(isFree ? "One starter lesson" : "All lessons and quizzes")</li>
-                    <li class="@(isFree ? "locked" : "")">Music games and virtual keyboard</li>
-                    <li class="@(isFree ? "locked" : "")">Progress tracking</li>
+                    <li>@(isFree ? "Free lessons and quizzes" : "All free and premium lessons")</li>
+                    <li>@(isFree ? "Free music games" : "All music games")</li>
+                    <li>Virtual instrument</li>
+                    <li>Progress and badge tracking</li>
                     @if (isYearly)
                     {
                         <li>Printable certificates</li>

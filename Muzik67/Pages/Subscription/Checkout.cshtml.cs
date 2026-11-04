@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
 using Muzik67.Models;
+using Muzik67.Pages.Shared;
 
 namespace Muzik67.Pages.Subscription
 {
-    public class CheckoutModel : PageModel
+    public class CheckoutModel : SessionPageModel
     {
         private readonly MuzikDbContext _context;
 
@@ -17,15 +17,10 @@ namespace Muzik67.Pages.Subscription
         }
 
         public SubscriptionPlan? Plan { get; private set; }
+        protected override bool MemberOnly => true;
 
         public async Task<IActionResult> OnGetAsync(int planId)
         {
-            var access = SessionAuthorization.RequireMember(this);
-            if (access is not null)
-            {
-                return access;
-            }
-
             Plan = await _context.SubscriptionPlans
                 .FirstOrDefaultAsync(plan => plan.PlanId == planId && plan.Status == "Active");
             if (Plan is null)
@@ -38,12 +33,6 @@ namespace Muzik67.Pages.Subscription
 
         public async Task<IActionResult> OnPostConfirmAsync(int planId)
         {
-            var access = SessionAuthorization.RequireMember(this);
-            if (access is not null)
-            {
-                return access;
-            }
-
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             var plan = await _context.SubscriptionPlans
@@ -62,7 +51,7 @@ namespace Muzik67.Pages.Subscription
             var endDate = plan.Duration == "Monthly"
                 ? startDate.AddMonths(1)
                 : startDate.AddYears(1);
-            var userId = HttpContext.Session.GetInt32("UserId")!.Value;
+            var userId = CurrentUserId;
 
             var existingSubscriptions = await _context.UserSubscriptions
                 .Where(subscription => subscription.UserId == userId && subscription.Status == "Active")

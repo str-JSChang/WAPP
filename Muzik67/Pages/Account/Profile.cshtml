@@ -45,8 +45,8 @@
                     <span class="profile-sidebar-name">@Model.Input.Username</span>
                     <nav class="workspace-nav" aria-label="My account">
                         <a asp-page="/Account/Profile" class="workspace-nav-item active" aria-current="page">Profile</a>
-                        <span class="workspace-nav-item" aria-disabled="true">Subscription</span>
-                        <span class="workspace-nav-item" aria-disabled="true">Progress</span>
+                        <a asp-page="/Student/Subscription" class="workspace-nav-item">Subscription</a>
+                        <a asp-page="/Student/Progress" class="workspace-nav-item">Progress</a>
                     </nav>
                 </aside>
             }

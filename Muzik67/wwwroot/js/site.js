@@ -1,12 +1,27 @@
 // Muzik 67 - Interactive Intro Animation, 4-Phase Video Navigation & Minecraft Audio System
 
 document.addEventListener("DOMContentLoaded", function () {
+    initNavbarFallback();
     initIntroAnimation();
     initScrollReveal();
     initBgmController();
     initFourPhaseVideoController();
     initMinecraftSplash();
 });
+
+function initNavbarFallback() {
+    document.querySelectorAll(".navbar-toggler[data-bs-target]").forEach(function (button) {
+        const selector = button.getAttribute("data-bs-target");
+        const target = selector ? document.querySelector(selector) : null;
+        if (!target) return;
+
+        button.addEventListener("click", function () {
+            if (window.bootstrap?.Collapse) return;
+            const isOpen = target.classList.toggle("show");
+            button.setAttribute("aria-expanded", String(isOpen));
+        });
+    });
+}
 
 // =========================================================================
 // 1. STORYBOARD INTRO ANIMATION & AUDIO CHIME
@@ -26,6 +41,13 @@ function initIntroAnimation() {
 
     if (!overlay) return;
 
+    let hasSeenIntro = false;
+    try {
+        hasSeenIntro = window.localStorage.getItem("muzik67IntroSeen") === "1";
+    } catch (_) {
+        // Private browsing can disable storage; the intro remains skippable.
+    }
+
     let soundEnabled = true;
     let audioCtx = null;
     let isIntroPlaying = true;
@@ -36,7 +58,7 @@ function initIntroAnimation() {
     let timer3 = null;
 
     // Begin fetching/decoding the chime before the visual sequence needs it.
-    if (audioIntro) {
+    if (audioIntro && !hasSeenIntro) {
         audioIntro.preload = "auto";
         audioIntro.load();
     }
@@ -189,12 +211,14 @@ function initIntroAnimation() {
             overlay.style.display = "none";
             overlay.classList.remove("intro-sequence-active");
             isIntroPlaying = false;
+            try { window.localStorage.setItem("muzik67IntroSeen", "1"); } catch (_) { }
         }, 4600);
     }
 
     function skipIntro() {
         if (!isIntroPlaying && overlay.style.display === "none") return;
         isIntroPlaying = false;
+        try { window.localStorage.setItem("muzik67IntroSeen", "1"); } catch (_) { }
         clearTimeout(timer1);
         clearTimeout(timer2);
         clearTimeout(timer3);
@@ -255,8 +279,13 @@ function initIntroAnimation() {
         });
     });
 
-    // Run storyboard sequence on page load
-    startIntroSequence();
+    if (hasSeenIntro) {
+        isIntroPlaying = false;
+        overlay.style.display = "none";
+        if (landingWrapper) landingWrapper.classList.add("animate-landing-in");
+    } else {
+        startIntroSequence();
+    }
 }
 
 // =========================================================================

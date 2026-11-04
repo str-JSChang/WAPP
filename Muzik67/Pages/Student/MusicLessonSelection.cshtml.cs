@@ -1,15 +1,15 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
 using Muzik67.Models;
+using Muzik67.Pages.Shared;
 
 
 namespace Muzik67.Pages.Student
 {
-    public class MusicLessonSelectionModel : PageModel
+    public class MusicLessonSelectionModel : SessionPageModel
     {
         readonly MuzikDbContext _context;
         public MusicLessonSelectionModel(MuzikDbContext context)
@@ -18,6 +18,8 @@ namespace Muzik67.Pages.Student
         }
 
         public IList<LearningContent> Lessons { get; set; } = new List<LearningContent>();
+        public ISet<int> CompletedLessonIds { get; private set; } = new HashSet<int>();
+        protected override bool MemberOnly => true;
 
         [BindProperty(SupportsGet = true, Name = "type")]
         public string SelectedType { get; set; } = "All";
@@ -28,13 +30,16 @@ namespace Muzik67.Pages.Student
 
         public async Task<IActionResult> OnGetAsync(string? type, string? difficulty)
         {
-            SelectedType = string.IsNullOrEmpty(type) ? "All" : type;
-            SelectedDifficulty = string.IsNullOrEmpty(difficulty) ? "All" : difficulty;
+            var allowedTypes = new[] { "All", "Theory", "EarTraining", "Instrument" };
+            var allowedDifficulties = new[] { "All", "Easy", "Medium", "Hard" };
+            SelectedType = allowedTypes.Contains(type, StringComparer.OrdinalIgnoreCase)
+                ? allowedTypes.First(item => string.Equals(item, type, StringComparison.OrdinalIgnoreCase))
+                : "All";
+            SelectedDifficulty = allowedDifficulties.Contains(difficulty, StringComparer.OrdinalIgnoreCase)
+                ? allowedDifficulties.First(item => string.Equals(item, difficulty, StringComparison.OrdinalIgnoreCase))
+                : "All";
 
-            var userId = HttpContext.Session.GetInt32("UserId");
-            var subscription = userId.HasValue
-                ? await SubscriptionAccess.GetActiveAsync(_context, userId.Value)
-                : null;
+            var subscription = await SubscriptionAccess.GetActiveAsync(_context, CurrentUserId);
             var hasPremiumAccess = subscription?.Plan?.Price > 0;
 
             var query = _context.LearningContents
@@ -51,7 +56,11 @@ namespace Muzik67.Pages.Student
                 query = query.Where(l => l.DifficultyLevel == SelectedDifficulty);
             }
 
-            Lessons = await query.ToListAsync();
+            Lessons = await query.OrderBy(l => l.DifficultyLevel).ThenBy(l => l.Title).ToListAsync();
+            CompletedLessonIds = (await _context.LessonProgresses
+                .Where(progress => progress.UserId == CurrentUserId)
+                .Select(progress => progress.ContentId)
+                .ToListAsync()).ToHashSet();
 
             return Page();
         }

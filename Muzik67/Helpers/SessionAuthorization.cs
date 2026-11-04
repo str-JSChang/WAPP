@@ -15,7 +15,7 @@ namespace Muzik67.Helpers
 
             if (!string.Equals(page.HttpContext.Session.GetString("Role"), "Member", StringComparison.Ordinal))
             {
-                return page.StatusCode(StatusCodes.Status403Forbidden);
+                return page.RedirectToPage("/Account/AccessDenied");
             }
 
             return null;
@@ -31,7 +31,7 @@ namespace Muzik67.Helpers
 
             if (!string.Equals(page.HttpContext.Session.GetString("Role"), "Admin", StringComparison.Ordinal))
             {
-                return page.StatusCode(StatusCodes.Status403Forbidden);
+                return page.RedirectToPage("/Account/AccessDenied");
             }
 
             return null;

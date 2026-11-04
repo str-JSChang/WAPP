@@ -1,75 +1,49 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
-using Muzik67.Helpers;
+using Muzik67.Pages.Shared;
 
 namespace Muzik67.Pages.Student;
 
-public class ProgressModel : PageModel
+public class ProgressModel : SessionPageModel
 {
     private readonly MuzikDbContext _context;
 
-    public ProgressModel(MuzikDbContext context)
-    {
-        _context = context;
-    }
+    public ProgressModel(MuzikDbContext context) => _context = context;
+
+    protected override bool MemberOnly => true;
 
     public string Username { get; private set; } = string.Empty;
+    public IReadOnlyList<GameProgressSummary> GameProgress { get; private set; } = [];
+    public IList<GameResultItem> RecentResults { get; private set; } = [];
+    public IList<LessonProgressItem> LessonProgress { get; private set; } = [];
+    public IList<BadgeItem> Badges { get; private set; } = [];
 
-    public IReadOnlyList<GameProgressSummary> GameProgress { get; private set; } =
-        Array.Empty<GameProgressSummary>();
-
-    public IList<GameResultItem> RecentResults { get; private set; } = new List<GameResultItem>();
-
-    // Summary metrics
     public int CompletedGames => GameProgress.Count;
     public int TotalAttempts => GameProgress.Sum(progress => progress.Attempts);
     public int AverageScore => GameProgress.Count == 0
         ? 0
         : (int)Math.Round(GameProgress.Average(progress => progress.ScorePercentage));
 
-    public class GameResultItem
-    {
-        public string GameName { get; init; } = string.Empty;
-        public int Score { get; init; }
-        public int Attempts { get; init; }
-        public DateTime CompletedAt { get; init; }
-    }
-
     public async Task<IActionResult> OnGetAsync()
     {
-        var access = SessionAuthorization.RequireMember(this);
-        if (access is not null)
-        {
-            return access;
-        }
-
-        var userId = HttpContext.Session.GetInt32("UserId");
-        if (userId is null)
-        {
-            return RedirectToPage("/Account/Login");
-        }
-
         Username = HttpContext.Session.GetString("Username") ?? "Member";
 
         var progressRecords = await _context.GameProgresses
             .AsNoTracking()
-            .Where(progress => progress.UserId == userId.Value &&
-                               progress.Game != null &&
-                               progress.Game.Status == "Active")
+            .Where(progress => progress.UserId == CurrentUserId && progress.Game != null)
             .Include(progress => progress.Game)
                 .ThenInclude(game => game!.Quizzes)
             .OrderByDescending(progress => progress.DateOfCompletion)
             .ToListAsync();
 
-        // Grouped summaries for per-game progress bars
-        var records = progressRecords
+        GameProgress = progressRecords
             .GroupBy(progress => new
             {
                 progress.GameId,
                 GameName = progress.Game?.GameName ?? "Unknown game",
-                DifficultyLevel = progress.Game?.DifficultyLevel ?? "Unknown"
+                DifficultyLevel = progress.Game?.DifficultyLevel ?? "Unknown",
+                TotalQuestions = progress.Game?.Quizzes.Count ?? 0
             })
             .Select(group => new GameProgressSummary
             {
@@ -77,39 +51,70 @@ public class ProgressModel : PageModel
                 GameName = group.Key.GameName,
                 Difficulty = group.Key.DifficultyLevel,
                 HighestScore = group.Max(progress => progress.Score),
-                Attempts = group.Sum(progress => progress.Attempts),
+                Attempts = group.Count(),
                 LastCompleted = group.Max(progress => progress.DateOfCompletion),
-                TotalQuestions = group
-                    .SelectMany(progress => progress.Game?.Quizzes ?? [])
-                    .Count()
+                TotalQuestions = Math.Max(group.Key.TotalQuestions, 1)
             })
             .OrderByDescending(progress => progress.LastCompleted)
             .ToList();
 
-        foreach (var progress in records)
+        RecentResults = progressRecords.Take(10).Select(progress => new GameResultItem
         {
-            progress.TotalQuestions = Math.Max(progress.TotalQuestions, 1);
-        }
+            GameName = progress.Game?.GameName ?? "Game unavailable",
+            Score = progress.Score,
+            TotalQuestions = progress.Game?.Quizzes.Count ?? 0,
+            CompletedAt = progress.DateOfCompletion
+        }).ToList();
 
-        GameProgress = records;
-
-        // Recent attempts for the detailed history log
-        RecentResults = progressRecords
-            .Take(10)
-            .Select(progress => new GameResultItem
+        LessonProgress = await _context.LessonProgresses
+            .AsNoTracking()
+            .Where(progress => progress.UserId == CurrentUserId)
+            .Include(progress => progress.Content)
+            .OrderByDescending(progress => progress.CompletedAt)
+            .Select(progress => new LessonProgressItem
             {
-                GameName = progress.Game?.GameName ?? "Game unavailable",
-                Score = progress.Score,
-                Attempts = progress.Attempts,
-                CompletedAt = progress.DateOfCompletion
+                ContentId = progress.ContentId,
+                LessonTitle = progress.Content != null ? progress.Content.Title : "Lesson unavailable",
+                CompletedAt = progress.CompletedAt
             })
-            .ToList();
+            .ToListAsync();
+
+        Badges = await _context.UserBadges
+            .AsNoTracking()
+            .Where(badge => badge.UserId == CurrentUserId)
+            .OrderByDescending(badge => badge.EarnedAt)
+            .Select(badge => new BadgeItem
+            {
+                Name = badge.BadgeName,
+                EarnedAt = badge.EarnedAt
+            })
+            .ToListAsync();
 
         return Page();
     }
+
+    public sealed class GameResultItem
+    {
+        public string GameName { get; init; } = string.Empty;
+        public int Score { get; init; }
+        public int TotalQuestions { get; init; }
+        public DateTime CompletedAt { get; init; }
+    }
+
+    public sealed class LessonProgressItem
+    {
+        public int ContentId { get; init; }
+        public string LessonTitle { get; init; } = string.Empty;
+        public DateTime CompletedAt { get; init; }
+    }
+
+    public sealed class BadgeItem
+    {
+        public string Name { get; init; } = string.Empty;
+        public DateTime EarnedAt { get; init; }
+    }
 }
 
-// Summary data displayed for each completed game
 public sealed class GameProgressSummary
 {
     public int GameId { get; init; }
@@ -118,11 +123,7 @@ public sealed class GameProgressSummary
     public int HighestScore { get; init; }
     public int Attempts { get; init; }
     public DateTime LastCompleted { get; init; }
-    public int TotalQuestions { get; set; }
-
-    // Converts the highest score into a percentage for the progress bar
+    public int TotalQuestions { get; init; }
     public int ScorePercentage => Math.Clamp(
-        (int)Math.Round(HighestScore * 100.0 / TotalQuestions),
-        0,
-        100);
+        (int)Math.Round(HighestScore * 100.0 / TotalQuestions), 0, 100);
 }
