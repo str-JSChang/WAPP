@@ -27,5 +27,10 @@ namespace Muzik67.Models
 
         [MaxLength(20)]
         public string AccountStatus { get; set; } = "Active"; // "Active", "Suspended"
+
+        [MaxLength(20)]
+        public string AvatarKey { get; set; } = "note";
+
+        public string? PinHash { get; set; }
     }
 }

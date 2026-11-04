@@ -22,6 +22,16 @@ namespace Muzik67.Models
         [MaxLength(100)]
         public string CorrectAnswer { get; set; } = string.Empty;
 
+        [MaxLength(20)]
+        public string ActivityType { get; set; } = "MultipleChoice";
+
+        [MaxLength(500)]
+        public string MediaUrl { get; set; } = string.Empty;
+
+        public string OptionImageUrls { get; set; } = string.Empty;
+
+        public int SortOrder { get; set; }
+
         [ForeignKey("GameId")]
         public Game? Game { get; set; }
     }

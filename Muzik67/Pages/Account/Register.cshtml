@@ -44,6 +44,22 @@
                             </div>
                         </div>
 
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.AvatarKey" class="form-label fw-semibold"></label>
+                                <select asp-for="Input.AvatarKey" class="form-select">
+                                    <option value="note">♪ Music Note</option><option value="piano">🎹 Piano</option><option value="star">★ Star</option><option value="drum">🥁 Drum</option>
+                                </select>
+                                <span asp-validation-for="Input.AvatarKey" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.Pin" class="form-label fw-semibold"></label>
+                                <input asp-for="Input.Pin" class="form-control" inputmode="numeric" maxlength="4" placeholder="1234" />
+                                <span asp-validation-for="Input.Pin" class="text-danger small"></span>
+                                <div class="form-text">Enables the child-friendly quick login.</div>
+                            </div>
+                        </div>
+
                         <div class="form-check mb-4">
                             <input asp-for="Input.AgreeToTerms" class="form-check-input" />
                             <label asp-for="Input.AgreeToTerms" class="form-check-label small text-muted">

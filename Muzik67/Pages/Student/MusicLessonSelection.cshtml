@@ -48,6 +48,11 @@
                     Instrument
                 </a>
 
+                <a asp-page="./MusicLessonSelection" asp-route-type="Song" asp-route-difficulty="@Model.SelectedDifficulty"
+                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedType == "Song" ? "active-difficulty" : "")">
+                    Songs
+                </a>
+
             </div>
         </div>
 

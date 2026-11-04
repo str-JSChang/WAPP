@@ -74,7 +74,7 @@ public class LessonContentModel : SessionPageModel
         var lesson = await _context.LearningContents
             .AsNoTracking()
             .FirstOrDefaultAsync(content => content.ContentId == id);
-        if (lesson is null) return false;
+        if (lesson is null || lesson.ApprovalStatus != "Approved") return false;
 
         var subscription = await SubscriptionAccess.GetActiveAsync(_context, CurrentUserId);
         if (!SubscriptionAccess.CanAccess(lesson.Status, subscription))
@@ -89,9 +89,11 @@ public class LessonContentModel : SessionPageModel
         NextLessonId = await _context.LearningContents
             .AsNoTracking()
             .Where(content => content.ContentId > id &&
+                content.ApprovalStatus == "Approved" &&
                 (content.Status == "Active" ||
                  content.Status == "Premium" && subscription != null && subscription.Plan != null && subscription.Plan.Price > 0))
-            .OrderBy(content => content.ContentId)
+            .OrderBy(content => content.SortOrder)
+            .ThenBy(content => content.ContentId)
             .Select(content => (int?)content.ContentId)
             .FirstOrDefaultAsync();
 

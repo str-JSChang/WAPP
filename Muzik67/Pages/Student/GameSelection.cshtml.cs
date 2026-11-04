@@ -33,15 +33,15 @@ namespace Muzik67.Pages.Student
             var hasPremiumAccess = subscription?.Plan?.Price > 0;
 
             var query = _context.Games
-                .Where(game => game.Status == "Active"
-                    || hasPremiumAccess && game.Status == "Premium");
+                .Where(game => game.ApprovalStatus == "Approved" && game.Quizzes.Any() && (game.Status == "Active"
+                    || hasPremiumAccess && game.Status == "Premium"));
 
             if (SelectedDifficulty != "All")
             {
                 query = query.Where(g => g.DifficultyLevel == SelectedDifficulty);
             }
 
-            Games = await query.OrderBy(g => g.DifficultyLevel).ThenBy(g => g.GameName).ToListAsync();
+            Games = await query.OrderBy(g => g.SortOrder).ThenBy(g => g.DifficultyLevel).ThenBy(g => g.GameName).ToListAsync();
             
             return Page();
         }

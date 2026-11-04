@@ -26,7 +26,7 @@
         <div class="panel-heading">
             <h2>@(Model.ContentForm.ContentId == 0 ? "Add learning material" : "Edit learning material")</h2>
         </div>
-        <form method="post" asp-page-handler="SaveContent" class="row g-3">
+        <form method="post" asp-page-handler="SaveContent" enctype="multipart/form-data" class="row g-3">
             <input type="hidden" asp-for="ContentForm.ContentId" />
             <div class="col-md-6">
                 <label asp-for="ContentForm.Title" class="form-label">Title</label>
@@ -39,6 +39,7 @@
                     <option value="Theory">Music theory</option>
                     <option value="EarTraining">Ear training</option>
                     <option value="Instrument">Instrument</option>
+                    <option value="Song">Song / guided tune</option>
                 </select>
                 <span asp-validation-for="ContentForm.ContentType" class="text-danger"></span>
             </div>
@@ -55,6 +56,28 @@
                 <label asp-for="ContentForm.Description" class="form-label">Description</label>
                 <textarea asp-for="ContentForm.Description" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="ContentForm.Description" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="ContentForm.BodyContent" class="form-label">Full lesson instructions</label>
+                <textarea asp-for="ContentForm.BodyContent" class="form-control" rows="5" placeholder="Write the complete learner-facing lesson or song instructions."></textarea>
+                <span asp-validation-for="ContentForm.BodyContent" class="text-danger"></span>
+            </div>
+            <div class="col-md-5">
+                <label asp-for="ContentForm.MediaFile" class="form-label">Upload lesson or song media</label>
+                <input asp-for="ContentForm.MediaFile" class="form-control" type="file" accept="audio/*,image/*,video/mp4,application/pdf" />
+                <span asp-validation-for="ContentForm.MediaFile" class="text-danger"></span>
+            </div>
+            <div class="col-md-5">
+                <label asp-for="ContentForm.MediaUrl" class="form-label">Existing or external media URL</label>
+                <input asp-for="ContentForm.MediaUrl" class="form-control" placeholder="/uploads/file.mp3 or https://..." />
+            </div>
+            <div class="col-md-2">
+                <label asp-for="ContentForm.SortOrder" class="form-label">Display order</label>
+                <input asp-for="ContentForm.SortOrder" class="form-control" min="0" max="9999" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="ContentForm.ApprovalStatus" class="form-label">Review state</label>
+                <select asp-for="ContentForm.ApprovalStatus" class="form-select"><option>Pending</option><option>Approved</option><option>Rejected</option></select>
             </div>
             <div class="col-md-3">
                 <label asp-for="ContentForm.Status" class="form-label">Visibility</label>
@@ -76,17 +99,26 @@
 
         <div class="table-responsive mt-4">
             <table class="table align-middle">
-                <thead><tr><th>Title</th><th>Type</th><th>Level</th><th>Access</th><th class="text-end">Actions</th></tr></thead>
+                <thead><tr><th>Order</th><th>Title</th><th>Type</th><th>Level</th><th>Access</th><th>Review</th><th class="text-end">Actions</th></tr></thead>
                 <tbody>
                     @foreach (var content in Model.Contents)
                     {
                         <tr>
-                            <td>@content.Title</td>
+                            <td>@content.SortOrder</td><td>@content.Title</td>
                             <td>@content.ContentType</td>
                             <td>@content.DifficultyLevel</td>
                             <td>@(content.Status == "Premium" ? "Premium" : content.Status)</td>
+                            <td>@content.ApprovalStatus</td>
                             <td class="text-end text-nowrap">
                                 <a asp-page="./ContentManagement" asp-route-contentId="@content.ContentId" class="btn btn-sm btn-outline-primary rounded-pill">Edit</a>
+                                @if (content.ApprovalStatus != "Approved")
+                                {
+                                    <form method="post" asp-page-handler="ReviewContent" class="d-inline"><input type="hidden" name="id" value="@content.ContentId" /><input type="hidden" name="decision" value="Approved" /><button class="btn btn-sm btn-outline-success rounded-pill">Approve</button></form>
+                                }
+                                @if (content.ApprovalStatus != "Rejected")
+                                {
+                                    <form method="post" asp-page-handler="ReviewContent" class="d-inline"><input type="hidden" name="id" value="@content.ContentId" /><input type="hidden" name="decision" value="Rejected" /><button class="btn btn-sm btn-outline-warning rounded-pill">Reject</button></form>
+                                }
                                 <form method="post" asp-page-handler="DeleteContent" class="d-inline">
                                     <input type="hidden" name="id" value="@content.ContentId" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this learning material?')">Delete</button>
@@ -96,7 +128,7 @@
                     }
                     @if (Model.Contents.Count == 0)
                     {
-                        <tr><td colspan="5" class="text-center text-muted py-3">No learning materials yet.</td></tr>
+                        <tr><td colspan="7" class="text-center text-muted py-3">No learning materials yet.</td></tr>
                     }
                 </tbody>
             </table>
@@ -112,6 +144,14 @@
             <div class="col-12">
                 <label class="form-label">Game ID</label>
                 <input class="form-control" value="@(Model.GameForm.GameId == 0 ? "Assigned after saving" : Model.GameForm.GameId.ToString())" readonly />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="GameForm.SortOrder" class="form-label">Display order</label>
+                <input asp-for="GameForm.SortOrder" class="form-control" min="0" max="9999" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="GameForm.ApprovalStatus" class="form-label">Review state</label>
+                <select asp-for="GameForm.ApprovalStatus" class="form-select"><option>Pending</option><option>Approved</option><option>Rejected</option></select>
             </div>
             <div class="col-12">
                 <label asp-for="GameForm.GameName" class="form-label">Game Name</label>
@@ -150,14 +190,22 @@
 
         <div class="table-responsive mt-4">
             <table class="table align-middle">
-                <thead><tr><th>Game</th><th>Difficulty</th><th>Access</th><th class="text-end">Actions</th></tr></thead>
+                <thead><tr><th>Order</th><th>Game</th><th>Difficulty</th><th>Access</th><th>Review</th><th class="text-end">Actions</th></tr></thead>
                 <tbody>
                     @foreach (var game in Model.Games)
                     {
                         <tr>
-                            <td>@game.GameName</td><td>@game.DifficultyLevel</td><td>@game.Status</td>
+                            <td>@game.SortOrder</td><td>@game.GameName</td><td>@game.DifficultyLevel</td><td>@game.Status</td><td>@game.ApprovalStatus</td>
                             <td class="text-end text-nowrap">
                                 <a asp-page="./ContentManagement" asp-route-gameId="@game.GameId" class="btn btn-sm btn-outline-primary rounded-pill">Edit</a>
+                                @if (game.ApprovalStatus != "Approved")
+                                {
+                                    <form method="post" asp-page-handler="ReviewGame" class="d-inline"><input type="hidden" name="id" value="@game.GameId" /><input type="hidden" name="decision" value="Approved" /><button class="btn btn-sm btn-outline-success rounded-pill">Approve</button></form>
+                                }
+                                @if (game.ApprovalStatus != "Rejected")
+                                {
+                                    <form method="post" asp-page-handler="ReviewGame" class="d-inline"><input type="hidden" name="id" value="@game.GameId" /><input type="hidden" name="decision" value="Rejected" /><button class="btn btn-sm btn-outline-warning rounded-pill">Reject</button></form>
+                                }
                                 <form method="post" asp-page-handler="DeleteGame" class="d-inline">
                                     <input type="hidden" name="id" value="@game.GameId" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this game and its questions?')">Delete</button>
@@ -167,7 +215,7 @@
                     }
                     @if (Model.Games.Count == 0)
                     {
-                        <tr><td colspan="4" class="text-center text-muted py-3">No games yet.</td></tr>
+                        <tr><td colspan="6" class="text-center text-muted py-3">No games yet.</td></tr>
                     }
                 </tbody>
             </table>
@@ -179,7 +227,7 @@
             <h2>@(Model.QuestionForm.QuestionId == 0 ? "Add game question" : "Edit game question")</h2>
             <p class="text-muted mb-0">Write answer choices separated by commas, then select the correct answer.</p>
         </div>
-        <form method="post" asp-page-handler="SaveQuestion" class="row g-3">
+        <form method="post" asp-page-handler="SaveQuestion" enctype="multipart/form-data" class="row g-3">
             <input type="hidden" asp-for="QuestionForm.QuestionId" />
             <div class="col-md-4">
                 <label asp-for="QuestionForm.GameId" class="form-label">Game</label>
@@ -197,6 +245,10 @@
                 <input asp-for="QuestionForm.QuestionText" class="form-control" />
                 <span asp-validation-for="QuestionForm.QuestionText" class="text-danger"></span>
             </div>
+            <div class="col-md-4">
+                <label asp-for="QuestionForm.ActivityType" class="form-label">Activity type</label>
+                <select asp-for="QuestionForm.ActivityType" class="form-select"><option value="MultipleChoice">Multiple choice</option><option value="Sound">Guess the sound</option><option value="DragDrop">Image drag and drop</option><option value="Melody">Melody performance</option></select>
+            </div>
             <div class="col-md-8">
                 <label asp-for="QuestionForm.AnswerOptions" class="form-label">Answer choices</label>
                 <input asp-for="QuestionForm.AnswerOptions" class="form-control" placeholder="C, D, E, F" />
@@ -207,6 +259,14 @@
                 <input asp-for="QuestionForm.CorrectAnswer" class="form-control" />
                 <span asp-validation-for="QuestionForm.CorrectAnswer" class="text-danger"></span>
             </div>
+            <div class="col-md-5">
+                <label asp-for="QuestionForm.MediaFile" class="form-label">Question sound or image</label>
+                <input asp-for="QuestionForm.MediaFile" class="form-control" type="file" accept="audio/*,image/*" />
+                <span asp-validation-for="QuestionForm.MediaFile" class="text-danger"></span>
+            </div>
+            <div class="col-md-5"><label asp-for="QuestionForm.MediaUrl" class="form-label">Existing media URL</label><input asp-for="QuestionForm.MediaUrl" class="form-control" /></div>
+            <div class="col-md-2"><label asp-for="QuestionForm.SortOrder" class="form-label">Order</label><input asp-for="QuestionForm.SortOrder" class="form-control" min="0" max="9999" /></div>
+            <div class="col-12"><label asp-for="QuestionForm.OptionImageUrls" class="form-label">Option image URLs (drag-and-drop only)</label><input asp-for="QuestionForm.OptionImageUrls" class="form-control" placeholder="One comma-separated image URL per answer choice" /></div>
             <div class="col-12 d-flex gap-2">
                 <button class="btn btn-primary rounded-pill px-4" type="submit">Save question</button>
                 @if (Model.QuestionForm.QuestionId > 0)
@@ -218,12 +278,12 @@
 
         <div class="table-responsive mt-4">
             <table class="table align-middle">
-                <thead><tr><th>Game</th><th>Question</th><th>Choices</th><th>Answer</th><th class="text-end">Actions</th></tr></thead>
+                <thead><tr><th>Game</th><th>Type</th><th>Question</th><th>Choices</th><th>Answer</th><th class="text-end">Actions</th></tr></thead>
                 <tbody>
                     @foreach (var question in Model.Questions)
                     {
                         <tr>
-                            <td>@question.Game?.GameName</td><td>@question.QuestionText</td><td>@question.AnswerOptions</td><td>@question.CorrectAnswer</td>
+                            <td>@question.Game?.GameName</td><td>@question.ActivityType</td><td>@question.QuestionText</td><td>@question.AnswerOptions</td><td>@question.CorrectAnswer</td>
                             <td class="text-end text-nowrap">
                                 <a asp-page="./ContentManagement" asp-route-questionId="@question.QuestionId" class="btn btn-sm btn-outline-primary rounded-pill">Edit</a>
                                 <form method="post" asp-page-handler="DeleteQuestion" class="d-inline">
@@ -235,7 +295,7 @@
                     }
                     @if (Model.Questions.Count == 0)
                     {
-                        <tr><td colspan="5" class="text-center text-muted py-3">No game questions yet.</td></tr>
+                        <tr><td colspan="6" class="text-center text-muted py-3">No game questions yet.</td></tr>
                     }
                 </tbody>
             </table>

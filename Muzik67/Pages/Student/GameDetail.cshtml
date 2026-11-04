@@ -1,10 +1,12 @@
 @page "{id:int}"
 @model Muzik67.Pages.Student.GameDetailModel
+@using Muzik67.Helpers
 @{
     ViewData["Title"] = Model.Game?.GameName ?? "Music Quiz";
     var progress = Model.Questions.Count == 0
         ? 0
         : (int)Math.Round(Model.QuestionNumber * 100.0 / Model.Questions.Count);
+    var activityType = Model.CurrentQuestion?.ActivityType ?? "MultipleChoice";
 }
 
 <div class="container py-4 py-lg-5 mc-quiz-page">
@@ -38,7 +40,7 @@
         <span aria-disabled="true">4 Reward</span>
     </nav>
 
-    <p class="mb-4">GOAL: Read each question, then pick the best musical answer.</p>
+    <p class="mb-4">GOAL: @(activityType == "Melody" ? "Listen and perform the tune in the correct order." : activityType == "DragDrop" ? "Match the correct music picture to the answer portal." : activityType == "Sound" ? "Listen carefully, then identify the sound." : "Read each question, then pick the best musical answer.")</p>
 
     @if (!string.IsNullOrWhiteSpace(Model.FeedbackMessage))
     {
@@ -50,10 +52,18 @@
     <section class="mc-question-board" aria-labelledby="question-heading">
         <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-3">
             <h2 id="question-heading" class="h6 mb-0">Question @Model.QuestionNumber: @Model.CurrentQuestion?.QuestionText</h2>
-            <span class="small">Choose one answer</span>
+            <span class="small">@(activityType == "Melody" ? "Play the full sequence" : activityType == "DragDrop" ? "Drag or tap one picture" : "Choose one answer")</span>
         </div>
 
-        @if (Model.AudioCueFrequency.HasValue)
+        @if (MediaUploadHelper.IsAudio(Model.CurrentQuestion?.MediaUrl))
+        {
+            <audio controls preload="metadata" class="w-100 mb-3" src="@Model.CurrentQuestion!.MediaUrl">Your browser cannot play this question sound.</audio>
+        }
+        else if (MediaUploadHelper.IsImage(Model.CurrentQuestion?.MediaUrl))
+        {
+            <img src="@Model.CurrentQuestion!.MediaUrl" class="img-fluid rounded mb-3 quiz-prompt-media" alt="Question clue" />
+        }
+        else if (Model.AudioCueFrequency.HasValue)
         {
             <button type="button" class="btn btn-outline-dark mb-3" onclick="playTone(@Model.AudioCueFrequency.Value, this)">
                 ♪ Hear the question sound
@@ -66,28 +76,74 @@
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
             <span asp-validation-for="SelectedAnswer" class="text-danger"></span>
 
-            <div class="mc-answer-grid">
-                @for (var index = 0; index < Model.AnswerOptions.Count; index++)
-                {
-                    var option = Model.AnswerOptions[index];
-                    <div class="mc-answer-card">
-                        <label class="mc-answer-choice">
-                            <input asp-for="SelectedAnswer" type="radio" value="@option" />
-                            <span class="mc-answer-block">@((char)('A' + index))</span>
-                            <strong>@option</strong>
-                        </label>
+            @if (activityType == "Melody")
+            {
+                <div class="melody-workspace" data-melody-length="@Model.CurrentQuestion!.CorrectAnswer.Split(',', StringSplitOptions.RemoveEmptyEntries).Length">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button type="button" class="btn btn-outline-dark" id="hearTargetMelody" data-target="@Model.CurrentQuestion.CorrectAnswer">♪ Hear target melody</button>
+                        <button type="button" class="btn btn-outline-secondary" id="resetMelody">Reset my notes</button>
                     </div>
-                }
-            </div>
+                    <p class="mb-2"><strong>Your notes:</strong> <span id="melodySequence" aria-live="polite">None yet</span></p>
+                    <div class="melody-keyboard" role="group" aria-label="Melody keyboard">
+                        @foreach (var note in Model.AnswerOptions)
+                        {
+                            <button type="button" class="melody-key" data-note="@note">@note</button>
+                        }
+                    </div>
+                    <input asp-for="SelectedAnswer" type="hidden" id="melodyAnswer" />
+                </div>
+            }
+            else if (activityType == "DragDrop")
+            {
+                <div class="drag-match-workspace">
+                    <p class="small">Drag a picture into the portal. On touch devices, tap a picture and then tap the portal.</p>
+                    <div class="drag-option-grid" id="dragOptions">
+                        @for (var index = 0; index < Model.AnswerOptions.Count; index++)
+                        {
+                            var option = Model.AnswerOptions[index];
+                            var imageUrl = index < Model.AnswerOptionImages.Count ? Model.AnswerOptionImages[index] : string.Empty;
+                            <button type="button" class="drag-answer-card" draggable="true" data-answer="@option" aria-label="Choose @option">
+                                @if (!string.IsNullOrWhiteSpace(imageUrl))
+                                {
+                                    <img src="@imageUrl" alt="@option note picture" />
+                                }
+                                else
+                                {
+                                    <span class="drag-note-symbol">♪</span>
+                                }
+                                <strong>@option</strong>
+                            </button>
+                        }
+                    </div>
+                    <button type="button" id="answerPortal" class="answer-portal mt-3" aria-label="Drop selected answer here">Drop the matching picture here</button>
+                    <input asp-for="SelectedAnswer" type="hidden" id="dragAnswer" />
+                </div>
+            }
+            else
+            {
+                <div class="mc-answer-grid">
+                    @for (var index = 0; index < Model.AnswerOptions.Count; index++)
+                    {
+                        var option = Model.AnswerOptions[index];
+                        <div class="mc-answer-card">
+                            <label class="mc-answer-choice">
+                                <input asp-for="SelectedAnswer" type="radio" value="@option" />
+                                <span class="mc-answer-block">@((char)('A' + index))</span>
+                                <strong>@option</strong>
+                            </label>
+                        </div>
+                    }
+                </div>
+            }
 
             <div class="mc-quiz-support-grid">
                 <aside class="mc-parent-panel">
                     <h3 class="h6">HINT</h3>
-                    <p class="mb-0">Say each option aloud and connect it to what you learned in the lesson.</p>
+                    <p class="mb-0">@(activityType == "Melody" ? "Hear the target as often as you need, then copy every note from left to right." : activityType == "DragDrop" ? "Look at the large note letter and its solfege name before matching." : activityType == "Sound" ? "Replay the sound and compare its pitch with the answer words." : "Say each option aloud and connect it to what you learned in the lesson.")</p>
                 </aside>
                 <aside class="mc-parent-panel">
                     <h3 class="h6">FEEDBACK</h3>
-                    <p class="mb-0">Right answer = +20 XP. Wrong answer = lose one heart.</p>
+                    <p class="mb-0">Right answer = one point. Wrong answer = lose one heart.</p>
                 </aside>
             </div>
 
@@ -105,4 +161,51 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+    (() => {
+        const frequencies = { C: 261.63, D: 293.66, E: 329.63, F: 349.23, G: 392, A: 440, B: 493.88 };
+        const playSequence = (sequence) => sequence.split(',').map(note => note.trim().toUpperCase()).filter(Boolean).forEach((note, index) => {
+            window.setTimeout(() => playTone(frequencies[note] || 261.63), index * 430);
+        });
+        document.getElementById('hearTargetMelody')?.addEventListener('click', event => playSequence(event.currentTarget.dataset.target || ''));
+
+        const melodyRoot = document.querySelector('.melody-workspace');
+        if (melodyRoot) {
+            const notes = [];
+            const maxLength = Number(melodyRoot.dataset.melodyLength || 0);
+            const answer = document.getElementById('melodyAnswer');
+            const display = document.getElementById('melodySequence');
+            const update = () => { answer.value = notes.join(','); display.textContent = notes.length ? notes.join(' - ') : 'None yet'; };
+            melodyRoot.querySelectorAll('[data-note]').forEach(key => key.addEventListener('click', () => {
+                if (notes.length >= maxLength) return;
+                const note = key.dataset.note.toUpperCase(); notes.push(note); playTone(frequencies[note] || 261.63, key); update();
+            }));
+            document.getElementById('resetMelody')?.addEventListener('click', () => { notes.length = 0; update(); });
+        }
+
+        const portal = document.getElementById('answerPortal');
+        const dragAnswer = document.getElementById('dragAnswer');
+        let selectedCard = null;
+        const choose = card => {
+            document.querySelectorAll('.drag-answer-card').forEach(item => item.classList.remove('selected'));
+            selectedCard = card; card.classList.add('selected');
+        };
+        const place = card => {
+            if (!card || !portal || !dragAnswer) return;
+            dragAnswer.value = card.dataset.answer; portal.textContent = `${card.dataset.answer} selected`; portal.classList.add('has-answer');
+        };
+        document.querySelectorAll('.drag-answer-card').forEach(card => {
+            card.addEventListener('click', () => choose(card));
+            card.addEventListener('dragstart', event => event.dataTransfer.setData('text/plain', card.dataset.answer));
+        });
+        portal?.addEventListener('click', () => place(selectedCard));
+        portal?.addEventListener('dragover', event => { event.preventDefault(); portal.classList.add('drag-over'); });
+        portal?.addEventListener('dragleave', () => portal.classList.remove('drag-over'));
+        portal?.addEventListener('drop', event => {
+            event.preventDefault(); portal.classList.remove('drag-over');
+            const answerValue = event.dataTransfer.getData('text/plain');
+            place(Array.from(document.querySelectorAll('.drag-answer-card')).find(card => card.dataset.answer === answerValue));
+        });
+    })();
+    </script>
 }

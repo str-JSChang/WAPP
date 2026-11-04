@@ -38,7 +38,8 @@ public class UsersModel : SessionPageModel
                     Username = user.Username,
                     Email = user.Email,
                     Role = user.Role,
-                    AccountStatus = user.AccountStatus
+                    AccountStatus = user.AccountStatus,
+                    AvatarKey = user.AvatarKey
                 };
             }
         }
@@ -56,6 +57,8 @@ public class UsersModel : SessionPageModel
             ModelState.AddModelError("Input.Password", "A password is required for a new account.");
         if (!string.IsNullOrEmpty(Input.Password) && !PasswordMeetsPolicy(Input.Password))
             ModelState.AddModelError("Input.Password", "Use at least 8 characters with uppercase, lowercase, and a number.");
+        if (!string.IsNullOrWhiteSpace(Input.Pin) && !System.Text.RegularExpressions.Regex.IsMatch(Input.Pin, "^[0-9]{4}$"))
+            ModelState.AddModelError("Input.Pin", "The child PIN must contain exactly four numbers.");
 
         if (!ModelState.IsValid)
         {
@@ -86,8 +89,11 @@ public class UsersModel : SessionPageModel
         user.Email = email;
         user.Role = Input.Role;
         user.AccountStatus = Input.AccountStatus;
+        user.AvatarKey = Input.AvatarKey;
         if (!string.IsNullOrEmpty(Input.Password))
             user.PasswordHash = PasswordHelper.HashPassword(Input.Password);
+        if (!string.IsNullOrWhiteSpace(Input.Pin))
+            user.PinHash = PasswordHelper.HashPassword(Input.Pin);
 
         await _context.SaveChangesAsync();
         StatusMessage = Input.UserId == 0 ? "Account created." : "Account updated.";
@@ -129,5 +135,7 @@ public class UsersModel : SessionPageModel
         [DataType(DataType.Password), StringLength(100)] public string? Password { get; set; }
         [Required, RegularExpression("^(Admin|Member)$")] public string Role { get; set; } = "Member";
         [Required, RegularExpression("^(Active|Suspended)$")] public string AccountStatus { get; set; } = "Active";
+        [Required, RegularExpression("^(note|piano|star|drum)$")] public string AvatarKey { get; set; } = "note";
+        [DataType(DataType.Password)] public string? Pin { get; set; }
     }
 }

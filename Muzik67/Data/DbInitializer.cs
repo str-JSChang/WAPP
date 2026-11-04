@@ -12,6 +12,7 @@ namespace Muzik67.Data
             context.Database.EnsureCreated();
 
             EnsureStatusColumn(context);
+            EnsureProposalColumns(context);
             CreateProgressTables(context);
 
             // 1. Seed Users
@@ -26,7 +27,9 @@ namespace Muzik67.Data
                         PasswordHash = PasswordHelper.HashPassword("Admin@123"),
                         Role = "Admin",
                         RegistrationDate = DateTime.UtcNow,
-                        AccountStatus = "Active"
+                        AccountStatus = "Active",
+                        AvatarKey = "piano",
+                        PinHash = PasswordHelper.HashPassword("1234")
                     },
                     new User
                     {
@@ -35,7 +38,9 @@ namespace Muzik67.Data
                         PasswordHash = PasswordHelper.HashPassword("Student@123"),
                         Role = "Member",
                         RegistrationDate = DateTime.UtcNow,
-                        AccountStatus = "Active"
+                        AccountStatus = "Active",
+                        AvatarKey = "star",
+                        PinHash = PasswordHelper.HashPassword("2468")
                     }
                 };
                 context.Users.AddRange(users);
@@ -85,31 +90,46 @@ namespace Muzik67.Data
                     {
                         Title = "Introduction to the Treble Clef & Musical Notes",
                         Description = "Discover the 7 basic notes: C (Do), D (Re), E (Mi), F (Fa), G (Sol), A (La), B (Ti).",
+                        BodyContent = "Listen to every note from C to B. Notice how each pitch rises. Then play the scale and say each solfege name aloud.",
                         ContentType = "Theory",
                         DifficultyLevel = "Easy",
                         CreatedBy = "admin",
                         Status = "Active",
-                        CreatedDate = DateTime.UtcNow
+                        CreatedDate = DateTime.UtcNow,
+                        ApprovalStatus = "Approved",
+                        ApprovedBy = "admin",
+                        ApprovedDate = DateTime.UtcNow,
+                        SortOrder = 10
                     },
                     new LearningContent
                     {
                         Title = "Rhythm Fun: Quarter Notes and Half Notes",
                         Description = "Learn how beats work by clapping along with friendly musical rhythm cards.",
+                        BodyContent = "Count a steady four-beat pulse. Tap once for a quarter note and hold for two counts when you see a half note.",
                         ContentType = "Theory",
                         DifficultyLevel = "Easy",
                         CreatedBy = "admin",
                         Status = "Active",
-                        CreatedDate = DateTime.UtcNow
+                        CreatedDate = DateTime.UtcNow,
+                        ApprovalStatus = "Approved",
+                        ApprovedBy = "admin",
+                        ApprovedDate = DateTime.UtcNow,
+                        SortOrder = 20
                     },
                     new LearningContent
                     {
                         Title = "Meet the Keyboard: White Keys and Black Keys",
                         Description = "Understand how piano keys are arranged in repeating patterns of two and three black keys.",
+                        BodyContent = "Find each group of two black keys. The white key immediately before that group is C. Use this pattern to find notes anywhere on a keyboard.",
                         ContentType = "Instrument",
                         DifficultyLevel = "Medium",
                         CreatedBy = "admin",
                         Status = "Active",
-                        CreatedDate = DateTime.UtcNow
+                        CreatedDate = DateTime.UtcNow,
+                        ApprovalStatus = "Approved",
+                        ApprovedBy = "admin",
+                        ApprovedDate = DateTime.UtcNow,
+                        SortOrder = 30
                     }
                 };
                 context.LearningContents.AddRange(contents);
@@ -165,6 +185,179 @@ namespace Muzik67.Data
                 };
                 context.GamesQuizzes.AddRange(quizzes);
                 context.SaveChanges();
+            }
+
+            EnsureProposalActivities(context);
+        }
+
+        private static void EnsureProposalActivities(MuzikDbContext context)
+        {
+            var now = DateTime.UtcNow;
+            var adminName = context.Users.Where(user => user.Role == "Admin")
+                .Select(user => user.Username).FirstOrDefault() ?? "admin";
+
+            var demoLearner = context.Users.FirstOrDefault(user => user.Username == "student1" && user.Role == "Member");
+            if (demoLearner is not null && string.IsNullOrWhiteSpace(demoLearner.PinHash))
+            {
+                demoLearner.AvatarKey = "star";
+                demoLearner.PinHash = PasswordHelper.HashPassword("2468");
+            }
+
+            foreach (var content in context.LearningContents.Where(item => item.ApprovalStatus == ""))
+            {
+                content.ApprovalStatus = "Approved";
+                content.ApprovedBy = adminName;
+                content.ApprovedDate = now;
+            }
+
+            foreach (var game in context.Games.Where(item => item.ApprovalStatus == ""))
+            {
+                game.ApprovalStatus = "Approved";
+                game.ApprovedBy = adminName;
+                game.ApprovedDate = now;
+            }
+
+            var noteMatcher = context.Games.FirstOrDefault(game => game.GameName == "Note Matcher");
+            if (noteMatcher is not null && !context.GamesQuizzes.Any(question =>
+                    question.GameId == noteMatcher.GameId && question.ActivityType == "DragDrop"))
+            {
+                context.GamesQuizzes.Add(new GameQuiz
+                {
+                    GameId = noteMatcher.GameId,
+                    QuestionText = "Drag the picture for middle C into the answer portal.",
+                    AnswerOptions = "C,D,G,B",
+                    CorrectAnswer = "C",
+                    ActivityType = "DragDrop",
+                    OptionImageUrls = "/images/note-c-card.svg,/images/note-d-card.svg,/images/note-g-card.svg,/images/note-b-card.svg",
+                    SortOrder = 30
+                });
+            }
+
+            var soundGame = context.Games.FirstOrDefault(game => game.GameName == "Guess the Sound");
+            if (soundGame is not null)
+            {
+                foreach (var question in context.GamesQuizzes.Where(question => question.GameId == soundGame.GameId))
+                {
+                    question.ActivityType = "Sound";
+                }
+            }
+
+            var melodyGame = context.Games.FirstOrDefault(game => game.GameName == "Melody Builder");
+            if (melodyGame is null)
+            {
+                melodyGame = new Game
+                {
+                    GameName = "Melody Builder",
+                    Description = "Listen to a short tune, then perform the same notes on the virtual keyboard.",
+                    DifficultyLevel = "Medium",
+                    Status = "Active",
+                    ApprovalStatus = "Approved",
+                    ApprovedBy = adminName,
+                    ApprovedDate = now,
+                    SortOrder = 30
+                };
+                context.Games.Add(melodyGame);
+                context.SaveChanges();
+            }
+
+            if (!context.GamesQuizzes.Any(question => question.GameId == melodyGame.GameId))
+            {
+                context.GamesQuizzes.AddRange(
+                    new GameQuiz
+                    {
+                        GameId = melodyGame.GameId,
+                        QuestionText = "Listen, then play the four-note rising tune.",
+                        AnswerOptions = "C,D,E,F,G,A,B",
+                        CorrectAnswer = "C,D,E,G",
+                        ActivityType = "Melody",
+                        SortOrder = 10
+                    },
+                    new GameQuiz
+                    {
+                        GameId = melodyGame.GameId,
+                        QuestionText = "Listen, then copy the musical answer.",
+                        AnswerOptions = "C,D,E,F,G,A,B",
+                        CorrectAnswer = "G,E,D,C",
+                        ActivityType = "Melody",
+                        SortOrder = 20
+                    });
+            }
+
+            if (!context.LearningContents.Any(content => content.ContentType == "EarTraining"))
+            {
+                context.LearningContents.Add(new LearningContent
+                {
+                    Title = "Ear Training: High and Low Sounds",
+                    Description = "Listen to two pitches and learn how to tell which sound is higher.",
+                    BodyContent = "High sounds vibrate faster and feel lighter. Low sounds vibrate more slowly and feel deeper. Play the scale, compare the first and last notes, and describe what you hear.",
+                    ContentType = "EarTraining",
+                    DifficultyLevel = "Easy",
+                    CreatedBy = adminName,
+                    Status = "Active",
+                    ApprovalStatus = "Approved",
+                    ApprovedBy = adminName,
+                    ApprovedDate = now,
+                    SortOrder = 40,
+                    CreatedDate = now
+                });
+            }
+
+            context.SaveChanges();
+        }
+
+        private static void EnsureProposalColumns(MuzikDbContext context)
+        {
+            AddColumnIfMissing(context, "Users", "AvatarKey", "TEXT NOT NULL DEFAULT 'note'");
+            AddColumnIfMissing(context, "Users", "PinHash", "TEXT NULL");
+
+            AddColumnIfMissing(context, "LearningContent", "BodyContent", "TEXT NOT NULL DEFAULT ''");
+            AddColumnIfMissing(context, "LearningContent", "MediaUrl", "TEXT NOT NULL DEFAULT ''");
+            AddColumnIfMissing(context, "LearningContent", "SortOrder", "INTEGER NOT NULL DEFAULT 0");
+            AddColumnIfMissing(context, "LearningContent", "ApprovalStatus", "TEXT NOT NULL DEFAULT 'Approved'");
+            AddColumnIfMissing(context, "LearningContent", "ApprovedBy", "TEXT NULL");
+            AddColumnIfMissing(context, "LearningContent", "ApprovedDate", "TEXT NULL");
+
+            AddColumnIfMissing(context, "Games", "SortOrder", "INTEGER NOT NULL DEFAULT 0");
+            AddColumnIfMissing(context, "Games", "ApprovalStatus", "TEXT NOT NULL DEFAULT 'Approved'");
+            AddColumnIfMissing(context, "Games", "ApprovedBy", "TEXT NULL");
+            AddColumnIfMissing(context, "Games", "ApprovedDate", "TEXT NULL");
+
+            AddColumnIfMissing(context, "GamesQuiz", "ActivityType", "TEXT NOT NULL DEFAULT 'MultipleChoice'");
+            AddColumnIfMissing(context, "GamesQuiz", "MediaUrl", "TEXT NOT NULL DEFAULT ''");
+            AddColumnIfMissing(context, "GamesQuiz", "OptionImageUrls", "TEXT NOT NULL DEFAULT ''");
+            AddColumnIfMissing(context, "GamesQuiz", "SortOrder", "INTEGER NOT NULL DEFAULT 0");
+        }
+
+        private static void AddColumnIfMissing(MuzikDbContext context, string table, string column, string definition)
+        {
+            var connection = context.Database.GetDbConnection();
+            var shouldClose = connection.State != System.Data.ConnectionState.Open;
+            if (shouldClose) connection.Open();
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = $"PRAGMA table_info(\"{table}\");";
+                using var reader = command.ExecuteReader();
+                var exists = false;
+                while (reader.Read())
+                {
+                    if (string.Equals(reader.GetString(1), column, StringComparison.OrdinalIgnoreCase))
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                reader.Close();
+                if (!exists)
+                {
+                    command.CommandText = $"ALTER TABLE \"{table}\" ADD COLUMN \"{column}\" {definition};";
+                    command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                if (shouldClose) connection.Close();
             }
         }
 

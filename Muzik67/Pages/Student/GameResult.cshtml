@@ -42,7 +42,10 @@
                 <div class="mc-stars" aria-label="@stars out of 5 stars">
                     @for (var index = 1; index <= 5; index++)
                     {
-                        <span class="@(index <= stars ? "mc-star-earned" : "mc-star-empty")" aria-hidden="true">★</span>
+                        <img src="~/images/star.png"
+                             alt=""
+                             class="mc-star-icon @(index <= stars ? "mc-star-earned" : "mc-star-empty")"
+                             aria-hidden="true" />
                     }
                 </div>
                 <strong class="score-value">@Model.Score / @Model.TotalQuestions</strong>

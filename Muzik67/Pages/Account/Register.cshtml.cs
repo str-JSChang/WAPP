@@ -56,6 +56,14 @@ namespace Muzik67.Pages.Account
 
             [Display(Name = "I agree to the Terms & Conditions and Privacy Policy")]
             public bool AgreeToTerms { get; set; }
+
+            [Required, RegularExpression("^(note|piano|star|drum)$")]
+            [Display(Name = "Learning Avatar")]
+            public string AvatarKey { get; set; } = "note";
+
+            [DataType(DataType.Password)]
+            [Display(Name = "4-digit Child PIN (optional)")]
+            public string? Pin { get; set; }
         }
 
         public void OnGet()
@@ -69,6 +77,10 @@ namespace Muzik67.Pages.Account
             if (!Input.AgreeToTerms)
             {
                 ModelState.AddModelError("Input.AgreeToTerms", "You must agree to the Terms & Conditions and Privacy Policy.");
+            }
+            if (!string.IsNullOrWhiteSpace(Input.Pin) && !System.Text.RegularExpressions.Regex.IsMatch(Input.Pin, "^[0-9]{4}$"))
+            {
+                ModelState.AddModelError("Input.Pin", "The child PIN must contain exactly four numbers.");
             }
 
             if (!ModelState.IsValid)
@@ -105,7 +117,9 @@ namespace Muzik67.Pages.Account
                     PasswordHash = hashedPassword,
                     Role = "Member",
                     RegistrationDate = DateTime.UtcNow,
-                    AccountStatus = "Active"
+                    AccountStatus = "Active",
+                    AvatarKey = Input.AvatarKey,
+                    PinHash = string.IsNullOrWhiteSpace(Input.Pin) ? null : PasswordHelper.HashPassword(Input.Pin)
                 };
 
                 await _context.Users.AddAsync(newUser);

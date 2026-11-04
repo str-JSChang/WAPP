@@ -55,6 +55,7 @@
                     <!-- Top-Right Actions -->
                     <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
                         <div class="d-flex align-items-center gap-2 ms-auto">
+                            <button type="button" id="readPageAloud" class="btn btn-outline-dark btn-sm" title="Read this page aloud"><i class="bi bi-volume-up"></i> Read</button>
                             <a asp-page="/Account/Profile" class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 40px; height: 40px;" title="My Profile">
                                 <i class="bi bi-person-circle fs-4"></i>
                             </a>
@@ -97,6 +98,17 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        document.getElementById('readPageAloud')?.addEventListener('click', () => {
+            if (!('speechSynthesis' in window)) return;
+            speechSynthesis.cancel();
+            const main = document.getElementById('mainContent');
+            const readable = Array.from(main?.querySelectorAll('h1,h2,h3,p,label,button,a') || [])
+                .filter(element => !element.closest('script,[aria-hidden="true"]'))
+                .map(element => element.textContent?.trim()).filter(Boolean).join('. ');
+            speechSynthesis.speak(new SpeechSynthesisUtterance(readable.slice(0, 5000)));
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

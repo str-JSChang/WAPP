@@ -28,6 +28,10 @@ html {
   scroll-behavior: smooth;
 }
 
+.validation-summary-valid {
+  display: none !important;
+}
+
 @media (min-width: 768px) {
   html {
     font-size: 16px;

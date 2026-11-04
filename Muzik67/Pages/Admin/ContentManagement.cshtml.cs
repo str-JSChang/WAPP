@@ -11,11 +11,13 @@ namespace Muzik67.Pages.Admin
     public class ContentManagementModel : SessionPageModel
     {
         private readonly MuzikDbContext _context;
+        private readonly IWebHostEnvironment _environment;
         protected override bool AdminOnly => true;
 
-        public ContentManagementModel(MuzikDbContext context)
+        public ContentManagementModel(MuzikDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         [BindProperty(SupportsGet = true)]
@@ -48,8 +50,16 @@ namespace Muzik67.Pages.Admin
             [StringLength(2000)]
             public string? Description { get; set; } = string.Empty;
 
+            [StringLength(8000)]
+            public string? BodyContent { get; set; } = string.Empty;
+
+            [StringLength(500)]
+            public string? MediaUrl { get; set; } = string.Empty;
+
+            public IFormFile? MediaFile { get; set; }
+
             [Required]
-            [RegularExpression("^(Theory|EarTraining|Instrument)$")]
+            [RegularExpression("^(Theory|EarTraining|Instrument|Song)$")]
             public string ContentType { get; set; } = "Theory";
 
             [Required]
@@ -59,6 +69,12 @@ namespace Muzik67.Pages.Admin
             [Required]
             [RegularExpression("^(Active|Premium|Inactive)$")]
             public string Status { get; set; } = "Active";
+
+            [Range(0, 9999)]
+            public int SortOrder { get; set; }
+
+            [Required, RegularExpression("^(Pending|Approved|Rejected)$")]
+            public string ApprovalStatus { get; set; } = "Approved";
         }
 
         public class GameInput
@@ -79,6 +95,12 @@ namespace Muzik67.Pages.Admin
             [Required]
             [RegularExpression("^(Active|Premium|Inactive)$")]
             public string Status { get; set; } = "Active";
+
+            [Range(0, 9999)]
+            public int SortOrder { get; set; }
+
+            [Required, RegularExpression("^(Pending|Approved|Rejected)$")]
+            public string ApprovalStatus { get; set; } = "Pending";
         }
 
         public class QuestionInput
@@ -99,6 +121,20 @@ namespace Muzik67.Pages.Admin
             [Required]
             [StringLength(100)]
             public string CorrectAnswer { get; set; } = string.Empty;
+
+            [Required, RegularExpression("^(MultipleChoice|Sound|DragDrop|Melody)$")]
+            public string ActivityType { get; set; } = "MultipleChoice";
+
+            [StringLength(500)]
+            public string? MediaUrl { get; set; } = string.Empty;
+
+            public IFormFile? MediaFile { get; set; }
+
+            [StringLength(2000)]
+            public string? OptionImageUrls { get; set; } = string.Empty;
+
+            [Range(0, 9999)]
+            public int SortOrder { get; set; }
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -124,9 +160,13 @@ namespace Muzik67.Pages.Admin
                     ContentId = content.ContentId,
                     Title = content.Title,
                     Description = content.Description,
+                    BodyContent = content.BodyContent,
+                    MediaUrl = content.MediaUrl,
                     ContentType = content.ContentType,
                     DifficultyLevel = content.DifficultyLevel,
-                    Status = content.Status
+                    Status = content.Status,
+                    SortOrder = content.SortOrder,
+                    ApprovalStatus = content.ApprovalStatus
                 };
             }
 
@@ -144,7 +184,9 @@ namespace Muzik67.Pages.Admin
                     GameName = game.GameName,
                     Description = game.Description,
                     DifficultyLevel = game.DifficultyLevel,
-                    Status = game.Status
+                    Status = game.Status,
+                    SortOrder = game.SortOrder,
+                    ApprovalStatus = game.ApprovalStatus
                 };
             }
 
@@ -162,7 +204,11 @@ namespace Muzik67.Pages.Admin
                     GameId = question.GameId,
                     QuestionText = question.QuestionText,
                     AnswerOptions = question.AnswerOptions,
-                    CorrectAnswer = question.CorrectAnswer
+                    CorrectAnswer = question.CorrectAnswer,
+                    ActivityType = question.ActivityType,
+                    MediaUrl = question.MediaUrl,
+                    OptionImageUrls = question.OptionImageUrls,
+                    SortOrder = question.SortOrder
                 };
             }
 
@@ -177,6 +223,9 @@ namespace Muzik67.Pages.Admin
             {
                 return access;
             }
+
+            if (form.MediaFile is null && !IsSafeMediaUrl(form.MediaUrl))
+                ModelState.AddModelError("ContentForm.MediaUrl", "Use a local path beginning with / or an HTTPS/HTTP URL.");
 
             if (!ModelState.IsValid)
             {
@@ -208,9 +257,31 @@ namespace Muzik67.Pages.Admin
 
             content.Title = form.Title.Trim();
             content.Description = form.Description?.Trim() ?? string.Empty;
+            content.BodyContent = form.BodyContent?.Trim() ?? string.Empty;
             content.ContentType = form.ContentType;
             content.DifficultyLevel = form.DifficultyLevel;
             content.Status = form.Status;
+            content.SortOrder = form.SortOrder;
+            content.ApprovalStatus = form.ApprovalStatus;
+            if (form.MediaFile is not null)
+            {
+                try
+                {
+                    content.MediaUrl = await MediaUploadHelper.SaveAsync(form.MediaFile, _environment);
+                }
+                catch (InvalidOperationException exception)
+                {
+                    ModelState.AddModelError("ContentForm.MediaFile", exception.Message);
+                    ContentForm = form;
+                    await LoadListsAsync();
+                    return Page();
+                }
+            }
+            else
+            {
+                content.MediaUrl = form.MediaUrl?.Trim() ?? string.Empty;
+            }
+            ApplyApproval(content, form.ApprovalStatus);
 
             await _context.SaveChangesAsync();
             StatusMessage = "Learning material saved.";
@@ -224,6 +295,12 @@ namespace Muzik67.Pages.Admin
             if (access is not null)
             {
                 return access;
+            }
+
+            var hasQuestions = form.GameId > 0 && await _context.GamesQuizzes.AnyAsync(question => question.GameId == form.GameId);
+            if (form.ApprovalStatus == "Approved" && !hasQuestions)
+            {
+                ModelState.AddModelError("GameForm.ApprovalStatus", "Add at least one question before approving a game.");
             }
 
             if (!ModelState.IsValid)
@@ -254,6 +331,9 @@ namespace Muzik67.Pages.Admin
             game.Description = form.Description?.Trim() ?? string.Empty;
             game.DifficultyLevel = form.DifficultyLevel;
             game.Status = form.Status;
+            game.SortOrder = form.SortOrder;
+            game.ApprovalStatus = form.ApprovalStatus;
+            ApplyApproval(game, form.ApprovalStatus);
 
             await _context.SaveChangesAsync();
             StatusMessage = "Game saved.";
@@ -277,9 +357,17 @@ namespace Muzik67.Pages.Admin
             {
                 ModelState.AddModelError(string.Empty, "Enter at least two unique answers, separated by commas.");
             }
-            else if (!options.Contains(correctAnswer, StringComparer.OrdinalIgnoreCase))
+            else if (form.ActivityType != "Melody" && !options.Contains(correctAnswer, StringComparer.OrdinalIgnoreCase))
             {
                 ModelState.AddModelError(string.Empty, "The correct answer must match one of the answer options.");
+            }
+            else if (form.ActivityType == "Melody")
+            {
+                var melody = correctAnswer.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                if (melody.Length < 2 || melody.Any(note => !options.Contains(note, StringComparer.OrdinalIgnoreCase)))
+                {
+                    ModelState.AddModelError("QuestionForm.CorrectAnswer", "A melody needs at least two comma-separated notes selected from the allowed notes.");
+                }
             }
 
             var gameExists = await _context.Games.AnyAsync(game => game.GameId == form.GameId);
@@ -287,6 +375,13 @@ namespace Muzik67.Pages.Admin
             {
                 ModelState.AddModelError("QuestionForm.GameId", "Select an existing game.");
             }
+            if (form.MediaFile is null && !IsSafeMediaUrl(form.MediaUrl))
+                ModelState.AddModelError("QuestionForm.MediaUrl", "Use a local path beginning with / or an HTTPS/HTTP URL.");
+            var imageUrls = (form.OptionImageUrls ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (imageUrls.Any(url => !IsSafeMediaUrl(url)))
+                ModelState.AddModelError("QuestionForm.OptionImageUrls", "Every option image must use a local path or an HTTPS/HTTP URL.");
+            if (form.ActivityType == "DragDrop" && imageUrls.Length > 0 && imageUrls.Length != options.Length)
+                ModelState.AddModelError("QuestionForm.OptionImageUrls", "Provide one image URL for each drag-and-drop answer, or leave the field empty.");
 
             if (!ModelState.IsValid)
             {
@@ -315,10 +410,31 @@ namespace Muzik67.Pages.Admin
             question.GameId = form.GameId;
             question.QuestionText = (form.QuestionText ?? string.Empty).Trim();
             question.AnswerOptions = string.Join(", ", options);
-            question.CorrectAnswer = options.First(option => string.Equals(
-                option,
-                correctAnswer,
-                StringComparison.OrdinalIgnoreCase));
+            question.CorrectAnswer = form.ActivityType == "Melody"
+                ? string.Join(',', correctAnswer.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                    .Select(note => options.First(option => string.Equals(option, note, StringComparison.OrdinalIgnoreCase))))
+                : options.First(option => string.Equals(option, correctAnswer, StringComparison.OrdinalIgnoreCase));
+            question.ActivityType = form.ActivityType;
+            question.OptionImageUrls = form.OptionImageUrls?.Trim() ?? string.Empty;
+            question.SortOrder = form.SortOrder;
+            if (form.MediaFile is not null)
+            {
+                try
+                {
+                    question.MediaUrl = await MediaUploadHelper.SaveAsync(form.MediaFile, _environment, audioOnly: form.ActivityType == "Sound", maxBytes: 8 * 1024 * 1024);
+                }
+                catch (InvalidOperationException exception)
+                {
+                    ModelState.AddModelError("QuestionForm.MediaFile", exception.Message);
+                    QuestionForm = form;
+                    await LoadListsAsync();
+                    return Page();
+                }
+            }
+            else
+            {
+                question.MediaUrl = form.MediaUrl?.Trim() ?? string.Empty;
+            }
 
             await _context.SaveChangesAsync();
             StatusMessage = "Game question saved.";
@@ -391,19 +507,74 @@ namespace Muzik67.Pages.Admin
             return RedirectToPage();
         }
 
+        public async Task<IActionResult> OnPostReviewContentAsync(int id, string decision)
+        {
+            var content = await _context.LearningContents.FindAsync(id);
+            if (content is null) return NotFound();
+            if (decision is not ("Approved" or "Rejected")) return BadRequest();
+            content.ApprovalStatus = decision;
+            ApplyApproval(content, decision);
+            await _context.SaveChangesAsync();
+            StatusMessage = $"Learning material {decision.ToLowerInvariant()}.";
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostReviewGameAsync(int id, string decision)
+        {
+            var game = await _context.Games.FindAsync(id);
+            if (game is null) return NotFound();
+            if (decision is not ("Approved" or "Rejected")) return BadRequest();
+            if (decision == "Approved" && !await _context.GamesQuizzes.AnyAsync(question => question.GameId == id))
+            {
+                StatusMessage = "Add at least one question before approving this game.";
+                return RedirectToPage();
+            }
+            game.ApprovalStatus = decision;
+            ApplyApproval(game, decision);
+            await _context.SaveChangesAsync();
+            StatusMessage = $"Game {decision.ToLowerInvariant()}.";
+            return RedirectToPage();
+        }
+
         private async Task LoadListsAsync()
         {
             Contents = await _context.LearningContents
-                .OrderBy(content => content.Title)
+                .OrderBy(content => content.SortOrder)
+                .ThenBy(content => content.Title)
                 .ToListAsync();
             Games = await _context.Games
-                .OrderBy(game => game.GameName)
+                .OrderBy(game => game.SortOrder)
+                .ThenBy(game => game.GameName)
                 .ToListAsync();
             Questions = await _context.GamesQuizzes
                 .Include(question => question.Game)
-                .OrderBy(question => question.Game!.GameName)
-                .ThenBy(question => question.QuestionText)
+                .OrderBy(question => question.Game!.SortOrder)
+                .ThenBy(question => question.Game!.GameName)
+                .ThenBy(question => question.SortOrder)
                 .ToListAsync();
+        }
+
+        private void ApplyApproval(LearningContent content, string decision)
+        {
+            content.ApprovedBy = decision == "Approved"
+                ? HttpContext.Session.GetString("Username") ?? "Admin"
+                : null;
+            content.ApprovedDate = decision == "Approved" ? DateTime.UtcNow : null;
+        }
+
+        private void ApplyApproval(Game game, string decision)
+        {
+            game.ApprovedBy = decision == "Approved"
+                ? HttpContext.Session.GetString("Username") ?? "Admin"
+                : null;
+            game.ApprovedDate = decision == "Approved" ? DateTime.UtcNow : null;
+        }
+
+        private static bool IsSafeMediaUrl(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return true;
+            if (value.StartsWith('/') && !value.StartsWith("//")) return true;
+            return Uri.TryCreate(value, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https";
         }
     }
 }

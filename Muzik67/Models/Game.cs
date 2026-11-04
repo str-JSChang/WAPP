@@ -19,6 +19,16 @@ namespace Muzik67.Models
         [MaxLength(20)]
         public string Status { get; set; } = "Active";
 
+        public int SortOrder { get; set; }
+
+        [MaxLength(20)]
+        public string ApprovalStatus { get; set; } = "Approved";
+
+        [MaxLength(50)]
+        public string? ApprovedBy { get; set; }
+
+        public DateTime? ApprovedDate { get; set; }
+
         public ICollection<GameQuiz> Quizzes { get; set; } = new List<GameQuiz>();
     }
 }

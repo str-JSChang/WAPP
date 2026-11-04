@@ -1,9 +1,45 @@
 @page
 @model Muzik67.Pages.Admin.UserProgressModel
-@{ ViewData["Title"] = "Learner Progress"; }
+@{ ViewData["Title"] = "Progress & Rewards Management"; }
 <link rel="stylesheet" href="~/css/management.css" asp-append-version="true" />
-<main class="container management-page py-5"><div class="d-flex justify-content-between align-items-center mb-4"><div><p class="text-uppercase text-muted small fw-semibold mb-1">Administrator</p><h1 class="management-title">Learner Progress</h1><p class="text-muted">Monitor lessons, verified game attempts, mastery, and badges.</p></div><a asp-page="/Admin/Users" class="btn btn-outline-dark">Manage accounts</a></div>
-<section class="management-panel"><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Member</th><th>Status</th><th>Game attempts</th><th>Average mastery</th><th>Lessons</th><th>Badges</th><th>Last activity</th></tr></thead><tbody>
-@foreach(var member in Model.Members){<tr><td><a asp-page="/Admin/Users" asp-route-editId="@member.UserId">@member.Username</a></td><td>@member.Status</td><td>@member.GameAttempts</td><td>@member.AverageScore%</td><td>@member.LessonsCompleted</td><td>@member.BadgesEarned</td><td>@(member.LastActivity?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt") ?? "No activity")</td></tr>}
-@if(Model.Members.Count == 0){<tr><td colspan="7" class="text-center text-muted py-4">No member accounts found.</td></tr>}
-</tbody></table></div></section></main>
+<main class="container management-page py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><div><p class="text-uppercase text-muted small fw-semibold mb-1">Administrator</p><h1 class="management-title">Progress &amp; Rewards</h1><p class="text-muted">Monitor learners and correct progress or badge records through a complete CRUD workflow.</p></div><a asp-page="/Admin/Users" class="btn btn-outline-dark">Manage accounts</a></div>
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage)) { <div class="alert alert-info" role="status">@Model.StatusMessage</div> }
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <section class="management-panel mb-4"><div class="panel-heading"><h2>Learner overview</h2></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Member</th><th>Status</th><th>Game attempts</th><th>Average mastery</th><th>Lessons</th><th>Badges</th><th>Last activity</th></tr></thead><tbody>
+    @foreach(var member in Model.Members){<tr><td><a asp-page="/Admin/Users" asp-route-editId="@member.UserId">@member.Username</a></td><td>@member.Status</td><td>@member.GameAttempts</td><td>@member.AverageScore%</td><td>@member.LessonsCompleted</td><td>@member.BadgesEarned</td><td>@(member.LastActivity?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt") ?? "No activity")</td></tr>}
+    @if(Model.Members.Count == 0){<tr><td colspan="7" class="text-center text-muted py-4">No member accounts found.</td></tr>}
+    </tbody></table></div></section>
+
+    <div class="row g-4">
+        <div class="col-lg-6"><section class="management-panel h-100"><div class="panel-heading"><h2>@(Model.ProgressForm.ProgressId == 0 ? "Add progress record" : "Edit progress record")</h2></div>
+            <form method="post" asp-page-handler="SaveProgress" class="row g-3"><input asp-for="ProgressForm.ProgressId" type="hidden" />
+                <div class="col-md-6"><label asp-for="ProgressForm.UserId" class="form-label">Learner</label><select asp-for="ProgressForm.UserId" class="form-select"><option value="0">Choose learner</option>@foreach(var user in Model.Learners){<option value="@user.UserId">@user.Username</option>}</select></div>
+                <div class="col-md-6"><label asp-for="ProgressForm.GameId" class="form-label">Game</label><select asp-for="ProgressForm.GameId" class="form-select"><option value="0">Choose game</option>@foreach(var game in Model.Games){<option value="@game.GameId">@game.GameName (@game.Quizzes.Count questions)</option>}</select></div>
+                <div class="col-md-6"><label asp-for="ProgressForm.Score" class="form-label"></label><input asp-for="ProgressForm.Score" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="ProgressForm.Status" class="form-label"></label><select asp-for="ProgressForm.Status" class="form-select"><option>Completed</option><option>Reviewed</option></select></div>
+                <div class="col-12"><button class="btn btn-primary">Save progress</button> @if(Model.ProgressForm.ProgressId > 0){<a asp-page="/Admin/UserProgress" class="btn btn-outline-secondary">Cancel</a>}</div>
+            </form>
+        </section></div>
+        <div class="col-lg-6"><section class="management-panel h-100"><div class="panel-heading"><h2>@(Model.BadgeForm.UserBadgeId == 0 ? "Add badge" : "Edit badge")</h2></div>
+            <form method="post" asp-page-handler="SaveBadge" class="row g-3"><input asp-for="BadgeForm.UserBadgeId" type="hidden" />
+                <div class="col-12"><label asp-for="BadgeForm.UserId" class="form-label">Learner</label><select asp-for="BadgeForm.UserId" class="form-select"><option value="0">Choose learner</option>@foreach(var user in Model.Learners){<option value="@user.UserId">@user.Username</option>}</select></div>
+                <div class="col-md-6"><label asp-for="BadgeForm.BadgeCode" class="form-label">Badge code</label><input asp-for="BadgeForm.BadgeCode" class="form-control" placeholder="rhythm-master" /></div>
+                <div class="col-md-6"><label asp-for="BadgeForm.BadgeName" class="form-label">Badge name</label><input asp-for="BadgeForm.BadgeName" class="form-control" /></div>
+                <div class="col-12"><button class="btn btn-primary">Save badge</button> @if(Model.BadgeForm.UserBadgeId > 0){<a asp-page="/Admin/UserProgress" class="btn btn-outline-secondary">Cancel</a>}</div>
+            </form>
+        </section></div>
+    </div>
+
+    <section class="management-panel mt-4"><div class="panel-heading"><h2>Progress records</h2></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Learner</th><th>Game</th><th>Score</th><th>Status</th><th>Completed</th><th></th></tr></thead><tbody>
+        @foreach(var record in Model.ProgressRecords){<tr><td>@record.User?.Username</td><td>@record.Game?.GameName</td><td>@record.Score / @(record.Game?.Quizzes.Count ?? 0)</td><td>@record.Status</td><td>@record.DateOfCompletion.ToLocalTime().ToString("dd MMM yyyy")</td><td class="text-end"><a asp-page="/Admin/UserProgress" asp-route-editProgressId="@record.ProgressId" class="btn btn-sm btn-outline-primary">Edit</a> <form method="post" asp-page-handler="DeleteProgress" class="d-inline"><input type="hidden" name="id" value="@record.ProgressId"/><button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this progress record?')">Delete</button></form></td></tr>}
+        @if(Model.ProgressRecords.Count == 0){<tr><td colspan="6" class="text-center text-muted">No progress records.</td></tr>}
+    </tbody></table></div></section>
+
+    <section class="management-panel mt-4"><div class="panel-heading"><h2>Badge records</h2></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Learner</th><th>Code</th><th>Badge</th><th>Earned</th><th></th></tr></thead><tbody>
+        @foreach(var badge in Model.Badges){<tr><td>@badge.User?.Username</td><td>@badge.BadgeCode</td><td>@badge.BadgeName</td><td>@badge.EarnedAt.ToLocalTime().ToString("dd MMM yyyy")</td><td class="text-end"><a asp-page="/Admin/UserProgress" asp-route-editBadgeId="@badge.UserBadgeId" class="btn btn-sm btn-outline-primary">Edit</a> <form method="post" asp-page-handler="DeleteBadge" class="d-inline"><input type="hidden" name="id" value="@badge.UserBadgeId"/><button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this badge?')">Delete</button></form></td></tr>}
+        @if(Model.Badges.Count == 0){<tr><td colspan="5" class="text-center text-muted">No badge records.</td></tr>}
+    </tbody></table></div></section>
+</main>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

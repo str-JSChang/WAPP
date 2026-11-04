@@ -13,6 +13,7 @@
                         <img src="~/images/muzik67-full-logo.svg" alt="Muzik 67 Logo" class="auth-logo mb-2" />
                         <h2 class="auth-title mt-2">Welcome Back!</h2>
                         <p class="text-muted small">Please sign in to your Muzik 67 account.</p>
+                        <button type="button" id="readLoginHelp" class="btn btn-sm btn-outline-secondary">🔊 Read instructions</button>
                     </div>
 
                     @if (!string.IsNullOrEmpty(Model.SuccessMessage))
@@ -37,7 +38,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
                                 <label asp-for="Input.Password" class="form-label fw-semibold mb-0"></label>
                                 <span class="small text-muted">Contact an administrator if you need a reset.</span>
                             </div>
@@ -48,6 +49,23 @@
                         <button type="submit" class="btn btn-primary w-100 py-2 mt-2 fw-semibold auth-btn">
                             Sign In
                         </button>
+                    </form>
+
+                    <div class="text-center my-4"><span class="badge text-bg-light border">OR CHILD QUICK LOGIN</span></div>
+                    <form method="post" asp-page-handler="Quick" asp-route-returnUrl="@Request.Query["returnUrl"]">
+                        <div class="mb-3">
+                            <label asp-for="QuickInput.Username" class="form-label fw-semibold">Child username</label>
+                            <input asp-for="QuickInput.Username" class="form-control" autocomplete="username" placeholder="Friendly username" />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="QuickInput.AvatarKey" class="form-label fw-semibold">Choose your avatar</label>
+                            <select asp-for="QuickInput.AvatarKey" class="form-select"><option value="note">♪ Music Note</option><option value="piano">🎹 Piano</option><option value="star">★ Star</option><option value="drum">🥁 Drum</option></select>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="QuickInput.Pin" class="form-label fw-semibold">4-digit PIN</label>
+                            <input asp-for="QuickInput.Pin" class="form-control" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••" />
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">Open My Music World</button>
                     </form>
 
                     <div class="text-center mt-4 pt-2 border-top">
@@ -64,4 +82,11 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+    document.getElementById('readLoginHelp')?.addEventListener('click', () => {
+        if (!('speechSynthesis' in window)) return;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(new SpeechSynthesisUtterance('Ask a grown-up to help with the password login, or enter your child username, choose your avatar, and type your four number PIN.'));
+    });
+    </script>
 }

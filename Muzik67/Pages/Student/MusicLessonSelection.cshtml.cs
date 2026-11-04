@@ -30,7 +30,7 @@ namespace Muzik67.Pages.Student
 
         public async Task<IActionResult> OnGetAsync(string? type, string? difficulty)
         {
-            var allowedTypes = new[] { "All", "Theory", "EarTraining", "Instrument" };
+            var allowedTypes = new[] { "All", "Theory", "EarTraining", "Instrument", "Song" };
             var allowedDifficulties = new[] { "All", "Easy", "Medium", "Hard" };
             SelectedType = allowedTypes.Contains(type, StringComparer.OrdinalIgnoreCase)
                 ? allowedTypes.First(item => string.Equals(item, type, StringComparison.OrdinalIgnoreCase))
@@ -43,8 +43,8 @@ namespace Muzik67.Pages.Student
             var hasPremiumAccess = subscription?.Plan?.Price > 0;
 
             var query = _context.LearningContents
-                .Where(content => content.Status == "Active"
-                    || hasPremiumAccess && content.Status == "Premium");
+                .Where(content => content.ApprovalStatus == "Approved" && (content.Status == "Active"
+                    || hasPremiumAccess && content.Status == "Premium"));
 
             if (SelectedType != "All")
             {
@@ -56,7 +56,7 @@ namespace Muzik67.Pages.Student
                 query = query.Where(l => l.DifficultyLevel == SelectedDifficulty);
             }
 
-            Lessons = await query.OrderBy(l => l.DifficultyLevel).ThenBy(l => l.Title).ToListAsync();
+            Lessons = await query.OrderBy(l => l.SortOrder).ThenBy(l => l.DifficultyLevel).ThenBy(l => l.Title).ToListAsync();
             CompletedLessonIds = (await _context.LessonProgresses
                 .Where(progress => progress.UserId == CurrentUserId)
                 .Select(progress => progress.ContentId)

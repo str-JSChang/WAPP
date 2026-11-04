@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
 using Microsoft.AspNetCore.RateLimiting;
+using Muzik67.Models;
 
 namespace Muzik67.Pages.Account
 {
@@ -23,6 +24,9 @@ namespace Muzik67.Pages.Account
         [BindProperty]
         public InputModel Input { get; set; } = new();
 
+        [BindProperty]
+        public QuickLoginModel QuickInput { get; set; } = new();
+
         [TempData]
         public string? SuccessMessage { get; set; }
 
@@ -40,6 +44,13 @@ namespace Muzik67.Pages.Account
             [Display(Name = "Password")]
             public string Password { get; set; } = string.Empty;
 
+        }
+
+        public class QuickLoginModel
+        {
+            public string Username { get; set; } = string.Empty;
+            public string AvatarKey { get; set; } = "note";
+            public string Pin { get; set; } = string.Empty;
         }
 
         public IActionResult OnGet(bool accountDisabled = false)
@@ -73,14 +84,7 @@ namespace Muzik67.Pages.Account
                     return Page();
                 }
 
-                // 2. Set Session state
-                HttpContext.Session.SetInt32("UserId", user.UserId);
-                HttpContext.Session.SetString("Username", user.Username);
-                HttpContext.Session.SetString("Role", user.Role);
-
-                _logger.LogInformation("User '{Username}' logged in successfully as {Role}.", user.Username, user.Role);
-
-                SuccessMessage = $"Welcome back, {user.Username}!";
+                SignIn(user);
 
                 if (!string.IsNullOrWhiteSpace(returnUrl) &&
                     Url.IsLocalUrl(returnUrl) &&
@@ -98,6 +102,36 @@ namespace Muzik67.Pages.Account
                 ModelState.AddModelError(string.Empty, "An error occurred during login. Please try again.");
                 return Page();
             }
+        }
+
+        public async Task<IActionResult> OnPostQuickAsync(string? returnUrl = null)
+        {
+            ModelState.Clear();
+            var username = QuickInput.Username.Trim();
+            var allowedAvatars = new[] { "note", "piano", "star", "drum" };
+            if (username.Length < 3 || !allowedAvatars.Contains(QuickInput.AvatarKey) ||
+                !System.Text.RegularExpressions.Regex.IsMatch(QuickInput.Pin ?? string.Empty, "^[0-9]{4}$"))
+            {
+                ModelState.AddModelError(string.Empty, "Enter your username, choose your avatar, and enter your four-digit PIN.");
+                return Page();
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(item =>
+                item.Username.ToLower() == username.ToLower() &&
+                item.Role == "Member" && item.AccountStatus == "Active");
+            if (user is null || user.AvatarKey != QuickInput.AvatarKey || string.IsNullOrWhiteSpace(user.PinHash) ||
+                !PasswordHelper.VerifyPassword(QuickInput.Pin ?? string.Empty, user.PinHash))
+            {
+                ModelState.AddModelError(string.Empty, "That avatar or PIN did not match the child account.");
+                return Page();
+            }
+
+            SignIn(user);
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl) && returnUrl != "/")
+            {
+                return LocalRedirect(returnUrl);
+            }
+            return RedirectToPage("/Student/StudentDashboard");
         }
 
         public IActionResult OnPostLogout()
@@ -131,6 +165,15 @@ namespace Muzik67.Pages.Account
             return string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)
                 ? RedirectToPage("/Admin/Dashboard")
                 : RedirectToPage("/Student/StudentDashboard");
+        }
+
+        private void SignIn(User user)
+        {
+            HttpContext.Session.SetInt32("UserId", user.UserId);
+            HttpContext.Session.SetString("Username", user.Username);
+            HttpContext.Session.SetString("Role", user.Role);
+            _logger.LogInformation("User '{Username}' logged in successfully as {Role}.", user.Username, user.Role);
+            SuccessMessage = $"Welcome back, {user.Username}!";
         }
     }
 }

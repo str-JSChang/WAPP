@@ -1,5 +1,6 @@
 @page "{id:int}"
 @model Muzik67.Pages.Student.LessonContentModel
+@using Muzik67.Helpers
 @{
     var lesson = Model.Lesson;
     ViewData["Title"] = lesson.Title;
@@ -47,6 +48,33 @@
             <button type="button" class="btn btn-outline-dark text-nowrap" id="readLessonBtn"><i class="bi bi-volume-up"></i> Read to me</button>
         </div>
     </section>
+
+    @if (!string.IsNullOrWhiteSpace(lesson.BodyContent) || !string.IsNullOrWhiteSpace(lesson.MediaUrl))
+    {
+        <section class="mc-result-panel mb-3" aria-labelledby="lesson-material-title">
+            <h2 id="lesson-material-title" class="h6">LESSON MATERIAL</h2>
+            @if (!string.IsNullOrWhiteSpace(lesson.BodyContent))
+            {
+                <p id="lessonBodyText" class="lesson-body-copy">@lesson.BodyContent</p>
+            }
+            @if (MediaUploadHelper.IsAudio(lesson.MediaUrl))
+            {
+                <audio controls preload="metadata" class="w-100" src="@lesson.MediaUrl">Your browser cannot play this lesson audio.</audio>
+            }
+            else if (MediaUploadHelper.IsImage(lesson.MediaUrl))
+            {
+                <img src="@lesson.MediaUrl" alt="Visual material for @lesson.Title" class="img-fluid rounded lesson-media-preview" />
+            }
+            else if (MediaUploadHelper.IsVideo(lesson.MediaUrl))
+            {
+                <video controls preload="metadata" class="w-100 rounded lesson-media-preview"><source src="@lesson.MediaUrl" type="video/mp4" /></video>
+            }
+            else if (!string.IsNullOrWhiteSpace(lesson.MediaUrl))
+            {
+                <a href="@lesson.MediaUrl" target="_blank" rel="noopener" class="btn btn-outline-dark">Open lesson resource</a>
+            }
+        </section>
+    }
 
     @if (lesson.Title.Contains("Rhythm", StringComparison.OrdinalIgnoreCase))
     {
@@ -126,7 +154,9 @@
 document.getElementById("readLessonBtn")?.addEventListener("click", function () {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById("lessonText")?.textContent || ""));
+    const summary = document.getElementById("lessonText")?.textContent || "";
+    const body = document.getElementById("lessonBodyText")?.textContent || "";
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(`${summary} ${body}`.trim()));
 });
 document.getElementById("playScaleBtn")?.addEventListener("click", function () {
     const keys = Array.from(document.querySelectorAll(".mc-note-key[data-frequency]"));

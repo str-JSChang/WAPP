@@ -21,6 +21,7 @@ public class GameDetailModel : SessionPageModel
     public IReadOnlyList<GameQuiz> Questions { get; private set; } = [];
     public GameQuiz? CurrentQuestion => Questions.ElementAtOrDefault(QuestionNumber - 1);
     public IReadOnlyList<string> AnswerOptions => ParseOptions(CurrentQuestion?.AnswerOptions);
+    public IReadOnlyList<string> AnswerOptionImages => ParseOptions(CurrentQuestion?.OptionImageUrls);
     public int QuestionNumber { get; private set; } = 1;
     public int Score { get; private set; }
     public int Lives { get; private set; } = 3;
@@ -73,22 +74,27 @@ public class GameDetailModel : SessionPageModel
         }
 
         ApplyState(state!);
-        if (string.IsNullOrWhiteSpace(SelectedAnswer) ||
-            !AnswerOptions.Contains(SelectedAnswer.Trim(), StringComparer.OrdinalIgnoreCase))
+        var activityType = CurrentQuestion?.ActivityType ?? "MultipleChoice";
+        var submittedAnswer = SelectedAnswer?.Trim() ?? string.Empty;
+        var validAnswer = activityType == "Melody"
+            ? IsValidMelody(submittedAnswer, AnswerOptions, CurrentQuestion!.CorrectAnswer)
+            : AnswerOptions.Contains(submittedAnswer, StringComparer.OrdinalIgnoreCase);
+        if (!validAnswer)
         {
-            ModelState.AddModelError(nameof(SelectedAnswer), "Choose one of the available answers before checking.");
+            ModelState.AddModelError(nameof(SelectedAnswer), activityType == "Melody"
+                ? "Play the complete melody before checking."
+                : "Choose one of the available answers before checking.");
             return Page();
         }
 
-        var correct = string.Equals(
-            SelectedAnswer.Trim(),
-            CurrentQuestion!.CorrectAnswer.Trim(),
-            StringComparison.OrdinalIgnoreCase);
+        var correct = activityType == "Melody"
+            ? string.Equals(NormalizeMelody(submittedAnswer), NormalizeMelody(CurrentQuestion!.CorrectAnswer), StringComparison.OrdinalIgnoreCase)
+            : string.Equals(submittedAnswer, CurrentQuestion!.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
 
         if (correct)
         {
             state!.Score++;
-            FeedbackMessage = "Correct — great listening!";
+            FeedbackMessage = activityType == "Melody" ? "Perfect performance — you copied the melody!" : "Correct — great listening!";
             FeedbackWasCorrect = true;
         }
         else
@@ -180,7 +186,12 @@ public class GameDetailModel : SessionPageModel
             return false;
         }
 
-        Questions = Game.Quizzes.OrderBy(question => question.QuestionId).ToList();
+        if (Game.ApprovalStatus != "Approved")
+        {
+            return false;
+        }
+
+        Questions = Game.Quizzes.OrderBy(question => question.SortOrder).ThenBy(question => question.QuestionId).ToList();
         return Questions.Count > 0;
     }
 
@@ -252,4 +263,15 @@ public class GameDetailModel : SessionPageModel
         if (text.Contains("low pitch")) return 196;
         return null;
     }
+
+    private static bool IsValidMelody(string answer, IReadOnlyList<string> allowedNotes, string expected)
+    {
+        var notes = NormalizeMelody(answer).Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var expectedLength = NormalizeMelody(expected).Split(',', StringSplitOptions.RemoveEmptyEntries).Length;
+        return notes.Length == expectedLength && notes.All(note => allowedNotes.Contains(note, StringComparer.OrdinalIgnoreCase));
+    }
+
+    private static string NormalizeMelody(string value) => string.Join(',', value
+        .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+        .Select(note => note.ToUpperInvariant()));
 }
