@@ -28,8 +28,9 @@
                     <span class="nav-brand-text">Muzik 67</span>
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
-                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button"
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation"
+                        onclick="const menu = document.getElementById('mainNavbar'); const open = menu.classList.toggle('show'); this.setAttribute('aria-expanded', open.toString());">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 

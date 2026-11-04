@@ -21,8 +21,9 @@
                     <span class="nav-brand-text">Muzik 67</span>
                     <span class="admin-label">ADMIN</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar"
-                        aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle admin navigation">
+                <button class="navbar-toggler" type="button"
+                        aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle admin navigation"
+                        onclick="const menu = document.getElementById('adminNavbar'); const open = menu.classList.toggle('show'); this.setAttribute('aria-expanded', open.toString());">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="adminNavbar">
