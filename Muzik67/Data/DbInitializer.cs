@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Muzik67.Helpers;
 using Muzik67.Models;
 
@@ -9,6 +10,16 @@ namespace Muzik67.Data
         {
             // Creates the database and all tables if they do not exist
             context.Database.EnsureCreated();
+
+            // Self-healing schema safeguard: ensure Status column exists in GameProgress if database was created prior to commit f0fb180
+            try
+            {
+                context.Database.ExecuteSqlRaw("ALTER TABLE \"GameProgress\" ADD COLUMN \"Status\" TEXT DEFAULT 'Completed';");
+            }
+            catch
+            {
+                // Column already exists, safe to ignore
+            }
 
             // 1. Seed Users
             if (!context.Users.Any())
