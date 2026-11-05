@@ -16,6 +16,7 @@ public abstract class SessionPageModel : PageModel
         PageHandlerExecutingContext context,
         PageHandlerExecutionDelegate next)
     {
+        // session says yup this guy is real but the database is the final boss
         var userId = HttpContext.Session.GetInt32("UserId");
         if (userId is null or <= 0)
         {
@@ -31,6 +32,7 @@ public abstract class SessionPageModel : PageModel
             .AsNoTracking()
             .SingleOrDefaultAsync(item => item.UserId == userId.Value);
 
+        // SUSPENDED WHILE STILL LOGGED IN NAHHH NICE TRY BUDDY
         if (user is null || !string.Equals(user.AccountStatus, "Active", StringComparison.OrdinalIgnoreCase))
         {
             HttpContext.Session.Clear();

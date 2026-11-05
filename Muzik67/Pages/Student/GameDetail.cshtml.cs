@@ -87,6 +87,7 @@ public class GameDetailModel : SessionPageModel
             return Page();
         }
 
+        // SERVER CALCULATES THE SCORE because DevTools users be like infinite points go brrrrr
         var correct = activityType == "Melody"
             ? string.Equals(NormalizeMelody(submittedAnswer), NormalizeMelody(CurrentQuestion!.CorrectAnswer), StringComparison.OrdinalIgnoreCase)
             : string.Equals(submittedAnswer, CurrentQuestion!.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
@@ -217,6 +218,7 @@ public class GameDetailModel : SessionPageModel
     private void WriteState(GameSessionState state) =>
         HttpContext.Session.SetString(StateKeyPrefix + CurrentUserId, JsonSerializer.Serialize(state));
 
+    // TWO HOURS FOR ONE QUIZ WHAT SHOULD I EAT TODAY GO DRINK WATER AND RESTART
     private bool IsValidState(GameSessionState? state) =>
         state is not null &&
         state.GameId == Id &&

@@ -78,6 +78,7 @@ public class UsersModel : SessionPageModel
             var existingUser = await _context.Users.FindAsync(Input.UserId);
             if (existingUser is null) return NotFound();
             user = existingUser;
+            // admin tried to remove their own admin powers WHO IS GOING TO SAVE YOU AFTER THAT
             if (user.UserId == CurrentUserId && (Input.Role != "Admin" || Input.AccountStatus != "Active"))
             {
                 ModelState.AddModelError(string.Empty, "You cannot remove your own admin access or suspend your own account.");
@@ -114,6 +115,7 @@ public class UsersModel : SessionPageModel
 
     public async Task<IActionResult> OnPostDeleteAsync(int id)
     {
+        // deleting yourself from the admin panel is NOT character development
         if (id == CurrentUserId)
         {
             StatusMessage = "You cannot delete the account you are currently using.";

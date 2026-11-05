@@ -109,7 +109,7 @@ namespace Muzik67.Pages.Account
                     return Page();
                 }
 
-                // Hash password securely with salt using PBKDF2
+                // HASH THE PASSWORD WE ARE NOT PUTTING secret123 DIRECTLY IN THE DATABASE AAAAAA
                 string hashedPassword = PasswordHelper.HashPassword(Input.Password);
 
                 // Newly registered users are assigned the Member role for safety

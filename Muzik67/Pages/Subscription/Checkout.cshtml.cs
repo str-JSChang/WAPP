@@ -33,6 +33,7 @@ namespace Muzik67.Pages.Subscription
 
         public async Task<IActionResult> OnPostConfirmAsync(int planId)
         {
+            // ALL OR NOTHING no one wants to be emotionally half subscribed
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             var plan = await _context.SubscriptionPlans
@@ -80,6 +81,7 @@ namespace Muzik67.Pages.Subscription
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
+            // DEMO MONEY ONLY please do not ask where the bank API is hiding
             TempData["StatusMessage"] = "Your subscription is active. This was a demo checkout; no payment was processed.";
             return RedirectToPage("/Subscription/Plans");
         }

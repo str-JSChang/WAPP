@@ -11,6 +11,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<ModuleDataService>();
 builder.Services.AddRateLimiter(options =>
 {
+    // TEN GUESSES A MINUTE IS ENOUGH PLEASE DO NOT SPEEDRUN THE LOGIN FORM
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.AddPolicy("login", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
@@ -21,6 +22,7 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
             }));
+    // FIVE ACCOUNTS IN TEN MINUTES BRO WHO ARE YOU RECRUITING AN ARMY
     options.AddPolicy("registration", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",

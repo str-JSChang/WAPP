@@ -47,6 +47,7 @@ function initIntroAnimation() {
     let introSeenResetTimer = null;
 
     function resetIntroSeen() {
+        // five minutes later the intro says GUESS WHO IS BACK
         try {
             window.localStorage.setItem(introSeenKey, "0");
             window.localStorage.removeItem(introSeenExpiryKey);
@@ -100,7 +101,7 @@ function initIntroAnimation() {
         // Private browsing can disable storage; the intro remains skippable.
     }
 
-    // A visit starts (or refreshes) the five-minute intro-seen window.
+    // visitor detected START THE FIVE MINUTE DRAMA TIMER
     markIntroSeen();
 
     let soundEnabled = true;
@@ -236,7 +237,7 @@ function initIntroAnimation() {
             tapPrompt.classList.remove("visible", "fade-out");
         }
 
-        // Force a style flush so the CSS entrance animations restart on replay.
+        // browser please forget the old animation and DO THE COOL THING AGAIN
         void overlay.offsetWidth;
         overlay.classList.add("intro-sequence-active");
 

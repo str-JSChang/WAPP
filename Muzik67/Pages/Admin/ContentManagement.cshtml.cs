@@ -230,6 +230,7 @@ namespace Muzik67.Pages.Admin
             var normalizedTitle = form.Title?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(normalizedTitle))
                 ModelState.AddModelError("ContentForm.Title", "Enter a title that contains letters or numbers.");
+            // same title but CAPS LOCK is still the same title my brother in music
             else if (await _context.LearningContents.AnyAsync(content =>
                          content.ContentId != form.ContentId &&
                          content.Title.ToLower() == normalizedTitle.ToLower()))
@@ -532,6 +533,7 @@ namespace Muzik67.Pages.Admin
             }
 
             var game = await _context.Games.FindAsync(question.GameId);
+            // APPROVED GAME WITH ZERO QUESTIONS IS JUST A CONFIDENT EMPTY BOX
             if (game?.ApprovalStatus == "Approved" &&
                 await _context.GamesQuizzes.CountAsync(item => item.GameId == question.GameId) <= 1)
             {

@@ -86,6 +86,7 @@ namespace Muzik67.Pages.Account
 
                 SignIn(user);
 
+                // only local return URLs because sending users to evil dot com would be VERY NOT COOL
                 if (!string.IsNullOrWhiteSpace(returnUrl) &&
                     Url.IsLocalUrl(returnUrl) &&
                     returnUrl != "/" &&
@@ -108,6 +109,7 @@ namespace Muzik67.Pages.Account
         {
             ModelState.Clear();
             var username = QuickInput.Username.Trim();
+            // FOUR AVATARS FOUR PIN DIGITS ZERO DLC CHARACTERS
             var allowedAvatars = new[] { "note", "piano", "star", "drum" };
             if (username.Length < 3 || !allowedAvatars.Contains(QuickInput.AvatarKey) ||
                 !System.Text.RegularExpressions.Regex.IsMatch(QuickInput.Pin ?? string.Empty, "^[0-9]{4}$"))

@@ -65,11 +65,12 @@ public class LessonContentModel : SessionPageModel
             {
                 await _context.SaveChangesAsync();
             }
+            // BRO THIS DOUBLE SUBMIT HANDLER MESSED ME UP the unique index can fight it now - jason
             catch (DbUpdateException exception) when (
                 exception.InnerException is SqliteException sqliteException &&
                 sqliteException.SqliteErrorCode == 19)
             {
-                // A repeated or simultaneous completion request hit a uniqueness rule.
+                // user clicked complete twice at LIGHT SPEED but the database said only one
                 StatusMessage = "This lesson was already completed.";
                 return RedirectToPage(new { id });
             }
@@ -98,10 +99,13 @@ public class LessonContentModel : SessionPageModel
         IsCompleted = await _context.LessonProgresses
             .AnyAsync(progress => progress.UserId == CurrentUserId && progress.ContentId == id);
 
+        // follow SortOrder because database IDs woke up and chose CHAOS TODAY
         NextLessonId = await _context.LearningContents
             .AsNoTracking()
-            .Where(content => content.ContentId > id &&
+            .Where(content =>
                 content.ApprovalStatus == "Approved" &&
+                (content.SortOrder > lesson.SortOrder ||
+                 content.SortOrder == lesson.SortOrder && content.ContentId > id) &&
                 (content.Status == "Active" ||
                  content.Status == "Premium" && subscription != null && subscription.Plan != null && subscription.Plan.Price > 0))
             .OrderBy(content => content.SortOrder)
