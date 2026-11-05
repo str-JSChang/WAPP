@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
@@ -8,6 +10,7 @@ using Muzik67.Models;
 
 namespace Muzik67.Pages.Account
 {
+    [EnableRateLimiting("registration")]
     public class RegisterModel : PageModel
     {
         private readonly MuzikDbContext _context;
@@ -129,6 +132,14 @@ namespace Muzik67.Pages.Account
 
                 SuccessMessage = $"Account registered successfully! Welcome, {newUser.Username}. Please sign in.";
                 return RedirectToPage("/Account/Login");
+            }
+            catch (DbUpdateException ex) when (
+                ex.InnerException is SqliteException sqliteException &&
+                sqliteException.SqliteErrorCode == 19)
+            {
+                _logger.LogWarning(ex, "Duplicate account registration blocked for {Username}", Input.Username);
+                ModelState.AddModelError(string.Empty, "That username or email address is already registered.");
+                return Page();
             }
             catch (Exception ex)
             {

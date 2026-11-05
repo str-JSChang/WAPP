@@ -62,6 +62,16 @@ public class SubscriptionsModel : SessionPageModel
 
     public async Task<IActionResult> OnPostSaveAsync()
     {
+        var normalizedPlanName = Input.PlanName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(normalizedPlanName))
+        {
+            ModelState.AddModelError("Input.PlanName", "Enter a plan name that contains letters or numbers.");
+        }
+        else if (await _data.IsSubscriptionPlanNameInUseAsync(Input.PlanId, normalizedPlanName))
+        {
+            ModelState.AddModelError("Input.PlanName", "A subscription plan with this name already exists.");
+        }
+
         if (!ModelState.IsValid)
         {
             ShowPlanForm = true;
@@ -72,7 +82,7 @@ public class SubscriptionsModel : SessionPageModel
         var plan = new Muzik67.Models.SubscriptionPlan
         {
             PlanId = Input.PlanId,
-            PlanName = Input.PlanName.Trim(),
+            PlanName = normalizedPlanName,
             Price = Input.Price,
             Duration = Input.Duration,
             Description = Input.Description.Trim(),

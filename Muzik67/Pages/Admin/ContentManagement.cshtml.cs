@@ -227,6 +227,14 @@ namespace Muzik67.Pages.Admin
             if (form.MediaFile is null && !IsSafeMediaUrl(form.MediaUrl))
                 ModelState.AddModelError("ContentForm.MediaUrl", "Use a local path beginning with / or an HTTPS/HTTP URL.");
 
+            var normalizedTitle = form.Title?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(normalizedTitle))
+                ModelState.AddModelError("ContentForm.Title", "Enter a title that contains letters or numbers.");
+            else if (await _context.LearningContents.AnyAsync(content =>
+                         content.ContentId != form.ContentId &&
+                         content.Title.ToLower() == normalizedTitle.ToLower()))
+                ModelState.AddModelError("ContentForm.Title", "A learning material with this title already exists.");
+
             if (!ModelState.IsValid)
             {
                 ContentForm = form;
@@ -255,7 +263,7 @@ namespace Muzik67.Pages.Admin
                 _context.LearningContents.Add(content);
             }
 
-            content.Title = form.Title.Trim();
+            content.Title = normalizedTitle;
             content.Description = form.Description?.Trim() ?? string.Empty;
             content.BodyContent = form.BodyContent?.Trim() ?? string.Empty;
             content.ContentType = form.ContentType;
@@ -303,6 +311,14 @@ namespace Muzik67.Pages.Admin
                 ModelState.AddModelError("GameForm.ApprovalStatus", "Add at least one question before approving a game.");
             }
 
+            var normalizedGameName = form.GameName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(normalizedGameName))
+                ModelState.AddModelError("GameForm.GameName", "Enter a game name that contains letters or numbers.");
+            else if (await _context.Games.AnyAsync(game =>
+                         game.GameId != form.GameId &&
+                         game.GameName.ToLower() == normalizedGameName.ToLower()))
+                ModelState.AddModelError("GameForm.GameName", "A game with this name already exists.");
+
             if (!ModelState.IsValid)
             {
                 GameForm = form;
@@ -327,7 +343,7 @@ namespace Muzik67.Pages.Admin
                 _context.Games.Add(game);
             }
 
-            game.GameName = form.GameName.Trim();
+            game.GameName = normalizedGameName;
             game.Description = form.Description?.Trim() ?? string.Empty;
             game.DifficultyLevel = form.DifficultyLevel;
             game.Status = form.Status;
@@ -375,6 +391,14 @@ namespace Muzik67.Pages.Admin
             {
                 ModelState.AddModelError("QuestionForm.GameId", "Select an existing game.");
             }
+            var normalizedQuestionText = form.QuestionText?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(normalizedQuestionText))
+                ModelState.AddModelError("QuestionForm.QuestionText", "Enter a question that contains letters or numbers.");
+            else if (await _context.GamesQuizzes.AnyAsync(question =>
+                         question.QuestionId != form.QuestionId &&
+                         question.GameId == form.GameId &&
+                         question.QuestionText.ToLower() == normalizedQuestionText.ToLower()))
+                ModelState.AddModelError("QuestionForm.QuestionText", "This game already contains the same question.");
             if (form.MediaFile is null && !IsSafeMediaUrl(form.MediaUrl))
                 ModelState.AddModelError("QuestionForm.MediaUrl", "Use a local path beginning with / or an HTTPS/HTTP URL.");
             var imageUrls = (form.OptionImageUrls ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -408,7 +432,7 @@ namespace Muzik67.Pages.Admin
             }
 
             question.GameId = form.GameId;
-            question.QuestionText = (form.QuestionText ?? string.Empty).Trim();
+            question.QuestionText = normalizedQuestionText;
             question.AnswerOptions = string.Join(", ", options);
             question.CorrectAnswer = form.ActivityType == "Melody"
                 ? string.Join(',', correctAnswer.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
@@ -455,6 +479,12 @@ namespace Muzik67.Pages.Admin
                 return NotFound();
             }
 
+            if (await _context.LessonProgresses.AnyAsync(progress => progress.ContentId == id))
+            {
+                StatusMessage = "This lesson has saved learner progress and cannot be deleted. Set it to Inactive instead.";
+                return RedirectToPage();
+            }
+
             _context.LearningContents.Remove(content);
             await _context.SaveChangesAsync();
             StatusMessage = "Learning material deleted.";
@@ -499,6 +529,14 @@ namespace Muzik67.Pages.Admin
             if (question is null)
             {
                 return NotFound();
+            }
+
+            var game = await _context.Games.FindAsync(question.GameId);
+            if (game?.ApprovalStatus == "Approved" &&
+                await _context.GamesQuizzes.CountAsync(item => item.GameId == question.GameId) <= 1)
+            {
+                StatusMessage = "An approved game must keep at least one question. Reject the game before deleting its last question.";
+                return RedirectToPage();
             }
 
             _context.GamesQuizzes.Remove(question);

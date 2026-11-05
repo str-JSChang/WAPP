@@ -62,6 +62,14 @@ namespace Muzik67.Pages.Admin
                 return access;
             }
 
+            var normalizedPlanName = form.PlanName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(normalizedPlanName))
+                ModelState.AddModelError("PlanForm.PlanName", "Enter a plan name that contains letters or numbers.");
+            else if (await _context.SubscriptionPlans.AnyAsync(plan =>
+                         plan.PlanId != form.PlanId &&
+                         plan.PlanName.ToLower() == normalizedPlanName.ToLower()))
+                ModelState.AddModelError("PlanForm.PlanName", "A subscription plan with this name already exists.");
+
             if (!ModelState.IsValid)
             {
                 PlanForm = form;
@@ -86,7 +94,7 @@ namespace Muzik67.Pages.Admin
                 _context.SubscriptionPlans.Add(plan);
             }
 
-            plan.PlanName = form.PlanName.Trim();
+            plan.PlanName = normalizedPlanName;
             plan.Price = form.Price;
             plan.Duration = form.Duration;
             plan.Description = form.Description?.Trim() ?? string.Empty;

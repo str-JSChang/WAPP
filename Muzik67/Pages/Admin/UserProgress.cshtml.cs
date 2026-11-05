@@ -90,9 +90,10 @@ public class UserProgressModel : SessionPageModel
     {
         ModelState.Clear();
         TryValidateModel(BadgeForm, nameof(BadgeForm));
+        var normalizedBadgeCode = (BadgeForm.BadgeCode ?? string.Empty).Trim().ToLowerInvariant();
         if (!await _context.Users.AnyAsync(user => user.UserId == BadgeForm.UserId && user.Role == "Member"))
             ModelState.AddModelError("BadgeForm.UserId", "Choose an existing learner.");
-        if (await _context.UserBadges.AnyAsync(badge => badge.UserBadgeId != BadgeForm.UserBadgeId && badge.UserId == BadgeForm.UserId && badge.BadgeCode == BadgeForm.BadgeCode))
+        if (await _context.UserBadges.AnyAsync(badge => badge.UserBadgeId != BadgeForm.UserBadgeId && badge.UserId == BadgeForm.UserId && badge.BadgeCode.ToLower() == normalizedBadgeCode))
             ModelState.AddModelError("BadgeForm.BadgeCode", "That learner already has this badge code.");
         if (!ModelState.IsValid) { await LoadAsync(); return Page(); }
 
@@ -109,7 +110,7 @@ public class UserProgressModel : SessionPageModel
             badge = existing;
         }
         badge.UserId = BadgeForm.UserId;
-        badge.BadgeCode = BadgeForm.BadgeCode.Trim().ToLowerInvariant();
+        badge.BadgeCode = normalizedBadgeCode;
         badge.BadgeName = BadgeForm.BadgeName.Trim();
         await _context.SaveChangesAsync();
         StatusMessage = BadgeForm.UserBadgeId == 0 ? "Badge created." : "Badge updated.";

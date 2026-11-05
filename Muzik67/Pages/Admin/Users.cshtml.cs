@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
@@ -95,7 +96,18 @@ public class UsersModel : SessionPageModel
         if (!string.IsNullOrWhiteSpace(Input.Pin))
             user.PinHash = PasswordHelper.HashPassword(Input.Pin);
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException exception) when (
+            exception.InnerException is SqliteException sqliteException &&
+            sqliteException.SqliteErrorCode == 19)
+        {
+            ModelState.AddModelError(string.Empty, "That username or email address is already in use.");
+            await LoadUsersAsync();
+            return Page();
+        }
         StatusMessage = Input.UserId == 0 ? "Account created." : "Account updated.";
         return RedirectToPage();
     }

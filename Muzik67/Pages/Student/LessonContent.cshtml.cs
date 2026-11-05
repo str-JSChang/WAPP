@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Muzik67.Data;
 using Muzik67.Helpers;
@@ -60,7 +61,18 @@ public class LessonContentModel : SessionPageModel
                 });
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException exception) when (
+                exception.InnerException is SqliteException sqliteException &&
+                sqliteException.SqliteErrorCode == 19)
+            {
+                // A repeated or simultaneous completion request hit a uniqueness rule.
+                StatusMessage = "This lesson was already completed.";
+                return RedirectToPage(new { id });
+            }
         }
 
         StatusMessage = IsCompleted ? "This lesson was already completed." : "Lesson completed — your progress and badge were saved.";

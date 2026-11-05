@@ -140,6 +140,10 @@ public sealed class ModuleDataService
         await _context.SaveChangesAsync();
     }
 
+    public Task<bool> IsSubscriptionPlanNameInUseAsync(int planId, string planName) =>
+        _context.SubscriptionPlans.AnyAsync(plan =>
+            plan.PlanId != planId && plan.PlanName.ToLower() == planName.ToLower());
+
     public async Task<bool> UpdateSubscriptionPlanAsync(Models.SubscriptionPlan plan)
     {
         var existingPlan = await _context.SubscriptionPlans.FindAsync(plan.PlanId);
