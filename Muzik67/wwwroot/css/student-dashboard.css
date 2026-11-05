@@ -8,6 +8,13 @@
     background-color: #fcfcfc;
 }
 
+/* Keep the dashboard hero copy white despite the shared Minecraft heading rule. */
+.minecraft-shell .student-dashboard-container .dashboard-status-bar p,
+.minecraft-shell .student-dashboard-container .dashboard-status-bar h1 {
+    color: #ffffff !important;
+    text-shadow: 2px 2px 0 #111111;
+}
+
 /* Main Heading */
 .dashboard-title {
     font-family: 'Courier New', Courier, monospace, sans-serif;

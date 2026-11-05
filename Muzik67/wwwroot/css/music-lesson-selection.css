@@ -5,6 +5,24 @@
     overflow: hidden; /* Prevents content from spilling out of the box */
 }
 
+/* Four equal filter columns stay inside the lesson pane at every width. */
+.lesson-difficulty-filters {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-bottom: 1rem;
+    width: 100%;
+}
+
+.lesson-difficulty-filters .btn {
+    min-width: 0;
+    width: 100%;
+}
+
+#lesson-browser {
+    scroll-margin-top: 1rem;
+}
+
 /* Left side column: locked height and centered alignment */
 .lesson-left-col {
     height: 100%;
@@ -121,4 +139,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+@media (max-width: 575.98px) {
+    .lesson-difficulty-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }

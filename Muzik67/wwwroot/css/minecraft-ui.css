@@ -280,6 +280,7 @@
   text-align: left !important;
 }
 
+.minecraft-shell .mc-status-bar h1,
 .minecraft-shell .progress-heading h1,
 .minecraft-shell .admin-dashboard-heading h1,
 .minecraft-shell .module-heading h1,

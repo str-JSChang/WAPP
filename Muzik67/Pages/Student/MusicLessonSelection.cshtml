@@ -17,13 +17,14 @@
     </header>
 
     <nav class="mc-stage-tabs" aria-label="Learning stages">
-        <span class="active">1 Learn</span>
-        <span>2 Practice</span>
+        <a asp-page="./MusicLessonSelection" asp-route-type="@Model.SelectedType"
+           asp-route-difficulty="@Model.SelectedDifficulty" class="active" aria-current="page">1 Learn</a>
+        <a href="#lesson-browser">2 Practice</a>
         <a asp-page="/Student/GameSelection">3 Challenge</a>
         <span aria-disabled="true">4 Reward</span>
     </nav>
 
-    <div class="row lesson-selection-container p-4 shadow-sm rounded-4 align-items-stretch">
+    <div id="lesson-browser" class="row lesson-selection-container p-4 shadow-sm rounded-4 align-items-stretch">
         
         <!-- LEFT SIDE: Content Type Filters -->
         <div class="col-12 col-md-4 lesson-left-col border-end-md py-3">
@@ -60,24 +61,24 @@
         <div class="col-12 col-md-8 lesson-right-col ps-md-4 py-3">
 
             <!-- Difficulty Bar -->
-            <div class="d-flex justify-content-around align-items-center pd-3 border-bottom mb-3 gap-2">
+            <div class="lesson-difficulty-filters border-bottom mb-3">
                 <a asp-page="./MusicLessonSelection" asp-route-type="@Model.SelectedType" asp-route-difficulty="All"
-                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold @(Model.SelectedDifficulty == "All" ? "active-difficulty" : "")">
+                   class="btn btn-storyboard btn-go text-decoration-none py-3 fw-bold @(Model.SelectedDifficulty == "All" ? "active-difficulty" : "")">
                     All
                 </a>
                 
                 <a asp-page="./MusicLessonSelection" asp-route-type="@Model.SelectedType" asp-route-difficulty="Easy"
-                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold btn-difficulty-easy @(Model.SelectedDifficulty == "Easy" ? "active-easy" : "")">
+                   class="btn btn-storyboard btn-go text-decoration-none py-3 fw-bold btn-difficulty-easy @(Model.SelectedDifficulty == "Easy" ? "active-easy" : "")">
                     Easy
                 </a>
 
                 <a asp-page="./MusicLessonSelection" asp-route-type="@Model.SelectedType" asp-route-difficulty="Medium"
-                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold btn-difficulty-medium @(Model.SelectedDifficulty == "Medium" ? "active-medium" : "")">
+                   class="btn btn-storyboard btn-go text-decoration-none py-3 fw-bold btn-difficulty-medium @(Model.SelectedDifficulty == "Medium" ? "active-medium" : "")">
                     Medium
                 </a>
 
                 <a asp-page="./MusicLessonSelection" asp-route-type="@Model.SelectedType" asp-route-difficulty="Hard"
-                   class="btn btn-storyboard btn-go text-decoration-none w-75 py-3 fw-bold btn-difficulty-hard @(Model.SelectedDifficulty == "Hard" ? "active-hard" : "")">
+                   class="btn btn-storyboard btn-go text-decoration-none py-3 fw-bold btn-difficulty-hard @(Model.SelectedDifficulty == "Hard" ? "active-hard" : "")">
                     Hard
                 </a>
 

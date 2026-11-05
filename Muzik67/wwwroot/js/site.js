@@ -30,6 +30,9 @@ function initNavbarFallback() {
 // Slide 3: Screen fades out, shifting into landing page
 // =========================================================================
 function initIntroAnimation() {
+    const introSeenKey = "muzik67IntroSeen";
+    const introSeenExpiryKey = "muzik67IntroSeenExpiresAt";
+    const introSeenDurationMs = 5 * 60 * 1000;
     const overlay = document.getElementById("introOverlay");
     const introContent = document.querySelector(".intro-content");
     const landingWrapper = document.getElementById("landingWrapper");
@@ -41,12 +44,64 @@ function initIntroAnimation() {
 
     if (!overlay) return;
 
+    let introSeenResetTimer = null;
+
+    function resetIntroSeen() {
+        try {
+            window.localStorage.setItem(introSeenKey, "0");
+            window.localStorage.removeItem(introSeenExpiryKey);
+        } catch (_) {
+            // Private browsing can disable storage.
+        }
+    }
+
+    function scheduleIntroSeenReset(expiresAt) {
+        clearTimeout(introSeenResetTimer);
+        const remainingMs = expiresAt - Date.now();
+
+        if (remainingMs <= 0) {
+            resetIntroSeen();
+            return;
+        }
+
+        introSeenResetTimer = setTimeout(function () {
+            try {
+                const currentExpiry = Number(window.localStorage.getItem(introSeenExpiryKey));
+                if (!currentExpiry || currentExpiry <= Date.now()) {
+                    resetIntroSeen();
+                } else {
+                    scheduleIntroSeenReset(currentExpiry);
+                }
+            } catch (_) {
+                // Private browsing can disable storage.
+            }
+        }, remainingMs);
+    }
+
+    function markIntroSeen() {
+        const expiresAt = Date.now() + introSeenDurationMs;
+        try {
+            window.localStorage.setItem(introSeenKey, "1");
+            window.localStorage.setItem(introSeenExpiryKey, String(expiresAt));
+            scheduleIntroSeenReset(expiresAt);
+        } catch (_) {
+            // Private browsing can disable storage; the intro remains skippable.
+        }
+    }
+
     let hasSeenIntro = false;
     try {
-        hasSeenIntro = window.localStorage.getItem("muzik67IntroSeen") === "1";
+        const introSeenExpiresAt = Number(window.localStorage.getItem(introSeenExpiryKey));
+        hasSeenIntro = window.localStorage.getItem(introSeenKey) === "1"
+            && introSeenExpiresAt > Date.now();
+
+        if (!hasSeenIntro) resetIntroSeen();
     } catch (_) {
         // Private browsing can disable storage; the intro remains skippable.
     }
+
+    // A visit starts (or refreshes) the five-minute intro-seen window.
+    markIntroSeen();
 
     let soundEnabled = true;
     let audioCtx = null;
@@ -211,14 +266,12 @@ function initIntroAnimation() {
             overlay.style.display = "none";
             overlay.classList.remove("intro-sequence-active");
             isIntroPlaying = false;
-            try { window.localStorage.setItem("muzik67IntroSeen", "1"); } catch (_) { }
         }, 4600);
     }
 
     function skipIntro() {
         if (!isIntroPlaying && overlay.style.display === "none") return;
         isIntroPlaying = false;
-        try { window.localStorage.setItem("muzik67IntroSeen", "1"); } catch (_) { }
         clearTimeout(timer1);
         clearTimeout(timer2);
         clearTimeout(timer3);
