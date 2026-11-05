@@ -82,10 +82,10 @@
             <h2 id="rhythm-title" class="h6">Practice: quarter notes and half notes</h2>
             <p>A quarter note lasts for one beat. A half note lasts for two beats. Tap the blocks, then play the pattern.</p>
             <div class="mc-note-grid" id="rhythmPattern">
-                <button type="button" class="mc-note-key red" data-beats="1"><span class="mc-note-cube"></span><strong>♩ 1 beat</strong></button>
-                <button type="button" class="mc-note-key blue" data-beats="2"><span class="mc-note-cube"></span><strong>𝅗𝅥 2 beats</strong></button>
-                <button type="button" class="mc-note-key red" data-beats="1"><span class="mc-note-cube"></span><strong>♩ 1 beat</strong></button>
-                <button type="button" class="mc-note-key blue" data-beats="2"><span class="mc-note-cube"></span><strong>𝅗𝅥 2 beats</strong></button>
+                <button type="button" class="mc-note-key-rhythm red" data-beats="1"><span class="mc-note-cube"></span><strong>♩ 1 beat</strong></button>
+                <button type="button" class="mc-note-key-rhythm blue" data-beats="2"><span class="mc-note-cube"></span><strong>𝅗𝅥 2 beats</strong></button>
+                <button type="button" class="mc-note-key-rhythm red" data-beats="1"><span class="mc-note-cube"></span><strong>♩ 1 beat</strong></button>
+                <button type="button" class="mc-note-key-rhythm blue" data-beats="2"><span class="mc-note-cube"></span><strong>𝅗𝅥 2 beats</strong></button>
             </div>
             <button type="button" class="btn btn-outline-dark mt-3" id="playRhythmBtn">Play rhythm pattern</button>
         </section>
@@ -163,7 +163,7 @@ document.getElementById("playScaleBtn")?.addEventListener("click", function () {
     keys.forEach(function (key, index) { window.setTimeout(function () { playTone(Number(key.dataset.frequency), key); }, index * 280); });
 });
 document.getElementById("playRhythmBtn")?.addEventListener("click", function () {
-    const keys = Array.from(document.querySelectorAll("#rhythmPattern .mc-note-key"));
+    const keys = Array.from(document.querySelectorAll("#rhythmPattern .mc-note-key-rhythm"));
     let delay = 0;
     keys.forEach(function (key) {
         window.setTimeout(function () { playTone(392, key); }, delay);

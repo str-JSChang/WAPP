@@ -577,6 +577,13 @@
   padding: .55rem;
 }
 
+.mc-note-key-rhythm {
+  pointer-events: none;
+}
+
+.mc-note-key-rhythm.red { --note-color: #e94b4b; }
+.mc-note-key-rhythm.blue { --note-color: #368bd5; }
+
 .mc-note-cube,
 .mc-mini-note > span {
   background: var(--note-color, var(--mc-red));
