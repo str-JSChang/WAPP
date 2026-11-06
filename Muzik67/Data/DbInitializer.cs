@@ -188,6 +188,107 @@ namespace Muzik67.Data
             }
 
             EnsureProposalActivities(context);
+            EnsureDemoActivityData(context);
+        }
+
+        private static void EnsureDemoActivityData(MuzikDbContext context)
+        {
+            // SEED THE WHOLE PRESENTATION because empty dashboards have negative aura
+            var now = DateTime.UtcNow;
+            var demoLearner = context.Users.FirstOrDefault(user =>
+                user.Username == "student1" && user.Role == "Member");
+            if (demoLearner is null) return;
+
+            var premiumPlan = context.SubscriptionPlans
+                .Where(plan => plan.Price > 0 && plan.Status == "Active")
+                .AsEnumerable()
+                .OrderBy(plan => plan.Price)
+                .FirstOrDefault();
+            if (premiumPlan is not null && !context.UserSubscriptions.Any(subscription =>
+                    subscription.UserId == demoLearner.UserId &&
+                    subscription.Status == "Active" &&
+                    subscription.EndDate > now))
+            {
+                context.UserSubscriptions.Add(new UserSubscription
+                {
+                    UserId = demoLearner.UserId,
+                    PlanId = premiumPlan.PlanId,
+                    StartDate = now.AddDays(-7),
+                    EndDate = now.AddMonths(1),
+                    Status = "Active"
+                });
+            }
+
+            var demoLessons = context.LearningContents
+                .Where(content => content.ApprovalStatus == "Approved" && content.Status == "Active")
+                .OrderBy(content => content.SortOrder)
+                .ThenBy(content => content.ContentId)
+                .Take(2)
+                .ToList();
+            foreach (var lesson in demoLessons)
+            {
+                if (!context.LessonProgresses.Any(progress =>
+                        progress.UserId == demoLearner.UserId && progress.ContentId == lesson.ContentId))
+                {
+                    context.LessonProgresses.Add(new LessonProgress
+                    {
+                        UserId = demoLearner.UserId,
+                        ContentId = lesson.ContentId,
+                        CompletedAt = now.AddDays(-3).AddMinutes(lesson.SortOrder)
+                    });
+                }
+            }
+
+            var demoGames = context.Games
+                .Where(game => game.ApprovalStatus == "Approved" && game.Status == "Active")
+                .OrderBy(game => game.SortOrder)
+                .ThenBy(game => game.GameId)
+                .Take(2)
+                .ToList();
+            foreach (var game in demoGames)
+            {
+                if (context.GameProgresses.Any(progress =>
+                        progress.UserId == demoLearner.UserId && progress.GameId == game.GameId))
+                {
+                    continue;
+                }
+
+                var questionCount = context.GamesQuizzes.Count(question => question.GameId == game.GameId);
+                if (questionCount == 0) continue;
+
+                context.GameProgresses.Add(new GameProgress
+                {
+                    UserId = demoLearner.UserId,
+                    GameId = game.GameId,
+                    Attempts = 1,
+                    Score = Math.Max(1, questionCount - 1),
+                    Status = "Completed",
+                    DateOfCompletion = now.AddDays(-2).AddMinutes(game.GameId)
+                });
+            }
+
+            var demoBadges = new[]
+            {
+                new { Code = "first-lesson", Name = "First Steps" },
+                new { Code = "sound-explorer", Name = "Sound Explorer" }
+            };
+            foreach (var demoBadge in demoBadges)
+            {
+                if (!context.UserBadges.Any(badge =>
+                        badge.UserId == demoLearner.UserId && badge.BadgeCode == demoBadge.Code))
+                {
+                    context.UserBadges.Add(new UserBadge
+                    {
+                        UserId = demoLearner.UserId,
+                        BadgeCode = demoBadge.Code,
+                        BadgeName = demoBadge.Name,
+                        EarnedAt = now.AddDays(-1)
+                    });
+                }
+            }
+
+            // Save once at the end so the mock data arrives as one happy little family
+            context.SaveChanges();
         }
 
         private static void EnsureProposalActivities(MuzikDbContext context)
