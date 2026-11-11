@@ -344,8 +344,9 @@
 
 .minecraft-shell .btn-danger,
 .minecraft-shell .btn-outline-danger {
-  background: var(--mc-red) !important;
-  color: var(--mc-ink) !important;
+  background: #800000 !important;
+  border-color: #800000 !important;
+  color: #fff !important;
 }
 
 .minecraft-shell .btn-outline-primary,
