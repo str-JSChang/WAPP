@@ -14,6 +14,10 @@ public class ProgressModel : SessionPageModel
     protected override bool MemberOnly => true;
 
     public string Username { get; private set; } = string.Empty;
+    [BindProperty(SupportsGet = true)]
+    public int? SelectedGameId { get; set; }
+
+    public IReadOnlyList<GameFilterOption> AvailableGames { get; private set; } = [];
     public IReadOnlyList<GameProgressSummary> GameProgress { get; private set; } = [];
     public IList<GameResultItem> RecentResults { get; private set; } = [];
     public IList<LessonProgressItem> LessonProgress { get; private set; } = [];
@@ -29,11 +33,33 @@ public class ProgressModel : SessionPageModel
     {
         Username = HttpContext.Session.GetString("Username") ?? "Member";
 
-        var progressRecords = await _context.GameProgresses
+        AvailableGames = await _context.Games
+            .AsNoTracking()
+            .Where(game => _context.GameProgresses.Any(progress =>
+                progress.UserId == CurrentUserId && progress.GameId == game.GameId))
+            .OrderBy(game => game.SortOrder)
+            .ThenBy(game => game.GameName)
+            .Select(game => new GameFilterOption
+            {
+                GameId = game.GameId,
+                GameName = game.GameName
+            })
+            .ToListAsync();
+
+        var progressQuery = _context.GameProgresses
             .AsNoTracking()
             .Where(progress => progress.UserId == CurrentUserId && progress.Game != null)
             .Include(progress => progress.Game)
                 .ThenInclude(game => game!.Quizzes)
+            .AsQueryable();
+
+        if (SelectedGameId.HasValue)
+        {
+            progressQuery = progressQuery.Where(progress =>
+                progress.GameId == SelectedGameId.Value);
+        }
+
+        var progressRecords = await progressQuery
             .OrderByDescending(progress => progress.DateOfCompletion)
             .ToListAsync();
 
@@ -99,6 +125,12 @@ public class ProgressModel : SessionPageModel
         public int Score { get; init; }
         public int TotalQuestions { get; init; }
         public DateTime CompletedAt { get; init; }
+    }
+
+    public sealed class GameFilterOption
+    {
+        public int GameId { get; init; }
+        public string GameName { get; init; } = string.Empty;
     }
 
     public sealed class LessonProgressItem

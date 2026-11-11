@@ -19,6 +19,18 @@ public class UserProgressModel : SessionPageModel
     public IList<GameProgress> ProgressRecords { get; private set; } = [];
     public IList<UserBadge> Badges { get; private set; } = [];
 
+    [BindProperty(SupportsGet = true)]
+    public int? ProgressLearnerId { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public int? ProgressGameId { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public int? BadgeLearnerId { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public string? BadgeCodeFilter { get; set; }
+
     [BindProperty] public ProgressInput ProgressForm { get; set; } = new();
     [BindProperty] public BadgeInput BadgeForm { get; set; } = new();
     [TempData] public string? StatusMessage { get; set; }
@@ -26,6 +38,10 @@ public class UserProgressModel : SessionPageModel
     public async Task OnGetAsync(int? editProgressId, int? editBadgeId)
     {
         await LoadAsync();
+        if (!string.IsNullOrWhiteSpace(BadgeCodeFilter) && Badges.Count == 0)
+        {
+            StatusMessage = $"No badge code matched '{BadgeCodeFilter}'. Badge codes are case-sensitive.";
+        }
         if (editProgressId.HasValue)
         {
             var record = ProgressRecords.FirstOrDefault(item => item.ProgressId == editProgressId.Value);
@@ -131,8 +147,54 @@ public class UserProgressModel : SessionPageModel
     {
         Learners = await _context.Users.AsNoTracking().Where(user => user.Role == "Member").OrderBy(user => user.Username).ToListAsync();
         Games = await _context.Games.AsNoTracking().Include(game => game.Quizzes).OrderBy(game => game.SortOrder).ThenBy(game => game.GameName).ToListAsync();
-        ProgressRecords = await _context.GameProgresses.AsNoTracking().Include(progress => progress.User).Include(progress => progress.Game).ThenInclude(game => game!.Quizzes).OrderByDescending(progress => progress.DateOfCompletion).ToListAsync();
-        Badges = await _context.UserBadges.AsNoTracking().Include(badge => badge.User).OrderByDescending(badge => badge.EarnedAt).ToListAsync();
+        var progressQuery = _context.GameProgresses
+            .AsNoTracking()
+            .Include(progress => progress.User)
+            .Include(progress => progress.Game)
+            .ThenInclude(game => game!.Quizzes)
+            .AsQueryable();
+
+        if (ProgressLearnerId.HasValue)
+        {
+            progressQuery = progressQuery.Where(progress =>
+                progress.UserId == ProgressLearnerId.Value);
+        }
+
+        if (ProgressGameId.HasValue)
+        {
+            progressQuery = progressQuery.Where(progress =>
+                progress.GameId == ProgressGameId.Value);
+        }
+
+        ProgressRecords = await progressQuery
+            .OrderByDescending(progress => progress.DateOfCompletion)
+            .ToListAsync();
+
+        var badgeRecords = await _context.UserBadges
+            .AsNoTracking()
+            .Include(badge => badge.User)
+            .OrderByDescending(badge => badge.EarnedAt)
+            .ToListAsync();
+
+        if (BadgeLearnerId.HasValue)
+        {
+            badgeRecords = badgeRecords
+                .Where(badge => badge.UserId == BadgeLearnerId.Value)
+                .ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(BadgeCodeFilter))
+        {
+            var badgeFilter = BadgeCodeFilter.Trim();
+            badgeRecords = badgeRecords
+                .Where(badge => string.Equals(
+                    badge.BadgeCode,
+                    badgeFilter,
+                    StringComparison.Ordinal))
+                .ToList();
+        }
+
+        Badges = badgeRecords;
         var lessons = await _context.LessonProgresses.AsNoTracking().ToListAsync();
         Members = Learners.Select(user =>
         {

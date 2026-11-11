@@ -32,12 +32,66 @@
         </section></div>
     </div>
 
-    <section class="management-panel mt-4"><div class="panel-heading"><h2>Progress records</h2></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Learner</th><th>Game</th><th>Score</th><th>Status</th><th>Completed</th><th></th></tr></thead><tbody>
+    <section class="management-panel mt-4"><div class="panel-heading"><h2>Progress records</h2></div>
+        <form method="get" class="row g-2 align-items-end p-3 border-bottom">
+            <div class="col-md-4">
+                <label asp-for="ProgressLearnerId" class="form-label">Filter by learner</label>
+                <select asp-for="ProgressLearnerId" class="form-select">
+                    <option value="">All learners</option>
+                    @foreach (var user in Model.Learners)
+                    {
+                        <option value="@user.UserId">@user.Username</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="ProgressGameId" class="form-label">Filter by game</label>
+                <select asp-for="ProgressGameId" class="form-select">
+                    <option value="">All games</option>
+                    @foreach (var game in Model.Games)
+                    {
+                        <option value="@game.GameId">@game.GameName</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-primary">Apply filter</button>
+                @if (Model.ProgressLearnerId.HasValue || Model.ProgressGameId.HasValue)
+                {
+                    <a asp-page="/Admin/UserProgress" class="btn btn-outline-secondary">Clear</a>
+                }
+            </div>
+        </form>
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Learner</th><th>Game</th><th>Score</th><th>Status</th><th>Completed</th><th></th></tr></thead><tbody>
         @foreach(var record in Model.ProgressRecords){<tr><td>@record.User?.Username</td><td>@record.Game?.GameName</td><td>@record.Score / @(record.Game?.Quizzes.Count ?? 0)</td><td>@record.Status</td><td>@record.DateOfCompletion.ToLocalTime().ToString("dd MMM yyyy")</td><td class="text-end"><a asp-page="/Admin/UserProgress" asp-route-editProgressId="@record.ProgressId" class="btn btn-sm btn-outline-primary">Edit</a> <form method="post" asp-page-handler="DeleteProgress" class="d-inline"><input type="hidden" name="id" value="@record.ProgressId"/><button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this progress record?')">Delete</button></form></td></tr>}
         @if(Model.ProgressRecords.Count == 0){<tr><td colspan="6" class="text-center text-muted">No progress records.</td></tr>}
     </tbody></table></div></section>
 
-    <section class="management-panel mt-4"><div class="panel-heading"><h2>Badge records</h2></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Learner</th><th>Code</th><th>Badge</th><th>Earned</th><th></th></tr></thead><tbody>
+    <section class="management-panel mt-4"><div class="panel-heading"><h2>Badge records</h2></div>
+        <form method="get" class="row g-2 align-items-end p-3 border-bottom">
+            <div class="col-md-4">
+                <label asp-for="BadgeLearnerId" class="form-label">Filter by learner</label>
+                <select asp-for="BadgeLearnerId" class="form-select">
+                    <option value="">All learners</option>
+                    @foreach (var user in Model.Learners)
+                    {
+                        <option value="@user.UserId">@user.Username</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="BadgeCodeFilter" class="form-label">Enter exact badge code</label>
+                <input asp-for="BadgeCodeFilter" class="form-control" placeholder="sound-explorer" autocomplete="off" />
+            </div>
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-primary">Apply filter</button>
+                @if (Model.BadgeLearnerId.HasValue || !string.IsNullOrWhiteSpace(Model.BadgeCodeFilter))
+                {
+                    <a asp-page="/Admin/UserProgress" class="btn btn-outline-secondary">Clear</a>
+                }
+            </div>
+        </form>
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Learner</th><th>Code</th><th>Badge</th><th>Earned</th><th></th></tr></thead><tbody>
         @foreach(var badge in Model.Badges){<tr><td>@badge.User?.Username</td><td>@badge.BadgeCode</td><td>@badge.BadgeName</td><td>@badge.EarnedAt.ToLocalTime().ToString("dd MMM yyyy")</td><td class="text-end"><a asp-page="/Admin/UserProgress" asp-route-editBadgeId="@badge.UserBadgeId" class="btn btn-sm btn-outline-primary">Edit</a> <form method="post" asp-page-handler="DeleteBadge" class="d-inline"><input type="hidden" name="id" value="@badge.UserBadgeId"/><button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this badge?')">Delete</button></form></td></tr>}
         @if(Model.Badges.Count == 0){<tr><td colspan="5" class="text-center text-muted">No badge records.</td></tr>}
     </tbody></table></div></section>

@@ -95,9 +95,29 @@
             <span class="section-icon"><i class="bi bi-clock-history"></i></span>
             <div>
                 <h2 id="activity-heading" class="mb-0">Recent Activity Log</h2>
-                <p class="text-muted small mb-0">Your latest quiz results and game sessions.</p>
+                <p class="text-muted small mb-0">Review results separately by game.</p>
             </div>
         </div>
+
+        <form method="get" class="row g-2 align-items-end p-3 border-bottom">
+            <div class="col-12 col-md-8">
+                <label asp-for="SelectedGameId" class="form-label fw-semibold">Filter by game</label>
+                <select asp-for="SelectedGameId" class="form-select">
+                    <option value="">All games</option>
+                    @foreach (var game in Model.AvailableGames)
+                    {
+                        <option value="@game.GameId">@game.GameName</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 col-md-auto">
+                <button type="submit" class="btn btn-primary">Apply filter</button>
+                @if (Model.SelectedGameId.HasValue)
+                {
+                    <a asp-page="/Student/Progress" class="btn btn-outline-secondary">Clear</a>
+                }
+            </div>
+        </form>
 
         @if (Model.RecentResults.Count > 0)
         {
